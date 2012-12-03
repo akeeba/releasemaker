@@ -31,7 +31,7 @@
 	"pro.s3.access": "",
 	"pro.s3.secret": "",
 	"pro.s3.directory": "",
-	"pro.s3.cdnhostname (blank = no CDN)": "",
+	"pro.s3.cdnhostname": "",
 	"pro.s3.reldir": "",
 
 	"core.pattern": "com_*core.zip",

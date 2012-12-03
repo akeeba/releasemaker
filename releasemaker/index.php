@@ -22,6 +22,18 @@
 ini_set('display_errors', true);
 error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
 
+// Display banner
+echo <<< ENDBANNER
+Akeeba Release Maker
+================================================================================
+An automated script to upload and release a new version of an Akeeba component.
+Copyright ©2012 Nicholas K. Dionysopoulos / Akeeba Ltd.
+This is Free Software distributed under the terms of the GNU GPL v3 or later.
+See LICENSE.txt for more information.
+
+
+ENDBANNER;
+
 // Load the class autoloader
 require_once __DIR__.'/autoloader.php';
 
@@ -33,3 +45,13 @@ if(file_exists(__DIR__.'/config.json')) {
 }
 $config->postProcess();
 
+// Set up the steps to process
+$steps = array(
+	'prepare', 'deploy', 'release', 'items', 'publish', 'updates'
+);
+
+foreach($steps as $step) {
+	$stepClass = 'ArmStep'.ucfirst($step);
+	$stepObject = new $stepClass;
+	$stepObject->execute();
+}
