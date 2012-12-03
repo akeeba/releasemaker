@@ -18,3 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// DEBUG
+ini_set('display_errors', true);
+error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
+
+// Load the class autoloader
+require_once __DIR__.'/autoloader.php';
+
+// Load the configuration
+require_once __DIR__.'/configuration/configuration.php';
+$config = ArmConfiguration::getInstance();
+if(file_exists(__DIR__.'/config.json')) {
+	$config->loadFile(__DIR__.'/config.json');
+}
+$config->postProcess();
+
