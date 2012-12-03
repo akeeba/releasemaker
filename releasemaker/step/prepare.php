@@ -51,6 +51,8 @@ class ArmStepPrepare implements ArmStepInterface
 		
 		// Add the files to the volatile config key
 		$conf->set('volatile.files', $this->files);
+		
+		echo PHP_EOL;
 	}
 	
 	private function findFiles($type = 'core')

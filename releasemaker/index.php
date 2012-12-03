@@ -22,6 +22,9 @@
 ini_set('display_errors', true);
 error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
 
+// Setup path to cacert.pem
+define('AKEEBA_CACERT_PEM', __DIR__ . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'cacert.pem');
+
 // Display banner
 echo <<< ENDBANNER
 Akeeba Release Maker
@@ -53,5 +56,14 @@ $steps = array(
 foreach($steps as $step) {
 	$stepClass = 'ArmStep'.ucfirst($step);
 	$stepObject = new $stepClass;
-	$stepObject->execute();
+	try {
+		$stepObject->execute();
+	} catch (Exception $exc) {
+		echo PHP_EOL.PHP_EOL;
+		echo str_repeat('*', 79) . PHP_EOL;
+		echo "*** E R R O R\n";
+		echo str_repeat('*', 79) . PHP_EOL . PHP_EOL;
+		echo $exc->getMessage() . PHP_EOL . PHP_EOL;
+		echo $exc->getTraceAsString();
+	}
 }
