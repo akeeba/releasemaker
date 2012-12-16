@@ -50,7 +50,8 @@ $config->postProcess();
 
 // Set up the steps to process
 $steps = array(
-	'prepare', 'deploy', 'release', 'items', 'publish', 'updates'
+	'prepare', 'deploy', 'release',
+	'items', 'publish', 'updates'
 );
 
 foreach($steps as $step) {

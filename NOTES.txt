@@ -56,7 +56,7 @@ DATA
 	- pdf.where (core, pro)
 	- pdf.files (list of pdf file names, array)
 
-I. Preparation
+I. Preparation - "prepare"
 	Get list of core, pro and PDF files
 		For PDF files, check both .pdf and .pdf.zip files
 	PDF Files (if exist)
@@ -64,12 +64,12 @@ I. Preparation
 		Delete raw PDF files
 		Update PDF file lists with the .zip names
 	
-II. Upload
+II. Upload - "deploy"
 	Upload pro files
 	Upload core files
 	Upload pdf files
 
-III. Prepare release
+III. Prepare release - "release"
 	Check if a release exists.
 		If not, create a new one (unpublished).
 		If yes, update existing
@@ -77,12 +77,12 @@ III. Prepare release
 		Set description to DESCRIPTION.html
 		Set release notes to RELEASENOTES.html + latest CHANGELOG entries
 
-IV. Prepare items (for each item)
+IV. Prepare items (for each item) - "items"
 	Create if not exists or update otherwise
 	S3 items: link type, use the CDN link
 	File items: file type, relative file name
 
-V. Publish items and release
+V. Publish items and release - "publish"
 
-VI. Publish update information
+VI. Publish update information - "updates"
 	Fore each record fetch update INI and XML and upload to S3

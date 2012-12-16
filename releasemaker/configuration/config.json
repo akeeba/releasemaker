@@ -6,6 +6,7 @@
 	"common.password": "",
 	"common.category": "",
 	"common.releasedir": "",
+	"common.repodir": "",
 	"common.update.method": "s3",
 	"common.update.ftp.hostname": "",
 	"common.update.ftp.port": "",
