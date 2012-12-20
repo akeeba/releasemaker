@@ -170,4 +170,90 @@ class ArmArs
 		
 		return $response;
 	}
+	
+	/**
+	 * Get the data object of an item
+	 * 
+	 * @param   integer  $release    The release ID inside which the item is expected
+	 * @param   string   $type       The item type, one of 'file' or 'link'
+	 * @param   string   $fileOrURL  The relative path or absolute URL of the item
+	 * 
+	 * @return  stdClass  The data object of the item
+	 */
+	public function getItem($release, $type, $fileOrURL)
+	{
+		$key = ($type == 'file') ? 'filename' : 'url';
+		
+		$arsData = array(
+			'view'			=> 'items',
+			'task'			=> 'browse',
+			'release'		=> $release,
+			'type'			=> $type,
+			$key			=> $fileOrURL,
+			'format'		=> 'json',
+		);
+		
+		$response = $this->doApiCall($arsData);
+		
+		$response = json_decode($response);
+		
+		if (empty($response))
+		{
+			$response = (object)array(
+				'id'				=> null,
+				'release_id'		=> $release,
+				'title'				=> null,
+				'alias'				=> null,
+				'description'		=> null,
+				'type'				=> $type,
+				'filename'			=> ($type == 'file') ? $fileOrURL : null,
+				'url'				=> ($type == 'link') ? $fileOrURL : null,
+				'updatestream'		=> null,
+				'md5'				=> null,
+				'sha1'				=> null,
+				'filesize'			=> null,
+				'groups'			=> '',
+				'hits'				=> 0,
+				'created'			=> 0,
+				'created_by'		=> '0000-00-00 00:00:00',
+				'modified'			=> 0,
+				'modified_by'		=> '0000-00-00 00:00:00',
+				'checked_out'		=> 0,
+				'checked_out_time'	=> '0000-00-00 00:00:00',
+				'ordering'			=> 0,
+				'access'			=> 1,
+				'published'			=> 0,
+				'language'			=> '*',
+				'environments'		=> null,
+			);
+		}
+		else
+		{
+			$response = array_shift($response);
+		}
+		
+		return $response;
+	}
+	
+	/**
+	 * Save the changes to an existing item or create a new item
+	 * 
+	 * @param   array  $itemData  The item data to save.
+	 * 
+	 * @return  bool  As returned by ARS' JSON API
+	 */
+	public function saveItem(array $itemData)
+	{
+		$arsData = array(
+			'view'			=> 'items',
+			'task'			=> 'save',
+			'format'		=> 'json',
+		);
+		$arsData = array_merge($itemData, $arsData);
+		
+		$response = $this->doApiCall($arsData);
+		
+		return $response;
+	}
+	
 }
