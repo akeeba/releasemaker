@@ -1,62 +1,6 @@
 Generating a new release
 ================================================================================
-
-DATA
-	- common.version
-	- common.date
-	- common.arsapiurl (URL to ARS entry point)
-	- common.username (ARS API username)
-	- common.password (ARS API password)
-	- common.category (category id on the site)
-	- common.releasedir (absolute path to releases directory)
-	- common.update.method (ftp, sftp, s3)
-	- common.update.ftp.hostname
-	- common.update.ftp.port
-	- common.update.ftp.username
-	- common.update.ftp.password
-	- common.update.ftp.passive
-	- common.update.ftp.directory
-	- common.update.s3.access
-	- common.update.s3.secret
-	- common.update.s3.directory
-	- common.update.s3.cdnhostname (blank = no CDN)
-
-	- pro.pattern (default: com_*pro.zip)
-	- pro.method (ftp, sftp, s3)
-	- pro.update.stream (update stream ID)
-	- pro.update.formats (default: ini, inibare, xml)
-	- pro.ftp.hostname
-	- pro.ftp.port
-	- pro.ftp.username
-	- pro.ftp.password
-	- pro.ftp.passive
-	- pro.ftp.directory
-	- pro.s3.access (or use common.update.s3.access)
-	- pro.s3.secret (or use common.update.s3.secret)
-	- pro.s3.directory
-	- pro.s3.cdnhostname (blank = no CDN)
-	- pro.s3.reldir (relative directory for the ARS s3:// URL, if empty use pro.s3.directory)
-
-	- core.pattern (default: com_*core.zip)
-	- core.method (ftp, sftp, s3)
-	- core.update.stream (update stream ID)
-	- core.update.formats (default: ini, inibare, xml)
-	- core.ftp.hostname
-	- core.ftp.port
-	- core.ftp.username
-	- core.ftp.password
-	- core.ftp.passive
-	- core.ftp.directory
-	- core.s3.access (or use common.update.s3.access)
-	- core.s3.secret (or use common.update.s3.access)
-	- core.s3.directory
-	- core.s3.cdnhostname (blank = no CDN)
-	- core.s3.reldir (relative directory for the ARS s3:// URL, if empty use pro.s3.directory)
-
-	- pdf.where (core, pro)
-	- pdf.files (list of pdf file names, array)
-
-I. Preparation - "prepare"
+√ I. Preparation - "prepare"
 	Get list of core, pro and PDF files
 		For PDF files, check both .pdf and .pdf.zip files
 	PDF Files (if exist)
@@ -64,12 +8,12 @@ I. Preparation - "prepare"
 		Delete raw PDF files
 		Update PDF file lists with the .zip names
 	
-II. Upload - "deploy"
+√ II. Upload - "deploy"
 	Upload pro files
 	Upload core files
 	Upload pdf files
 
-III. Prepare release - "release"
+√ III. Prepare release - "release"
 	Check if a release exists.
 		If not, create a new one (unpublished).
 		If yes, update existing
@@ -77,7 +21,7 @@ III. Prepare release - "release"
 		Set description to DESCRIPTION.html
 		Set release notes to RELEASENOTES.html + latest CHANGELOG entries
 
-IV. Prepare items (for each item) - "items"
+√ IV. Prepare items (for each item) - "items"
 	Create if not exists or update otherwise
 	S3 items: link type, use the CDN link
 	File items: file type, relative file name
@@ -85,4 +29,4 @@ IV. Prepare items (for each item) - "items"
 V. Publish items and release - "publish"
 
 VI. Publish update information - "updates"
-	Fore each record fetch update INI and XML and upload to S3
+	For each record fetch update INI and XML and upload to S3
