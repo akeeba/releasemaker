@@ -93,8 +93,6 @@ class ArmStepRelease implements ArmStepInterface
 		$this->release->maturity = $this->getMaturity($version);
 		
 		$result = $this->arsConnector->saveRelease((array) $this->release);
-		
-		var_dump($result);
 	}
 	
 	private function readFile($filename)
