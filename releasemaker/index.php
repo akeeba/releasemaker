@@ -40,11 +40,38 @@ ENDBANNER;
 // Load the class autoloader
 require_once __DIR__.'/autoloader.php';
 
+// Get the path to the configuration file
+end($argv);
+$json_file = current($argv);
+if (strtolower(substr($json_file, -5)) != '.json')
+{
+	$json_file = null;
+}
+if (!file_exists($json_file))
+{
+	if (file_exists(__DIR__ . '/' . $json_file))
+	{
+		$json_file = __DIR__ . '/' . $json_file;
+	}
+	else
+	{
+		$json_file = null;
+	}
+}
+
 // Load the configuration
 require_once __DIR__.'/configuration/configuration.php';
 $config = ArmConfiguration::getInstance();
-if(file_exists(__DIR__.'/config.json')) {
+if (file_exists($json_file))
+{
+	$config->loadFile($json_file);
+}
+elseif (file_exists(__DIR__.'/config.json')) {
 	$config->loadFile(__DIR__.'/config.json');
+}
+else
+{
+	die("Configuration file not found.");
 }
 $config->postProcess();
 
