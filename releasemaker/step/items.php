@@ -81,11 +81,17 @@ class ArmStepItems implements ArmStepInterface
 	private function deployFiles($prefix = 'core', $isPdf = false)
 	{
 		// Get the files
-		if ($isPdf)
+		if ($isPdf || ($prefix == 'pdf'))
 		{
+			$publishArea = 'pdf';
 			$prefix = 'core';
+			$isPdf = true;
 		}
-		$this->publishInfo[$prefix] = array();
+		else
+		{
+			$publishArea = $prefix;
+		}
+		$this->publishInfo[$publishArea] = array();
 		
 		$conf = ArmConfiguration::getInstance();
 		
@@ -99,6 +105,7 @@ class ArmStepItems implements ArmStepInterface
 		}
 		
 		if(empty($coreFiles)) {
+			echo "\t\tNO FILES\n";
 			return;
 		}
 		
@@ -127,7 +134,7 @@ class ArmStepItems implements ArmStepInterface
 					{
 						$directory = $conf->get($prefix.'.s3.directory',	$conf->get('common.update.s3.directory', ''));
 						$fileOrURL = 'http://' . $cdnHostname . '/' . $directory . '/' . $destName;
-						$type = 'url';
+						$type = 'link';
 					}
 						
 					break;
@@ -151,7 +158,7 @@ class ArmStepItems implements ArmStepInterface
 			$item->access = $access;
 			$item->published = 0;
 			
-			$this->publishInfo[$prefix][] = $item;
+			$this->publishInfo[$publishArea][] = $item;
 			
 			$result = $this->arsConnector->saveItem((array)$item);
 			if ($result)
