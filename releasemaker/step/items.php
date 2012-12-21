@@ -53,7 +53,7 @@ class ArmStepItems implements ArmStepInterface
 		
 		echo "\tSaving publish information\n";
 		$conf = ArmConfiguration::getInstance();
-		$conf->get('volatile.publishInfo', $this->publishInfo);
+		$conf->set('volatile.publishInfo', $this->publishInfo);
 		
 		echo PHP_EOL;
 	}
