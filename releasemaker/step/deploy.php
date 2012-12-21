@@ -168,7 +168,7 @@ class ArmStepDeploy implements ArmStepInterface
 	{
 		$s3 = ArmAmazonS3::getInstance($config->access, $config->secret, $config->usessl);
 		
-		$input = realpath($sourcePath);
+		$inputFile = realpath($sourcePath);
 		$bucket = $config->bucket;
 		if(empty($destName)) {
 			$conf = ArmConfiguration::getInstance();
@@ -182,7 +182,8 @@ class ArmStepDeploy implements ArmStepInterface
 			$acl = ArmAmazonS3::ACL_PRIVATE;
 		}
 
-		$s3->putObject($input, $bucket, $uri, $acl);
+		$input = ArmAmazonS3::inputFile($inputFile, true);
+		$result = $s3->putObject($input, $bucket, $uri, $acl);
 	}
 	
 	private function uploadFtp($config, $sourcePath, $destName = null)
