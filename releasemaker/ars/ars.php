@@ -79,10 +79,10 @@ class ArmArs
 		curl_setopt($ch, CURLOPT_FAILONERROR,		true);
 		curl_setopt($ch, CURLOPT_HEADER,			false);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER,	true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,	true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,	false);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,	30);
 		curl_setopt($ch, CURLOPT_TIMEOUT,			180);
-		curl_setopt($ch, CURLOPT_USERAGENT,			'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0)');
+		curl_setopt($ch, CURLOPT_USERAGENT,			'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
 
 		$raw = curl_exec($ch);
 
