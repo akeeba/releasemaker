@@ -66,6 +66,12 @@ class ArmStepUpdates implements ArmStepInterface
 		$basename = $conf->get($prefix . '.update.basename', '');
 		$url = $conf->get('common.arsapiurl', '');
 		
+		// No base name means that no updates are set here
+		if(empty($basename))
+		{
+			return;
+		}
+		
 		$tempPath = realpath(__DIR__ . '/../tmp/');
 		
 		foreach ($formats as $format_raw)
