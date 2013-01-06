@@ -116,7 +116,7 @@ class ArmStepPrepare implements ArmStepInterface
 						// Compress the PDF
 						$zip = new ZipArchive();
 						$zip->open($zipFileName, ZIPARCHIVE::CREATE);
-						$zip->addFile($this->path . DIRECTORY_SEPARATOR . $fn);
+						$zip->addFile($this->path . DIRECTORY_SEPARATOR . $fn, basename($fn));
 						$zip->close();
 						// Remove the PDF file
 						unlink($this->path . DIRECTORY_SEPARATOR . $fn);
