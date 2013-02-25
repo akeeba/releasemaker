@@ -3,17 +3,17 @@
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
  * Copyright ©2012-2013 Nicholas K. Dionysopoulos / Akeeba Ltd.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,16 +25,16 @@ class ArmArs
 {
 	/** @var string The hostname of the site where ARS is installed, without the index.php */
 	private $host = null;
-	
+
 	/** @var string The username we're going to use to connect to the host */
 	private $username = null;
-	
+
 	/** @var string The password we're going to use to connect to the host */
 	private $password = null;
-	
+
 	/**
 	 * Public class constructor
-	 * 
+	 *
 	 * @param   array  $config  The configuration variables for this class
 	 */
 	public function __construct(Array $config = array()) {
@@ -51,10 +51,10 @@ class ArmArs
 			$this->password = $config['password'];
 		}
 	}
-	
+
 	/**
 	 * Perform an ARS API call using the $postData provided
-	 * 
+	 *
 	 * @param   array  $postData  POST variables to send to ARS
 	 */
 	public function doApiCall(array $postData = array())
@@ -67,9 +67,9 @@ class ArmArs
 			))
 		);
 		$postData = array_merge($postData, $arsData);
-		
+
 		$url = rtrim($this->host, '/') . '/index.php';
-		
+
 		$ch = curl_init($url);
 
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION,	1);
@@ -86,22 +86,25 @@ class ArmArs
 
 		$raw = curl_exec($ch);
 
+		$errno = curl_errno($ch);
+		$error = curl_error($ch);
 		curl_close($ch);
-		
+
 		if ($raw === false)
 		{
-			throw new Exception('ARS API communications error; please check the host name and your network status');
+			//var_dump($postData);
+			throw new Exception('ARS API communications error; please check the host name and your network status.' . "\ncURL error $errno\n$error");
 		}
-		
+
 		return $raw;
 	}
-	
+
 	/**
 	 * Get the data object of a release
-	 * 
+	 *
 	 * @param   integer  $category  The category ID inside which the version is expected
 	 * @param   string   $version   The version tag
-	 * 
+	 *
 	 * @return  stdClass  The data object of the release
 	 */
 	public function getRelease($category, $version)
@@ -113,11 +116,11 @@ class ArmArs
 			'version'		=> $version,
 			'format'		=> 'json',
 		);
-		
+
 		$response = $this->doApiCall($arsData);
-		
+
 		$response = json_decode($response);
-		
+
 		if (empty($response))
 		{
 			$response = (object)array(
@@ -146,15 +149,15 @@ class ArmArs
 		{
 			$response = array_shift($response);
 		}
-		
+
 		return $response;
 	}
-	
+
 	/**
 	 * Save the changes to an existing release or create a new release
-	 * 
+	 *
 	 * @param   array  $releaseData  The release data to save. At the bare minimum we need an ID and a title!
-	 * 
+	 *
 	 * @return  bool  As returned by ARS' JSON API
 	 */
 	public function saveRelease(array $releaseData)
@@ -165,25 +168,25 @@ class ArmArs
 			'format'		=> 'json',
 		);
 		$arsData = array_merge($releaseData, $arsData);
-		
+
 		$response = $this->doApiCall($arsData);
-		
+
 		return $response;
 	}
-	
+
 	/**
 	 * Get the data object of an item
-	 * 
+	 *
 	 * @param   integer  $release    The release ID inside which the item is expected
 	 * @param   string   $type       The item type, one of 'file' or 'link'
 	 * @param   string   $fileOrURL  The relative path or absolute URL of the item
-	 * 
+	 *
 	 * @return  stdClass  The data object of the item
 	 */
 	public function getItem($release, $type, $fileOrURL)
 	{
 		$key = ($type == 'file') ? 'filename' : 'url';
-		
+
 		$arsData = array(
 			'view'			=> 'items',
 			'task'			=> 'browse',
@@ -192,11 +195,11 @@ class ArmArs
 			$key			=> $fileOrURL,
 			'format'		=> 'json',
 		);
-		
+
 		$response = $this->doApiCall($arsData);
-		
+
 		$response = json_decode($response);
-		
+
 		if (empty($response))
 		{
 			$response = (object)array(
@@ -231,15 +234,15 @@ class ArmArs
 		{
 			$response = array_shift($response);
 		}
-		
+
 		return $response;
 	}
-	
+
 	/**
 	 * Save the changes to an existing item or create a new item
-	 * 
+	 *
 	 * @param   array  $itemData  The item data to save.
-	 * 
+	 *
 	 * @return  bool  As returned by ARS' JSON API
 	 */
 	public function saveItem(array $itemData)
@@ -250,10 +253,10 @@ class ArmArs
 			'format'		=> 'json',
 		);
 		$arsData = array_merge($itemData, $arsData);
-		
+
 		$response = $this->doApiCall($arsData);
-		
+
 		return $response;
 	}
-	
+
 }
