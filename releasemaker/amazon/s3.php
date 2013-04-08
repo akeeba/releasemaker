@@ -3,17 +3,17 @@
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
  * Copyright ©2012-2013 Nicholas K. Dionysopoulos / Akeeba Ltd.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -32,7 +32,7 @@ class ArmAmazonS3
 
 	private static $__accessKey; // AWS Access key
 	private static $__secretKey; // AWS Secret key
-	
+
 	public $defaultHost = 's3.amazonaws.com';
 
 	/**
@@ -60,15 +60,15 @@ class ArmAmazonS3
 		{
 			$instance = new ArmAmazonS3($accessKey, $secretKey, $useSSL);
 		}
-		
+
 		if(!is_null($accessKey) && !is_null($secretKey)) {
 			$instance->setAuth($accessKey, $secretKey);
 		}
-		
+
 		if(!is_null($useSSL)) {
 			self::$useSSL = $useSSL;
 		}
-		
+
 		return $instance;
 	}
 
@@ -97,7 +97,7 @@ class ArmAmazonS3
 			$o->setWarning(__CLASS__.'::inputFile(): Unable to open input file: '.$file);
 			return false;
 		}
-		
+
 		return array('file' => $file, 'size' => filesize($file),
 		'md5sum' => $md5sum !== false ? (is_string($md5sum) ? $md5sum :
 		base64_encode(md5_file($file, true))) : '');
@@ -204,7 +204,7 @@ class ArmAmazonS3
 		}
 		return true;
 	}
-	
+
 	/**
 	* Start a multipart upload of an object
 	*
@@ -255,19 +255,19 @@ class ArmAmazonS3
 		$rest->setAmzHeader('x-amz-acl', $acl);
 		foreach ($metaHeaders as $h => $v) $rest->setAmzHeader('x-amz-meta-'.$h, $v);
 		$rest->getResponse();
-		
+
 		if ($rest->response->error === false && $rest->response->code !== 200)
 			$rest->response->error = array('code' => $rest->response->code, 'message' => 'Unexpected HTTP status');
 		if ($rest->response->error !== false) {
 			$o = self::getInstance();
 			throw new Exception(sprintf(__CLASS__."::startMultipart(): [%s] %s", $rest->response->error['code'], $rest->response->error['message']),100);
 		}
-		
+
 		$body = $rest->response->body;
 		if(!is_object($body)) $body = simplexml_load_string($body);
 		return (string)$body->UploadId;
 	}
-	
+
 	/**
 	* Uploads a part of a multipart object upload
 	*
@@ -283,30 +283,30 @@ class ArmAmazonS3
 		if ($input === false) {
 			$o = self::getInstance();
 			$o->setWarning(__CLASS__."::uploadMultipart(): No input specified");
-			return false;	
+			return false;
 		}
-		
+
 		if (is_string($input)) $input = array(
 			'data' => $input, 'size' => strlen($input),
 			'md5sum' => base64_encode(md5($input, true))
 		);
-		
+
 		// We need a valid UploadID and PartNumber
 		if(!array_key_exists('UploadID', $input)) {
 			$o = self::getInstance();
 			$o->setWarning(__CLASS__."::uploadMultipart(): No UploadID specified");
-			return false;	
+			return false;
 		}
 		if(!array_key_exists('PartNumber', $input)) {
 			$o = self::getInstance();
 			$o->setWarning(__CLASS__."::uploadMultipart(): No PartNumber specified");
-			return false;	
+			return false;
 		}
-		
+
 		$UploadID = $input['UploadID'];
 		$UploadID = urlencode($UploadID);
 		$PartNumber = (int)$input['PartNumber'];
-		
+
 		$rest = new ArmAmazonS3request('PUT', $bucket, $uri, 's3.amazonaws.com', ArmAmazonS3::getInstance()->defaultHost);
 		$rest->setParameter('partNumber',$PartNumber);
 		$rest->setParameter('uploadId',$UploadID);
@@ -330,7 +330,7 @@ class ArmAmazonS3
 				$totalSize = strlen($input['data']);
 			}
 		}
-		
+
 		// No Content-Type for multipart uploads
 		if(array_key_exists('type', $input)) unset($input['type']);
 
@@ -339,23 +339,23 @@ class ArmAmazonS3
 		if($partOffset > $totalSize) {
 			return 0; // This is to signify that we ran out of parts ;)
 		}
-		
+
 		// How many parts are there?
 		$totalParts = floor($totalSize / 5242880);
 		if($totalParts * 5242880 < $totalSize) $totalParts++;
-		
+
 		// Calculate Content-Length
 		if($PartNumber == $totalParts) {
 			$rest->size = $totalSize - ($PartNumber - 1) * 5242880;
 		} else {
 			$rest->size = 5242880;
 		}
-		
+
 		if (isset($input['file'])) {
 			// Create a temp file with the bytes we want to upload
-			$fp = @fopen($input['file'], 'rb');			
+			$fp = @fopen($input['file'], 'rb');
 			$result = fseek($fp, ($PartNumber - 1) * 5242880);
-			
+
 			$rest->fp = $fp; // I have to set the ArmAmazonS3request's file pointer, NOT the file structure's, as the request object is already initialized
 			$rest->data = false;
 		} elseif (isset($input['data'])) {
@@ -363,7 +363,7 @@ class ArmAmazonS3
 			$rest->fp = false;
 			$rest->data = substr($input['data'], ($PartNumber - 1) * 5242880, $rest->size);
 		}
-		
+
 		// Custom request headers (Content-Type, Content-Disposition, Content-Encoding)
 		if (is_array($requestHeaders))
 			foreach ($requestHeaders as $h => $v) {
@@ -381,18 +381,18 @@ class ArmAmazonS3
 			$rest->getResponse();
 		} else {
 			if($rest->size < 0) {
-				$rest->response->error = array('code' => 0, 'message' => 'Missing file size parameter');	
+				$rest->response->error = array('code' => 0, 'message' => 'Missing file size parameter');
 			} else {
 				$rest->response->error = array('code' => 0, 'message' => 'No data file pointer specified');
 			}
 		}
 
 		@fclose($fp);
-		
+
 		if ($rest->response->error === false && $rest->response->code !== 200)
 			$rest->response->error = array('code' => $rest->response->code, 'message' => 'Unexpected HTTP status');
 		if ($rest->response->error !== false) {
-			// Sometimes we get a broken pipe error which is bullshit; it's just a response with 0 size
+			// Sometimes we get a broken pipe error which is bogus; it's just a response with 0 size
 			if( ($rest->response->error['code'] == 55) && ($rest->response->code == 200) && is_array($rest->response->headers) ) {
 				// This is not an error. AAAAARGH!
 				return $rest->response->headers['hash'];
@@ -402,11 +402,11 @@ class ArmAmazonS3
 				return false;
 			}
 		}
-				
+
 		// Return the ETag header
 		return $rest->response->headers['hash'];
 	}
-	
+
 	/**
 	 * Finalizes the multi-part upload. The $input array should contain two keys, etags an array of ETags of the uploaded
 	 * parts and UploadID the multipart upload ID.
@@ -419,17 +419,17 @@ class ArmAmazonS3
 		if(!array_key_exists('etags',$input)) {
 			$o = self::getInstance();
 			$o->setWarning(__CLASS__."::finalizeMultipart(): No ETags array specified");
-			return false;	
+			return false;
 		}
 		if(!array_key_exists('UploadID', $input)) {
 			$o = self::getInstance();
 			$o->setWarning(__CLASS__."::finalizeMultipart(): No UploadID specified");
-			return false;	
+			return false;
 		}
-		
+
 		$etags = $input['etags'];
 		$UploadID = $input['UploadID'];
-		
+
 		// Create the message
 		$message ="<CompleteMultipartUpload>\n";
 		$part = 0;
@@ -438,22 +438,22 @@ class ArmAmazonS3
 			$message .= "\t<Part>\n\t\t<PartNumber>$part</PartNumber>\n\t\t<ETag>\"$etag\"</ETag>\n\t</Part>\n";
 		}
 		$message .= "</CompleteMultipartUpload>";
-		
+
 		// Get a request query
 		$rest = new ArmAmazonS3request('POST', $bucket, $uri, ArmAmazonS3::getInstance()->defaultHost);
 		$rest->setParameter('uploadId', $UploadID);
-		
+
 		// Set content length
 		$rest->size = strlen($message);
-		
+
 		// Set content
 		$rest->data = $message;
 		$rest->fp = false;
-		
+
 		// Do post
 		$rest->setHeader('Content-Type', 'application/xml'); // Even though the Amazon API doc doesn't mention it, it's required... :(
 		$rest->getResponse();
-		
+
 		if ($rest->response->error === false && $rest->response->code !== 200)
 			$rest->response->error = array('code' => $rest->response->code, 'message' => 'Unexpected HTTP status');
 		if ($rest->response->error !== false) {
@@ -465,7 +465,7 @@ class ArmAmazonS3
 				throw new Exception(sprintf(__CLASS__."::finalizeMultipart(): [%s] %s", $rest->response->error['code'], $rest->response->error['message']),100);
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -528,7 +528,7 @@ class ArmAmazonS3
 		}
 		return true;
 	}
-	
+
 	/**
 	* Get MIME type for file
 	*
@@ -575,7 +575,7 @@ class ArmAmazonS3
 		$ext = strtolower(pathInfo($file, PATHINFO_EXTENSION));
 		return isset($exts[$ext]) ? $exts[$ext] : 'application/octet-stream';
 	}
-	
+
 	/**
 	* Get a query string authenticated URL
 	*
@@ -595,7 +595,7 @@ class ArmAmazonS3
 		$hostBucket ? $bucket : $bucket.'.s3.amazonaws.com', $uri, self::$__accessKey, $expires,
 		urlencode(self::__getHash("GET\n\n\n{$expires}\n/{$bucket}/{$uri}")));
 	}
-	
+
 	/*
 	* Get contents for a bucket
 	*
@@ -680,7 +680,7 @@ class ArmAmazonS3
 
 		return $results;
 	}
-	
+
 	/**
 	* Get a list of buckets
 	*
