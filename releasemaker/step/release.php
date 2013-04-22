@@ -3,17 +3,17 @@
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
  * Copyright ©2012-2013 Nicholas K. Dionysopoulos / Akeeba Ltd.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,17 +21,17 @@
 class ArmStepRelease implements ArmStepInterface
 {
 	private $arsConnector = null;
-	
+
 	private $release = null;
-	
+
 	public function execute()
 	{
 		echo "CREATING OR UPDATING RELEASE\n";
 		echo str_repeat('-', 79) . PHP_EOL;
-		
+
 		echo "\tChecking release status\n";
 		$this->checkRelease();
-		
+
 		if (is_null($this->release->id))
 		{
 			echo "\tCreating release\n";
@@ -41,34 +41,34 @@ class ArmStepRelease implements ArmStepInterface
 			echo "\tUpdating release\n";
 		}
 		$this->editRelease();
-		
+
 		echo PHP_EOL;
 	}
-	
+
 	private function checkRelease()
 	{
 		$conf = ArmConfiguration::getInstance();
-		
+
 		$this->arsConnector = new ArmArs(array(
 			'host'		=> $conf->get('common.arsapiurl', ''),
 			'username'	=> $conf->get('common.username', ''),
 			'password'	=> $conf->get('common.password', ''),
 		));
-		
+
 		$category	= $conf->get('common.category', 0);
 		$version	= $conf->get('common.version', 0);
-		
+
 		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
-	
+
 	private function editRelease()
 	{
 		$conf = ArmConfiguration::getInstance();
-		
+
 		$category	= $conf->get('common.category', 0);
 		$version	= $conf->get('common.version', 0);
 		$releaseDir	= $conf->get('common.releasedir', '');
-		
+
 		$this->release->description = $this->readFile('DESCRIPTION.html');
 		$this->release->notes = $this->readFile('RELEASENOTES.html');
 		$this->release->notes .= $this->readChangelog();
@@ -89,18 +89,18 @@ class ArmStepRelease implements ArmStepInterface
 		{
 			$this->release->groups = '';
 		}
-		
+
 		$this->release->maturity = $this->getMaturity($version);
-		
+
 		$result = $this->arsConnector->saveRelease((array) $this->release);
 	}
-	
+
 	private function readFile($filename)
 	{
 		$conf = ArmConfiguration::getInstance();
-		
+
 		$path = $conf->get('common.repodir', '');
-		
+
 		if (file_exists($path.'/'.$filename))
 		{
 			return @file_get_contents($path.'/'.$filename);
@@ -110,13 +110,13 @@ class ArmStepRelease implements ArmStepInterface
 			return null;
 		}
 	}
-	
+
 	private function getMaturity($version)
 	{
 		$version = strtolower($version);
 		$versionParts = explode('.', $version);
 		$lastPart = array_pop($versionParts);
-		
+
 		if (substr($lastPart, 0, 1) == 'a')
 		{
 			return 'alpha';
@@ -134,22 +134,22 @@ class ArmStepRelease implements ArmStepInterface
 			return 'stable';
 		}
 	}
-	
+
 	private function readChangelog()
 	{
 		$conf = ArmConfiguration::getInstance();
-		
+
 		$filename = rtrim($conf->get('common.repodir', ''), '/') . '/CHANGELOG';
 
 		$changelog = file($filename);
-		
+
 		// Remove the first line, it's the PHP die() statement
 		array_shift($changelog);
-		
+
 		// Remove the next two lines, they are the version banner
 		array_shift($changelog);
 		array_shift($changelog);
-		
+
 		// Loop until you find a blank line
 		$thisChangelog = array();
 		foreach ($changelog as $line)
@@ -164,15 +164,15 @@ class ArmStepRelease implements ArmStepInterface
 				break;
 			}
 		}
-		
+
 		if (empty($thisChangelog))
 		{
 			return '';
 		}
-		
+
 		// Sort the array
 		asort($thisChangelog);
-		
+
 		// Pick lines by type
 		$sorted = array(
 			'new'		=> array(),
@@ -204,7 +204,7 @@ class ArmStepRelease implements ArmStepInterface
 					break;
 			}
 		}
-		
+
 		// Format the changelog
 		$htmlChangelog = "<h3>Changelog</h3>\n";
 		foreach ($sorted as $area => $lines)
@@ -213,7 +213,7 @@ class ArmStepRelease implements ArmStepInterface
 			{
 				continue;
 			}
-			
+
 			switch ($area)
 			{
 				case 'new':
@@ -233,15 +233,15 @@ class ArmStepRelease implements ArmStepInterface
 					break;
 			}
 			$htmlChangelog .= "<h4>$title</h4>\n<ul>\n";
-			
+
 			foreach ($lines as $line)
 			{
 				$htmlChangelog .= "\t<li>" . htmlspecialchars($line, ENT_COMPAT, 'UTF-8') . "</li>\n";
 			}
-			
+
 			$htmlChangelog .= "</ul>\n";
 		}
-		
+
 		return $htmlChangelog;
 	}
 }

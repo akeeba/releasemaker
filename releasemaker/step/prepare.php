@@ -3,17 +3,17 @@
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
  * Copyright ©2012-2013 Nicholas K. Dionysopoulos / Akeeba Ltd.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,84 +21,85 @@
 class ArmStepPrepare implements ArmStepInterface
 {
 	private $path = null;
-	
+
 	private $files = array();
-	
+
 	public function execute()
 	{
 		echo "PREPARATION\n";
 		echo str_repeat('-', 79) . PHP_EOL;
-		
+
 		// Get the configuration
 		$conf = ArmConfiguration::getInstance();
 		$this->path = $conf->get('common.releasedir');
-		
+
 		if(empty($this->path)) {
 			throw new Exception('common.releasedir path is empty');
 		}
 		if(!is_dir($this->path)) {
 			throw new Exception('common.releasedir path is not a directory');
 		}
-			
+
 		if(!is_readable($this->path)) {
 			throw new Exception('common.releasedir path is not readable');
 		}
-		
+
 		// Find the files
 		$this->files['core'] = $this->findFiles('core');
 		$this->files['pro'] = $this->findFiles('pro');
 		$this->files['pdf'] = $this->findPdfFiles();
-		
+
 		// Add the files to the volatile config key
 		$conf->set('volatile.files', $this->files);
-		
+
 		echo PHP_EOL;
 	}
-	
+
 	private function findFiles($type = 'core')
 	{
 		echo "\tFinding $type files\n";
-		
+
 		$ret = array();
 
 		$conf = ArmConfiguration::getInstance();
 		$pattern = $conf->get($type.'.pattern', '');
-		
+
 		if(empty($pattern)) {
 			$pattern = 'com_*'.$type.'.zip';
 		}
-		
+
 		$dir = new DirectoryIterator($this->path);
 		foreach ($dir as $fileinfo) {
 			if($fileinfo->isDot()) continue;
 			if($fileinfo->isFile()) {
 				$fn = $fileinfo->getFilename();
 				if(!fnmatch($pattern, $fn)) continue;
-				
+
 				$ret[] = $fn;
+				echo "\t\t" . basename($fn) . "\n";
 			}
 		}
-		
+
 		return $ret;
 	}
-	
+
 	private function findPdfFiles()
 	{
 		echo "\tFinding pdf files\n";
-		
+
 		$ret = array();
 
 		$conf = ArmConfiguration::getInstance();
 		$files = $conf->get('pdf.files', '');
-		
+
 		if(empty($files)) {
 			return $ret;
 		}
-		
+
 		if(is_string($files)) {
 			$files = array($files);
 		}
-		
+
 		$dir = new DirectoryIterator($this->path);
 		foreach ($dir as $fileinfo) {
 			if($fileinfo->isDot()) continue;
@@ -122,14 +123,16 @@ class ArmStepPrepare implements ArmStepInterface
 						unlink($this->path . DIRECTORY_SEPARATOR . $fn);
 						// Add the ZIP file to the list
 						$ret[] = basename($zipFileName);
+						echo "\t\t" . basename($fn) . "\n";
 					} elseif($fn == $file.'.pdf.zip') {
 						// Just add comrpessed file
 						$ret[] = $fn;
+						echo "\t\t" . basename($fn) . "\n";
 					}
 				}
 			}
 		}
-		
+
 		return $ret;
 	}
 }

@@ -92,8 +92,15 @@ class ArmArs
 
 		if ($raw === false)
 		{
-			//var_dump($postData);
-			throw new Exception('ARS API communications error; please check the host name and your network status.' . "\ncURL error $errno\n$error");
+			if (($errno == 22) && strstr($error, ': 403'))
+			{
+				return json_encode(false);
+			}
+			else
+			{
+				//var_dump($postData);
+				throw new Exception('ARS API communications error; please check the host name and your network status.' . "\ncURL error $errno\n$error");
+			}
 		}
 
 		return $raw;
