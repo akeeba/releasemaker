@@ -101,7 +101,7 @@ class ArmStepUpdates implements ArmStepInterface
 
 			$temp_filename = $tempPath . '/' . $basename . $extension;
 
-			$updateURL = $url . "/index.php?option=com_ars&view=update&task=stream&format=$format&id=$stream_id" . $task;
+			$updateURL = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
 
 			$data = file_get_contents($updateURL);
 			//var_dump($updateURL, $data);die();
