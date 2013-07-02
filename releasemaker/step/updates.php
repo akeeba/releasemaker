@@ -54,7 +54,7 @@ class ArmStepUpdates implements ArmStepInterface
 				'type'			=> $type,
 				'hostname'		=> $conf->get('common.update.ftp.hostname', ''),
 				'port'			=> $conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21),
-				'username'		=> $conf->get('common.update.ftp.usernname', ''),
+				'username'		=> $conf->get('common.update.ftp.username', ''),
 				'password'		=> $conf->get('common.update.ftp.password', ''),
 				'passive'		=> $conf->get('common.update.ftp.passive', true),
 				'directory'		=> $conf->get('common.update.ftp.directory', ''),
