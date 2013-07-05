@@ -176,10 +176,13 @@ class ArmStepRelease implements ArmStepInterface
 
 		// Pick lines by type
 		$sorted = array(
-			'new'		=> array(),
-			'removed'	=> array(),
-			'misc'		=> array(),
+			'security'	=> array(),
 			'bugfix'	=> array(),
+			'language'	=> array(),
+			'new'		=> array(),
+			'change'	=> array(),
+			'misc'		=> array(),
+			'removed'	=> array(),
 			'critical'	=> array(),
 		);
 		foreach($thisChangelog as $line)
@@ -187,17 +190,26 @@ class ArmStepRelease implements ArmStepInterface
 			list($type, $text) = explode(' ', $line, 2);
 			switch ($type)
 			{
+				case '*':
+					$sorted['security'][] = $text;
+					break;
+				case '#':
+					$sorted['bugfix'][] = $text;
+					break;
+				case '$':
+					$sorted['language'][] = $text;
+					break;
 				case '+':
 					$sorted['new'][] = $text;
 					break;
-				case '-':
-					$sorted['removed'][] = $text;
+				case '^':
+					$sorted['change'][] = $text;
 					break;
 				case '~':
 					$sorted['misc'][] = $text;
 					break;
-				case '#':
-					$sorted['bugfix'][] = $text;
+				case '-':
+					$sorted['removed'][] = $text;
 					break;
 				case '!':
 				case '!!':
@@ -217,17 +229,26 @@ class ArmStepRelease implements ArmStepInterface
 
 			switch ($area)
 			{
+				case 'security':
+					$title = 'Security fixes';
+					break;
+				case 'bugfix':
+					$title = 'Bug fixes';
+					break;
+				case 'language':
+					$title = 'Language fixes or changes';
+					break;
 				case 'new':
 					$title = 'New features';
 					break;
-				case 'removed':
-					$title = 'Removed features';
+				case 'change':
+					$title = 'Changes';
 					break;
 				case 'misc':
 					$title = 'Miscellaneous changes';
 					break;
-				case 'bugfix':
-					$title = 'Bug fixes';
+				case 'removed':
+					$title = 'Removed features';
 					break;
 				case 'critical':
 					$title = 'Critical bugs and important changes';
