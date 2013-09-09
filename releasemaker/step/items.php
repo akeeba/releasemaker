@@ -163,7 +163,7 @@ class ArmStepItems implements ArmStepInterface
 			$this->publishInfo[$publishArea][] = $item;
 
 			$result = $this->arsConnector->saveItem((array)$item);
-			if ($result !== false)
+			if ($result !== 'false')
 			{
 				echo " -- OK\n";
 			}
