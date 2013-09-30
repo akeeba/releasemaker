@@ -69,6 +69,7 @@ class ArmStepRelease implements ArmStepInterface
 		$version	= $conf->get('common.version', 0);
 		$releaseDir	= $conf->get('common.releasedir', '');
 		$releaseGroups = $conf->get('common.releasegroups', '');
+		$releaseAccess = $conf->get('common.releaseaccess', '');
 
 		$this->release->description = $this->readFile('DESCRIPTION.html');
 		$this->release->notes = $this->readFile('RELEASENOTES.html');
@@ -89,6 +90,10 @@ class ArmStepRelease implements ArmStepInterface
 		if (empty($this->release->groups))
 		{
 			$this->release->groups = $releaseGroups;
+		}
+		if (!empty($releaseAccess))
+		{
+			$this->release->access = $releaseAccess;
 		}
 
 		$this->release->maturity = $this->getMaturity($version);
