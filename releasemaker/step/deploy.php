@@ -25,11 +25,15 @@ class ArmStepDeploy implements ArmStepInterface
 		echo "FILE DEPLOYMENT\n";
 		echo str_repeat('-', 79) . PHP_EOL;
 
-		echo "\tDeploying Core files\n";
-		$this->deployCore();
+		$prefixes = array (
+			'core',
+			'pro',
+		);
 
-		echo "\tDeploying Pro files\n";
-		$this->deployPro();
+		foreach ($prefixes as $prefix)
+		{
+			$this->deployFiles($prefix);
+		}
 
 		echo "\tDeploying PDF files\n";
 		$this->deployPdf();
@@ -37,104 +41,48 @@ class ArmStepDeploy implements ArmStepInterface
 		echo PHP_EOL;
 	}
 
-	private function deployPro($isPdf = false)
+	private function deployFiles($prefix, $isPdf = false)
 	{
+		echo "\tDeploying " . ucfirst($prefix) . " files\n";
+
 		$conf = ArmConfiguration::getInstance();
 
-		$type = $conf->get('pro.method', $conf->get('common.update.method', 'sftp'));
+		$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
 
 		if($type == 's3') {
 			$config = (object)array(
-				'access'		=> $conf->get('pro.s3.access',		$conf->get('common.update.s3.access', '')),
-				'secret'		=> $conf->get('pro.s3.secret',		$conf->get('common.update.s3.secret', '')),
-				'bucket'		=> $conf->get('pro.s3.bucket',		$conf->get('common.update.s3.bucket', '')),
-				'usessl'		=> $conf->get('pro.s3.usessl',		$conf->get('common.update.s3.usessl', true)),
-				'directory'		=> $conf->get('pro.s3.directory',	$conf->get('common.update.s3.directory', '')),
-				'cdnhostname'	=> $conf->get('pro.s3.cdnhostname', $conf->get('common.update.s3.cdnhostname', '')),
+				'access'		=> $conf->get($prefix . '.s3.access',		$conf->get('common.update.s3.access', '')),
+				'secret'		=> $conf->get($prefix . '.s3.secret',		$conf->get('common.update.s3.secret', '')),
+				'bucket'		=> $conf->get($prefix . '.s3.bucket',		$conf->get('common.update.s3.bucket', '')),
+				'usessl'		=> $conf->get($prefix . '.s3.usessl',		$conf->get('common.update.s3.usessl', true)),
+				'directory'		=> $conf->get($prefix . '.s3.directory',	$conf->get('common.update.s3.directory', '')),
+				'cdnhostname'	=> $conf->get($prefix . '.s3.cdnhostname', 	$conf->get('common.update.s3.cdnhostname', '')),
 			);
 		} else {
 			$config = (object)array(
 				'type'			=> $type,
-				'hostname'		=> $conf->get('pro.ftp.hostname',	$conf->get('common.update.ftp.hostname', '')),
-				'port'			=> $conf->get('pro.ftp.port',		$conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21)),
-				'username'		=> $conf->get('pro.ftp.username',	$conf->get('common.update.ftp.username', '')),
-				'password'		=> $conf->get('pro.ftp.password',	$conf->get('common.update.ftp.password', '')),
-				'passive'		=> $conf->get('pro.ftp.passive',	$conf->get('common.update.ftp.passive', true)),
-				'directory'		=> $conf->get('pro.ftp.directory',	$conf->get('common.update.ftp.directory', '')),
+				'hostname'		=> $conf->get($prefix . '.ftp.hostname',	$conf->get('common.update.ftp.hostname', '')),
+				'port'			=> $conf->get($prefix . '.ftp.port',		$conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21)),
+				'username'		=> $conf->get($prefix . '.ftp.username',	$conf->get('common.update.ftp.username', '')),
+				'password'		=> $conf->get($prefix . '.ftp.password',	$conf->get('common.update.ftp.password', '')),
+				'passive'		=> $conf->get($prefix . '.ftp.passive',		$conf->get('common.update.ftp.passive', true)),
+				'directory'		=> $conf->get($prefix . '.ftp.directory',	$conf->get('common.update.ftp.directory', '')),
 			);
 		}
 
-		$files = $conf->get('volatile.files');
+		$volatileFiles = $conf->get('volatile.files');
 		if($isPdf) {
-			$proFiles = $files['pdf'];
+			$files = $volatileFiles['pdf'];
 		} else {
-			$proFiles = $files['pro'];
+			$files = $volatileFiles[$prefix];
 		}
 
-		if(empty($proFiles)) {
+		if(empty($files)) {
 			return;
 		}
 
 		$path = $conf->get('common.releasedir');
-		foreach($proFiles as $filename) {
-			echo "\t\tUploading $filename\n";
-			$sourcePath = $path . DIRECTORY_SEPARATOR . $filename;
-
-			switch($type) {
-				case 's3':
-					$this->uploadS3($config, $sourcePath);
-					break;
-				case 'ftp':
-				case 'ftps':
-					$this->uploadFtp($config, $sourcePath);
-					break;
-				case 'sftp':
-					$this->uploadSftp($config, $sourcePath);
-					break;
-			}
-		}
-	}
-
-	private function deployCore($isPdf = false)
-	{
-		$conf = ArmConfiguration::getInstance();
-
-		$type = $conf->get('core.method', $conf->get('common.update.method', 'sftp'));
-
-		if($type == 's3') {
-			$config = (object)array(
-				'access'		=> $conf->get('core.s3.access',		$conf->get('common.update.s3.access', '')),
-				'secret'		=> $conf->get('core.s3.secret',		$conf->get('common.update.s3.secret', '')),
-				'bucket'		=> $conf->get('core.s3.bucket',		$conf->get('common.update.s3.bucket', '')),
-				'usessl'		=> $conf->get('core.s3.usessl',		$conf->get('common.update.s3.usessl', true)),
-				'directory'		=> $conf->get('core.s3.directory',	$conf->get('common.update.s3.directory', '')),
-				'cdnhostname'	=> $conf->get('core.s3.cdnhostname', $conf->get('common.update.s3.cdnhostname', '')),
-			);
-		} else {
-			$config = (object)array(
-				'type'			=> $type,
-				'hostname'		=> $conf->get('core.ftp.hostname',	$conf->get('common.update.ftp.hostname', '')),
-				'port'			=> $conf->get('core.ftp.port',		$conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21)),
-				'username'		=> $conf->get('core.ftp.username',	$conf->get('common.update.ftp.username', '')),
-				'password'		=> $conf->get('core.ftp.password',	$conf->get('common.update.ftp.password', '')),
-				'passive'		=> $conf->get('core.ftp.passive',	$conf->get('common.update.ftp.passive', true)),
-				'directory'		=> $conf->get('core.ftp.directory',	$conf->get('common.update.ftp.directory', '')),
-			);
-		}
-
-		$files = $conf->get('volatile.files');
-		if($isPdf) {
-			$coreFiles = $files['pdf'];
-		} else {
-			$coreFiles = $files['core'];
-		}
-
-		if(empty($coreFiles)) {
-			return;
-		}
-
-		$path = $conf->get('common.releasedir');
-		foreach($coreFiles as $filename) {
+		foreach($files as $filename) {
 			echo "\t\tUploading $filename\n";
 			$sourcePath = $path . DIRECTORY_SEPARATOR . $filename;
 
@@ -157,10 +105,10 @@ class ArmStepDeploy implements ArmStepInterface
 	{
 		$conf = ArmConfiguration::getInstance();
 		$where = $conf->get('pdf.where', 'core');
-		if($where == 'core') {
-			$this->deployCore(true);
+		if ($where == 'core') {
+			$this->deployFiles('core', true);
 		} else {
-			$this->deployPro(true);
+			$this->deployFiles('pro', true);
 		}
 	}
 
