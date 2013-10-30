@@ -109,7 +109,7 @@ class ArmStepPrepare implements ArmStepInterface
 					if($fn == $file.'.pdf') {
 						// Get the ZIP filename
 						$zipFileName = $this->path . DIRECTORY_SEPARATOR .
-							$file . '.pdf.zip';
+						$file . '.pdf.zip';
 						// Remove old ZIP file
 						if(file_exists($zipFileName)) {
 							unlink($zipFileName);
@@ -125,7 +125,7 @@ class ArmStepPrepare implements ArmStepInterface
 						$ret[] = basename($zipFileName);
 						echo "\t\t" . basename($fn) . "\n";
 					} elseif($fn == $file.'.pdf.zip') {
-						// Just add comrpessed file
+						// Just add compressed file
 						$ret[] = $fn;
 						echo "\t\t" . basename($fn) . "\n";
 					}

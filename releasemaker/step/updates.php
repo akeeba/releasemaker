@@ -104,7 +104,6 @@ class ArmStepUpdates implements ArmStepInterface
 			$updateURL = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
 
 			$data = file_get_contents($updateURL);
-			//var_dump($updateURL, $data);die();
 			file_put_contents($temp_filename, $data);
 
 			switch($type) {
