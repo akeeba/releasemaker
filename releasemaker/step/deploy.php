@@ -124,11 +124,12 @@ class ArmStepDeploy implements ArmStepInterface
 			$destName = $version.'/'.basename($sourcePath);
 		}
 		$uri = $config->directory . '/' . $destName;
-		if(isset($config->cdnhostname)) {
+		if(!empty($config->cdnhostname)) {
 			$acl = ArmAmazonS3::ACL_PUBLIC_READ;
 		} else {
 			$acl = ArmAmazonS3::ACL_PRIVATE;
 		}
+		echo "\t\t          with $acl ACL\n";
 
 		$requestHeaders = array(
 			'Cache-Control' => 'max-age=600'

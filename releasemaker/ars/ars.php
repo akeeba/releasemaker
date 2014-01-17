@@ -94,12 +94,12 @@ class ArmArs
 		{
 			if (($errno == 22) && strstr($error, ': 403'))
 			{
+				echo 'ARS API communications error; please check common.username, common.password, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n";
 				return json_encode(false);
 			}
 			else
 			{
-				//var_dump($postData);
-				throw new Exception('ARS API communications error; please check the host name and your network status.' . "\ncURL error $errno\n$error");
+				throw new Exception('ARS API communications error; please check common.username, common.password, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
 			}
 		}
 
