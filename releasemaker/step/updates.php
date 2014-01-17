@@ -133,7 +133,7 @@ class ArmStepUpdates implements ArmStepInterface
 			$destName = basename($sourcePath);
 		}
 		$uri = $config->directory . '/' . $destName;
-		if(isset($config->cdnhostname)) {
+		if(!empty($config->cdnhostname)) {
 			$acl = ArmAmazonS3::ACL_PUBLIC_READ;
 		} else {
 			$acl = ArmAmazonS3::ACL_PRIVATE;
