@@ -129,6 +129,7 @@ class ArmStepDeploy implements ArmStepInterface
 		} else {
 			$acl = ArmAmazonS3::ACL_PRIVATE;
 		}
+		echo "\t\t          with $acl ACL\n";
 
 		$requestHeaders = array(
 			'Cache-Control' => 'max-age=600'
