@@ -29,6 +29,11 @@ class ArmSftp
 	{
 		$this->config = $config;
 
+		if (!function_exists('ssh2_connect'))
+		{
+			throw new Exception('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
+		}
+
 		$this->ssh = ssh2_connect($config->hostname, $config->port);
 
 		if (!$this->ssh)
