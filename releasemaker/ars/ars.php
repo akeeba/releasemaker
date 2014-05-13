@@ -258,6 +258,7 @@ class ArmArs
 			'view'			=> 'items',
 			'task'			=> 'save',
 			'format'		=> 'json',
+			'returnurl'		=> base64_encode('index.php'),
 		);
 		$arsData = array_merge($itemData, $arsData);
 
