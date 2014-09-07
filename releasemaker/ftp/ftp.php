@@ -27,7 +27,7 @@ class ArmFtp
 	public function __construct($config) {
 		$this->config = $config;
 		
-		if($config->method == 'sftp') {
+		if($config->method == 'ftps') {
 			$this->fp = @ftp_ssl_connect($config->hostname, $config->port);
 		} else {
 			$this->fp = @ftp_connect($config->hostname, $config->port);
