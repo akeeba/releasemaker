@@ -40,6 +40,28 @@ ENDBANNER;
 // Load the class autoloader
 require_once __DIR__.'/autoloader.php';
 
+// Laod the Composer autoloader
+if (!file_exists(__DIR__.'/vendor/autoload.php'))
+{
+	echo <<< OOPS
+
+ERROR! You have not initialised Composer
+
+Before using Akeeba Release Maker you need to go into its directory and run:
+
+cd releasemaker
+composer install
+
+Then this message will go away and Akeeba Release Maker will run properly.
+
+OOPS;
+
+	exit(2);
+
+}
+
+require_once __DIR__.'/vendor/autoload.php';
+
 // Get the path to the configuration file
 end($argv);
 $json_file = current($argv);
