@@ -1,0 +1,15 @@
+{
+  "name": "akeeba/releasemaker",
+  "description": "Automates the deployment of software with Akeeba Release System",
+  "minimum-stability": "stable",
+  "license": "GPlv3",
+  "authors": [
+    {
+      "name": "Nicholas K. Dionysopoulos / Akeeba ltd",
+      "email": "no-reply@akeebabackup.com"
+    }
+  ],
+  "require": {
+    "aws/aws-sdk-php": "2.8.1"
+  }
+}
