@@ -1,6 +1,83 @@
-Akeeba Release Maker
-An automated script to upload and release a new version of an Akeeba component.
-Copyright ©2012 Nicholas K. Dionysopoulos / Akeeba Ltd.
+# Akeeba Release Maker
+
+An automated script to upload and release a new version of software using an Akeeba Release System installation.
+
+Copyright (c) 2012-2015 Nicholas K. Dionysopoulos / Akeeba Ltd.
+
+## Before you begin
+
+Run `composer install` to update the external requirements.
+
+## How to use
+
+`php /path/to/releasemaker/index.php /other/path/to/release.json`
+
+## Sample release.json file
+
+See configuration/config.json
+
+There are four sections: common, pro, core, pdf. Common settings apply to everything.
+
+Core and pro apply each to free
+(core) and paid (pro) versions. If you only have a free version set the pro.pattern to something silly, e.g.
+"LOLLOL-NOPRO" and leave the other pro keys blank. Likewise, if you only have a paid version set core.pattern to
+something silly and let the other keys blank. If you only have one kind of version and are confused, consider it "pro".
+The big idea is that only ONE item can be published per position and that file WILL have a corresponding update stream
+published.
+
+The PDF section is designed for documentation but can be used to upload anything. All files you specify here will be
+published to EITHER the core OR the pro version. The idea is that the files uploaded through this section do NOT have
+a corresponding update stream (they are support files). Since the original supprot files we were publishing were PDF
+documentation snapshots the name of the section stuck as "pdf".
+
+### Common section
+
+* *common.version* Version number, e.g. 1.2.3
+* *common.date* Release date, e.g. 2015-04-03
+* *common.arsapiurl* URL to the site with Akeeba Release System installed, e.g. http://www.example.com (do NOT include index.php?option=com_ars etc)
+* *common.username* Your login username, needs to have core.manage privilege for ARS or core.admin (Super User) privilege
+* *common.password* Your login password
+* *common.category* integer; the ARS category where things will be published.
+* *common.releasedir* Absolute path to the local directory containing the files to publish.
+* *common.releasegroups* array of integers; numeric IDs of Akeeba Subscriptions levels which will have access to the release. Optional.
+* *common.releaseaccess* integer; numeric ID of Joomla! View Access Level which will have access to the release. Optional.
+* *common.repodir* Absolute path to the local directory containing the Git directory of the files you're publishing
+* *common.update.method* How should I upload the update stream files? "s3", "ftp", "ftps" or "sftp"
+* *common.update.ftp.hostname* FTP(S) / SFTP hostname for update streams
+* *common.update.ftp.port* FTP(S) / SFTP port for update streams (default: 21 for FTP(S), 22 for SFTP)
+* *common.update.ftp.username* FTP(S) / SFTP username for update streams
+* *common.update.ftp.password* FTP(S) / SFTP password for update streams
+* *common.update.ftp.passive* Use FTP(S) passive mode for update streams
+* *common.update.ftp.directory* FTP(S) / SFTP initial directory
+* *common.update.s3.access* S3 Access Key for update streams
+* *common.update.s3.secret* S3 Secret Key for update streams
+* *common.update.s3.bucket* S3 Bucket for update streams
+* *common.update.s3.usessl* Use SSL with S3 for update streams
+* *common.update.s3.directory* S3 base directory for update streams
+* *common.update.s3.cdnhostname* CloudFront CDN hostname for the S3 bucket for update streams
+
+### Pro and core section
+
+* *pro.pattern* Filesystem match pattern for Pro file to publish, e.g. `com_foobar*.zip`
+* *pro.method* How should I upload Pro files? "s3", "ftp", "ftps" or "sftp"
+* *pro.update.stream* Numeric ID of ARS update stream for the Pro file
+* *pro.update.basename* Base filename for the update stream file, e.g. `something`. Used in conjunction with pro.update.formats to decide the file name of the uploaded update stream files.
+* *pro.update.formats* Which update stream format(s) should I upload for the Pro version? One or more of "ini" (`something.ini` containing Live Update INI data), "inibare" (`something` containing Live Update INI data), "xml" (`something.xml` containing Joomla! XML update stream data)
+* *pro.groups* array of integers; numeric IDs of Akeeba Subscriptions levels which will have access to the published file. Optional.
+* *pro.access* integer; numeric ID of Joomla! View Access Level which will have access to the published file. Optional.
+
+All pro.ftp.* options are used when you use pro.method = "ftp", "ftps" or "sftp". They work like common.update.s3.*
+
+All pro.s3.* options are used when you use pro.method = "s3". They work like common.update.s3.*
+
+All core.* options work the same as pro.* options but refer to the "Core" file.
+
+### PDF section
+
+* *pdf.where* How to publish the files. Use "core" or "pro". The publish method and access control will match the corresponding section as configured above.
+* *pdf.files* A list of additional files to publish. They don't have to be PDF files. Any type of files will do.
+
+## License
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
