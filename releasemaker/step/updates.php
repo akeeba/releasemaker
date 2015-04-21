@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
@@ -17,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 class ArmStepUpdates implements ArmStepInterface
 {
 	public function execute()
@@ -40,34 +40,39 @@ class ArmStepUpdates implements ArmStepInterface
 
 		$type = $conf->get('common.update.method', 'sftp');
 
-		if($type == 's3') {
-			$config = (object)array(
-				'access'		=> $conf->get('common.update.s3.access', ''),
-				'secret'		=> $conf->get('common.update.s3.secret', ''),
-				'bucket'		=> $conf->get('common.update.s3.bucket', ''),
-				'usessl'		=> $conf->get('common.update.s3.usessl', true),
-				'directory'		=> $conf->get('common.update.s3.directory', ''),
-				'cdnhostname'	=> $conf->get('common.update.s3.cdnhostname', ''),
+		if ($type == 's3')
+		{
+			$config = (object) array(
+				'access'      => $conf->get('common.update.s3.access', ''),
+				'secret'      => $conf->get('common.update.s3.secret', ''),
+				'bucket'      => $conf->get('common.update.s3.bucket', ''),
+				'usessl'      => $conf->get('common.update.s3.usessl', true),
+				'signature'   => $conf->get('common.update.s3.signature', 's3'),
+				'region'      => $conf->get('common.update.s3.region', 'us-east-1'),
+				'directory'   => $conf->get('common.update.s3.directory', ''),
+				'cdnhostname' => $conf->get('common.update.s3.cdnhostname', ''),
 			);
-		} else {
-			$config = (object)array(
-				'type'			=> $type,
-				'hostname'		=> $conf->get('common.update.ftp.hostname', ''),
-				'port'			=> $conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21),
-				'username'		=> $conf->get('common.update.ftp.username', ''),
-				'password'		=> $conf->get('common.update.ftp.password', ''),
-				'passive'		=> $conf->get('common.update.ftp.passive', true),
-				'directory'		=> $conf->get('common.update.ftp.directory', ''),
+		}
+		else
+		{
+			$config = (object) array(
+				'type'      => $type,
+				'hostname'  => $conf->get('common.update.ftp.hostname', ''),
+				'port'      => $conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21),
+				'username'  => $conf->get('common.update.ftp.username', ''),
+				'password'  => $conf->get('common.update.ftp.password', ''),
+				'passive'   => $conf->get('common.update.ftp.passive', true),
+				'directory' => $conf->get('common.update.ftp.directory', ''),
 			);
 		}
 
 		$stream_id = $conf->get($prefix . '.update.stream', 0);
-		$formats = $conf->get($prefix . '.update.formats', array());
-		$basename = $conf->get($prefix . '.update.basename', '');
-		$url = $conf->get('common.arsapiurl', '');
+		$formats   = $conf->get($prefix . '.update.formats', array());
+		$basename  = $conf->get($prefix . '.update.basename', '');
+		$url       = $conf->get('common.arsapiurl', '');
 
 		// No base name means that no updates are set here
-		if(empty($basename))
+		if (empty($basename))
 		{
 			return;
 		}
@@ -82,20 +87,20 @@ class ArmStepUpdates implements ArmStepInterface
 			{
 				case 'ini':
 					$extension = '.ini';
-					$format = 'ini';
-					$task = '';
+					$format    = 'ini';
+					$task      = '';
 					break;
 
 				case 'inibare':
 					$extension = '';
-					$format = 'ini';
-					$task = '';
+					$format    = 'ini';
+					$task      = '';
 					break;
 
 				case 'xml':
 					$extension = '.xml';
-					$format = 'xml';
-					$task = '&task=stream';
+					$format    = 'xml';
+					$task      = '&task=stream';
 					break;
 			}
 
@@ -106,7 +111,8 @@ class ArmStepUpdates implements ArmStepInterface
 			$data = file_get_contents($updateURL);
 			file_put_contents($temp_filename, $data);
 
-			switch($type) {
+			switch ($type)
+			{
 				case 's3':
 					$this->uploadS3($config, $temp_filename);
 					break;
@@ -125,30 +131,77 @@ class ArmStepUpdates implements ArmStepInterface
 
 	private function uploadS3($config, $sourcePath, $destName = null)
 	{
-		$s3 = ArmAmazonS3::getInstance($config->access, $config->secret, $config->usessl);
+		// Prepare the credentials object
+		$amazonCredentials = new \Aws\Common\Credentials\Credentials(
+			$config->access,
+			$config->secret
+		);
+
+		// Prepare the client options array. See http://docs.aws.amazon.com/aws-sdk-php/guide/latest/configuration.html#client-configuration-options
+		$clientOptions = array(
+			'credentials' => $amazonCredentials,
+			'scheme'      => $config->usessl ? 'https' : 'http',
+			'signature'   => $config->signature,
+			'region'      => $config->region
+		);
+
+		// If SSL is not enabled you must not provide the CA root file.
+		if (defined('AKEEBA_CACERT_PEM') && $config->usessl)
+		{
+			$clientOptions['ssl.certificate_authority'] = AKEEBA_CACERT_PEM;
+		}
+		else
+		{
+			$clientOptions['ssl.certificate_authority'] = false;
+		}
+
+		// Create the S3 client instance
+		$s3Client = \Aws\S3\S3Client::factory($clientOptions);
 
 		$inputFile = realpath($sourcePath);
-		$bucket = $config->bucket;
-		if(empty($destName)) {
+		$bucket    = $config->bucket;
+
+		if (empty($destName))
+		{
 			$destName = basename($sourcePath);
 		}
+
 		$uri = $config->directory . '/' . $destName;
-		if(!empty($config->cdnhostname)) {
-			$acl = ArmAmazonS3::ACL_PUBLIC_READ;
-		} else {
-			$acl = ArmAmazonS3::ACL_PRIVATE;
+
+		if (!empty($config->cdnhostname))
+		{
+			$acl = \Aws\S3\Enum\CannedAcl::PUBLIC_READ;
+		}
+		else
+		{
+			$acl = \Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS;
 		}
 
-		$requestHeaders = array(
-			'Cache-Control' => 'max-age=600'
+		$uploadOperation = array(
+			'Bucket'       => $bucket,
+			'Key'          => $uri,
+			'SourceFile'   => $inputFile,
+			'ACL'          => $acl,
+			'StorageClass' => 'STANDARD',
+			'CacheControl' => 'max-age=600'
 		);
-		$input = ArmAmazonS3::inputFile($inputFile, true);
-		$result = $s3->putObject($input, $bucket, $uri, $acl, array(), $requestHeaders);
+
+		try
+		{
+			$s3Client->putObject($uploadOperation);
+		}
+		catch (\Exception $e)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	private function uploadFtp($config, $sourcePath, $destName = null)
 	{
-		if(empty($destName)) {
+		if (empty($destName))
+		{
 			$destName = basename($sourcePath);
 		}
 
@@ -158,7 +211,8 @@ class ArmStepUpdates implements ArmStepInterface
 
 	private function uploadSftp($config, $sourcePath, $destName = null)
 	{
-		if(empty($destName)) {
+		if (empty($destName))
+		{
 			$destName = basename($sourcePath);
 		}
 

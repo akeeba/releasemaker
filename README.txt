@@ -53,6 +53,8 @@ documentation snapshots the name of the section stuck as "pdf".
 * *common.update.s3.secret* S3 Secret Key for update streams
 * *common.update.s3.bucket* S3 Bucket for update streams
 * *common.update.s3.usessl* Use SSL with S3 for update streams
+* *common.update.s3.signature* S3 signature method. "s3" for the legacy method, "v4" for the new AWSv4 API. If you use v4 you also need to specify the region below. Note: Frankfurt a.k.a. eu-central-1 and all newer (post-2014) regions REQUIRE v4 signatures.
+* *common.update.s3.region* S3 region. The Amazon S3 region of your bucket, e.g. us-east-1, eu-west-1. The full list of regions can be found at http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 * *common.update.s3.directory* S3 base directory for update streams
 * *common.update.s3.cdnhostname* CloudFront CDN hostname for the S3 bucket for update streams
 
