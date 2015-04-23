@@ -163,7 +163,10 @@ class ArmStepDeploy implements ArmStepInterface
 			$destName = basename($sourcePath);
 		}
 
-		$uri = $config->directory . '/' . $destName;
+		$conf     = ArmConfiguration::getInstance();
+		$version  = $conf->get('common.version');
+
+		$uri = $config->directory . '/' . $version . '/' . $destName;
 
 		if (!empty($config->cdnhostname))
 		{
@@ -173,6 +176,8 @@ class ArmStepDeploy implements ArmStepInterface
 		{
 			$acl = \Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS;
 		}
+
+		echo "\t\t          with $acl ACL\n";
 
 		$uploadOperation = array(
 			'Bucket'       => $bucket,
