@@ -70,7 +70,9 @@ documentation snapshots the name of the section stuck as "pdf".
 
 All pro.ftp.* options are used when you use pro.method = "ftp", "ftps" or "sftp". They work like common.update.s3.*
 
-All pro.s3.* options are used when you use pro.method = "s3". They work like common.update.s3.*
+All pro.s3.* options are used when you use pro.method = "s3". They work like common.update.s3.* On top of that you have:
+
+* *pro.s3.reldir* The relative directory of pro.s3.directory to the ARS Category directory. Let's say that the ARS Category is configured to use `s3://foo` and you're uploading to the directory `foo/bar/` of the S3 bucket. The pro.s3.reldir must be `bar` since the `foo` directory was included in the ARS Category already.
 
 All core.* options work the same as pro.* options but refer to the "Core" file.
 
