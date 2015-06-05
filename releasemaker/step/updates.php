@@ -63,6 +63,9 @@ class ArmStepUpdates implements ArmStepInterface
 				'password'  => $conf->get('common.update.ftp.password', ''),
 				'passive'   => $conf->get('common.update.ftp.passive', true),
 				'directory' => $conf->get('common.update.ftp.directory', ''),
+				'pubkeyfile' => $conf->get('common.update.ftp.pubkeyfile', ''),
+				'privkeyfile' => $conf->get('common.update.ftp.privkeyfile', ''),
+				'privkeyfile_pass' => $conf->get('common.update.ftp.privkeyfile_pass', ''),
 			);
 		}
 

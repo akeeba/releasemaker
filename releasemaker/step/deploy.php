@@ -72,6 +72,9 @@ class ArmStepDeploy implements ArmStepInterface
 				'password'  => $conf->get($prefix . '.ftp.password', $conf->get('common.update.ftp.password', '')),
 				'passive'   => $conf->get($prefix . '.ftp.passive', $conf->get('common.update.ftp.passive', true)),
 				'directory' => $conf->get($prefix . '.ftp.directory', $conf->get('common.update.ftp.directory', '')),
+				'pubkeyfile' => $conf->get($prefix . '.ftp.pubkeyfile', $conf->get('common.update.ftp.pubkeyfile', '')),
+				'privkeyfile' => $conf->get($prefix . '.ftp.privkeyfile', $conf->get('common.update.ftp.privkeyfile', '')),
+				'privkeyfile_pass' => $conf->get($prefix . '.ftp.privkeyfile_pass', $conf->get('common.update.ftp.privkeyfile_pass', '')),
 			);
 		}
 

@@ -41,20 +41,38 @@ class ArmSftp
 			throw new Exception('Could not connect to SFTP server: invalid hostname or port');
 		}
 
-		if (!@ssh2_auth_password($this->ssh, $config->username, $config->password))
+		if ($config->pubkeyfile && $config->privkeyfile)
 		{
-			throw new Exception('Could not connect to SFTP server: invalid username or password');
+			if (!@ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
+			{
+				throw new Exception('Could not connect to SFTP server: invalid username or public/private key file (' . $config->username .
+				                    ' - ' . $config->pubkeyfile .
+				                    ' - ' . $config->privkeyfile .
+				                    ' - ' . $config->privkeyfile_pass .
+				                    ')'
+				);
+			}
+
+		}
+		else
+		{
+			if (!@ssh2_auth_password($this->ssh, $config->username, $config->password))
+			{
+				throw new Exception('Could not connect to SFTP server: invalid username or password (' . $config->username . ':' . $config->password . ')');
+			}
 		}
 
+
 		$this->fp = ssh2_sftp($this->ssh);
+
 		if ($this->fp === false)
 		{
-			throw new Exception('Could nto connect to SFTP server: no SFTP support on this SSH server');
+			throw new Exception('Could not connect to SFTP server: no SFTP support on this SSH server');
 		}
 
 		if (!@ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new Exception('Could not connect to SFTP server: invalid directory');
+			throw new Exception('Could not connect to SFTP server: invalid directory (' . $config->directory . ')');
 		}
 	}
 
