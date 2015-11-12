@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
@@ -17,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 class ArmStepPrepare implements ArmStepInterface
 {
 	private $path = null;
@@ -30,24 +30,27 @@ class ArmStepPrepare implements ArmStepInterface
 		echo str_repeat('-', 79) . PHP_EOL;
 
 		// Get the configuration
-		$conf = ArmConfiguration::getInstance();
+		$conf       = ArmConfiguration::getInstance();
 		$this->path = $conf->get('common.releasedir');
 
-		if(empty($this->path)) {
+		if (empty($this->path))
+		{
 			throw new Exception('common.releasedir path is empty');
 		}
-		if(!is_dir($this->path)) {
+		if (!is_dir($this->path))
+		{
 			throw new Exception('common.releasedir path is not a directory');
 		}
 
-		if(!is_readable($this->path)) {
+		if (!is_readable($this->path))
+		{
 			throw new Exception('common.releasedir path is not readable');
 		}
 
 		// Find the files
 		$this->files['core'] = $this->findFiles('core');
-		$this->files['pro'] = $this->findFiles('pro');
-		$this->files['pdf'] = $this->findPdfFiles();
+		$this->files['pro']  = $this->findFiles('pro');
+		$this->files['pdf']  = $this->findPdfFiles();
 
 		// Add the files to the volatile config key
 		$conf->set('volatile.files', $this->files);
@@ -61,19 +64,28 @@ class ArmStepPrepare implements ArmStepInterface
 
 		$ret = array();
 
-		$conf = ArmConfiguration::getInstance();
-		$pattern = $conf->get($type.'.pattern', '');
+		$conf    = ArmConfiguration::getInstance();
+		$pattern = $conf->get($type . '.pattern', '');
 
-		if(empty($pattern)) {
-			$pattern = 'com_*'.$type.'.zip';
+		if (empty($pattern))
+		{
+			$pattern = 'com_*' . $type . '.zip';
 		}
 
 		$dir = new DirectoryIterator($this->path);
-		foreach ($dir as $fileinfo) {
-			if($fileinfo->isDot()) continue;
-			if($fileinfo->isFile()) {
+		foreach ($dir as $fileinfo)
+		{
+			if ($fileinfo->isDot())
+			{
+				continue;
+			}
+			if ($fileinfo->isFile())
+			{
 				$fn = $fileinfo->getFilename();
-				if(!fnmatch($pattern, $fn)) continue;
+				if (!fnmatch($pattern, $fn))
+				{
+					continue;
+				}
 
 				$ret[] = $fn;
 				echo "\t\t" . basename($fn) . "\n";
@@ -89,29 +101,39 @@ class ArmStepPrepare implements ArmStepInterface
 
 		$ret = array();
 
-		$conf = ArmConfiguration::getInstance();
+		$conf  = ArmConfiguration::getInstance();
 		$files = $conf->get('pdf.files', '');
 
-		if(empty($files)) {
+		if (empty($files))
+		{
 			return $ret;
 		}
 
-		if(is_string($files)) {
+		if (is_string($files))
+		{
 			$files = array($files);
 		}
 
 		$dir = new DirectoryIterator($this->path);
-		foreach ($dir as $fileinfo) {
-			if($fileinfo->isDot()) continue;
-			if($fileinfo->isFile()) {
+		foreach ($dir as $fileinfo)
+		{
+			if ($fileinfo->isDot())
+			{
+				continue;
+			}
+			if ($fileinfo->isFile())
+			{
 				$fn = $fileinfo->getFilename();
-				foreach($files as $file) {
-					if($fn == $file.'.pdf') {
+				foreach ($files as $file)
+				{
+					if ($fn == $file . '.pdf')
+					{
 						// Get the ZIP filename
 						$zipFileName = $this->path . DIRECTORY_SEPARATOR .
-						$file . '.pdf.zip';
+							$file . '.pdf.zip';
 						// Remove old ZIP file
-						if(file_exists($zipFileName)) {
+						if (file_exists($zipFileName))
+						{
 							unlink($zipFileName);
 						}
 						// Compress the PDF
@@ -124,8 +146,22 @@ class ArmStepPrepare implements ArmStepInterface
 						// Add the ZIP file to the list
 						$ret[] = basename($zipFileName);
 						echo "\t\t" . basename($fn) . "\n";
-					} elseif($fn == $file.'.pdf.zip') {
+					}
+					elseif ($fn == $file . '.pdf.zip')
+					{
+						// Just add compressed PDF file
+						$ret[] = $fn;
+						echo "\t\t" . basename($fn) . "\n";
+					}
+					elseif ($fn == $file . '.zip')
+					{
 						// Just add compressed file
+						$ret[] = $fn;
+						echo "\t\t" . basename($fn) . "\n";
+					}
+					elseif ($fn == $file)
+					{
+						// Just add bespoke file, including extension
 						$ret[] = $fn;
 						echo "\t\t" . basename($fn) . "\n";
 					}
