@@ -14,21 +14,13 @@ Run `composer install` to update the external requirements.
 
 ## Sample release.json file
 
-See configuration/config.json
+See `configuration/config.json`
 
-There are four sections: common, pro, core, pdf. Common settings apply to everything.
+There are four sections: `common`, `pro`, `core`, `pdf`. Common settings apply to everything.
 
-Core and pro apply each to free
-(core) and paid (pro) versions. If you only have a free version set the pro.pattern to something silly, e.g.
-"LOLLOL-NOPRO" and leave the other pro keys blank. Likewise, if you only have a paid version set core.pattern to
-something silly and let the other keys blank. If you only have one kind of version and are confused, consider it "pro".
-The big idea is that only ONE item can be published per position and that file WILL have a corresponding update stream
-published.
+`core` and `pro` apply each to free (`core`) and paid (`pro`) versions. If you only have a free version set the `pro.pattern` to something nonexistent, e.g. "THERE-IS-NO-PRO" and leave the other `pro` keys blank. Likewise, if you only have a paid version set `core.pattern` to something nonexistent and let the other keys blank. If you only have one kind of version and you do not know what to do, consider it "pro". The overall idea is that only _one_ item can be published per core/pro position and that file _will_ have a corresponding update stream published.
 
-The PDF section is designed for documentation but can be used to upload anything. All files you specify here will be
-published to EITHER the core OR the pro version. The idea is that the files uploaded through this section do NOT have
-a corresponding update stream (they are support files). Since the original supprot files we were publishing were PDF
-documentation snapshots the name of the section stuck as "pdf".
+The `pwd` section is designed for documentation but can be used to upload anything. All files you specify here will be published to either the `core` or the `pro` upload location. The idea is that the files uploaded through this section do *not* have a corresponding update stream (they are supporting files). Since the original supporting files we were publishing on our site were PDF documentation snapshots the name of the section ended up being "pdf".
 
 ### Common section
 
@@ -83,15 +75,8 @@ All core.* options work the same as pro.* options but refer to the "Core" file.
 
 ## License
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.

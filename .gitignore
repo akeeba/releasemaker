@@ -1,5 +1,8 @@
+# phpStorm
 .idea
-/nbproject/private/
-/releasemaker/config.json
-/releasemaker/test.json
+
+# Composer vendor directory
 /releasemaker/vendor
+
+# Temporary stuff
+/sample
