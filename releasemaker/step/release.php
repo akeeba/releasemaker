@@ -20,6 +20,7 @@
 
 class ArmStepRelease implements ArmStepInterface
 {
+	/** @var  ArmArs  ARS API connector */
 	private $arsConnector = null;
 
 	private $release = null;
@@ -69,7 +70,7 @@ class ArmStepRelease implements ArmStepInterface
 		$version	= $conf->get('common.version', 0);
 		$releaseDir	= $conf->get('common.releasedir', '');
 		$releaseGroups = $conf->get('common.releasegroups', '');
-		$releaseAccess = $conf->get('common.releaseaccess', '');
+		$releaseAccess = $conf->get('common.releaseaccess', 1);
 
 		$this->release->description = $this->readFile('DESCRIPTION.html');
 		$this->release->notes = $this->readFile('RELEASENOTES.html');
