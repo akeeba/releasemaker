@@ -160,6 +160,19 @@ class ArmStepItems implements ArmStepInterface
 			$item->access = $access;
 			$item->published = 0;
 
+			if (empty($item->groups))
+			{
+				$item->groups = array();
+			}
+
+			if (!is_array($item->groups))
+			{
+				$item->groups = explode(',', $item->groups);
+				$item->groups = array_map(function ($x) {
+					return trim($x);
+				}, $item->groups);
+			}
+
 			$this->publishInfo[$publishArea][] = $item;
 
 			$result = $this->arsConnector->saveItem((array)$item);
