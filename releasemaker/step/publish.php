@@ -92,7 +92,7 @@ class ArmStepPublish implements ArmStepInterface
 				echo " ({$item->id})";
 			}
 
-			$item->environments = null;
+			$item->environments = '';
 			$item->published = 1;
 			$result = $this->arsConnector->saveItem((array) $item);
 

@@ -174,6 +174,23 @@ class ArmArs
 			'task'			=> 'save',
 			'format'		=> 'json',
 		);
+
+		foreach (array('groups') as $key)
+		{
+			if (empty($releaseData[$key]))
+			{
+				$releaseData[$key] = '';
+			}
+
+			if (is_array($releaseData[$key]))
+			{
+				$releaseData[$key] = array_map(function ($x) {
+					return trim($x);
+				}, $releaseData[$key]);
+				$releaseData[$key] = implode(',', $releaseData[$key]);
+			}
+		}
+
 		$arsData = array_merge($releaseData, $arsData);
 
 		$response = $this->doApiCall($arsData);
@@ -260,6 +277,23 @@ class ArmArs
 			'format'		=> 'json',
 			'returnurl'		=> base64_encode('index.php'),
 		);
+
+		foreach (array('groups', 'environments') as $key)
+		{
+			if (empty($itemData[$key]))
+			{
+				$itemData[$key] = '';
+			}
+
+			if (is_array($itemData[$key]))
+			{
+				$itemData[$key] = array_map(function ($x) {
+					return trim($x);
+				}, $itemData[$key]);
+				$itemData[$key] = implode(',', $itemData[$key]);
+			}
+		}
+
 		$arsData = array_merge($itemData, $arsData);
 
 		$response = $this->doApiCall($arsData);
