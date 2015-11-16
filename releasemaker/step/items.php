@@ -162,15 +162,28 @@ class ArmStepItems implements ArmStepInterface
 
 			if (empty($item->groups))
 			{
-				$item->groups = array();
+				$item->groups = '';
 			}
 
-			if (!is_array($item->groups))
+			if (is_array($item->groups))
 			{
-				$item->groups = explode(',', $item->groups);
 				$item->groups = array_map(function ($x) {
 					return trim($x);
 				}, $item->groups);
+				$item->groups = implode(',', $item->groups);
+			}
+
+			if (empty($item->environments))
+			{
+				$item->environments = '';
+			}
+
+			if (is_array($item->environments))
+			{
+				$item->environments = array_map(function ($x) {
+					return trim($x);
+				}, $item->environments);
+				$item->environments = implode(',', $item->environments);
 			}
 
 			$this->publishInfo[$publishArea][] = $item;
