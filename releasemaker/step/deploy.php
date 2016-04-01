@@ -94,6 +94,7 @@ class ArmStepDeploy implements ArmStepInterface
 		}
 
 		$path = $conf->get('common.releasedir');
+
 		foreach ($files as $filename)
 		{
 			echo "\t\tUploading $filename\n";
@@ -131,69 +132,54 @@ class ArmStepDeploy implements ArmStepInterface
 
 	private function uploadS3($config, $sourcePath, $destName = null)
 	{
-		// Prepare the credentials object
-		$amazonCredentials = new \Aws\Common\Credentials\Credentials(
-			$config->access,
-			$config->secret
+		$config->signature = ($config->signature == 'v4') ? 'v4' : 'v2';
+
+		$configuration = new \Akeeba\Engine\Postproc\Connector\S3v4\Configuration(
+			$config->access, $config->secret, $config->signature, $config->region
 		);
 
-		// Prepare the client options array. See http://docs.aws.amazon.com/aws-sdk-php/guide/latest/configuration.html#client-configuration-options
-		$clientOptions = array(
-			'credentials' => $amazonCredentials,
-			'scheme'      => $config->usessl ? 'https' : 'http',
-			'signature'   => $config->signature,
-			'region'      => $config->region
-		);
+		// Is SSL enabled and we have a cacert.pem file?
+		if (!defined('AKEEBA_CACERT_PEM'))
+		{
+			$config->usessl = false;
+		}
 
-		// If SSL is not enabled you must not provide the CA root file.
-		if (defined('AKEEBA_CACERT_PEM') && $config->usessl)
-		{
-			$clientOptions['ssl.certificate_authority'] = AKEEBA_CACERT_PEM;
-		}
-		else
-		{
-			$clientOptions['ssl.certificate_authority'] = false;
-		}
+		$configuration->setSSL($config->usessl);
 
 		// Create the S3 client instance
-		$s3Client = \Aws\S3\S3Client::factory($clientOptions);
-
-		$inputFile = realpath($sourcePath);
-		$bucket    = $config->bucket;
+		$s3Client = new \Akeeba\Engine\Postproc\Connector\S3v4\Connector($configuration);
 
 		if (empty($destName))
 		{
 			$destName = basename($sourcePath);
 		}
 
-		$conf     = ArmConfiguration::getInstance();
-		$version  = $conf->get('common.version');
+		$conf    = ArmConfiguration::getInstance();
+		$version = $conf->get('common.version');
 
 		$uri = $config->directory . '/' . $version . '/' . $destName;
 
 		if (!empty($config->cdnhostname))
 		{
-			$acl = \Aws\S3\Enum\CannedAcl::PUBLIC_READ;
+			$acl = \Akeeba\Engine\Postproc\Connector\S3v4\Acl::ACL_PUBLIC_READ;
 		}
 		else
 		{
-			$acl = \Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS;
+			$acl = \Akeeba\Engine\Postproc\Connector\S3v4\Acl::ACL_PRIVATE;
 		}
 
 		echo "\t\t          with $acl ACL\n";
 
-		$uploadOperation = array(
-			'Bucket'       => $bucket,
-			'Key'          => $uri,
-			'SourceFile'   => $inputFile,
-			'ACL'          => $acl,
-			'StorageClass' => 'STANDARD',
-			'CacheControl' => 'max-age=600'
-		);
-
 		try
 		{
-			$s3Client->putObject($uploadOperation);
+			$bucket    = $config->bucket;
+			$inputFile = realpath($sourcePath);
+			$input     = \Akeeba\Engine\Postproc\Connector\S3v4\Input::createFromFile($inputFile);
+
+			$s3Client->putObject($input, $bucket, $uri, $acl, [
+				'StorageClass' => 'STANDARD',
+				'CacheControl' => 'max-age=600'
+			]);
 		}
 		catch (\Exception $e)
 		{

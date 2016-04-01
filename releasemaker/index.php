@@ -24,6 +24,7 @@ error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
 
 // Setup path to cacert.pem
 define('AKEEBA_CACERT_PEM', __DIR__ . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'cacert.pem');
+define('AKEEBAENGINE', 1);
 
 // Display banner
 echo <<< ENDBANNER

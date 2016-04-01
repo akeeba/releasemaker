@@ -9,7 +9,13 @@
       "email": "no-reply@akeebabackup.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/akeeba/s3"
+    }
+  ],
   "require": {
-    "aws/aws-sdk-php": "2.8.1"
+    "akeeba/s3": "dev-master"
   }
 }
