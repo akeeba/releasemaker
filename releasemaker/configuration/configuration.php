@@ -112,15 +112,15 @@ class ArmConfiguration
 
 				for ($i = 1; $i < $pathNodes; $i ++)
 				{
-					if ((isset($ns->$nodes[ $i ])))
+					if ((isset($ns->{$nodes[ $i ]})))
 					{
-						$ns = $ns->$nodes[ $i ];
+						$ns = $ns->{$nodes[ $i ]};
 					}
 				}
 
-				if (isset($ns->$nodes[ $i ]))
+				if (isset($ns->{$nodes[ $i ]}))
 				{
-					$result = $ns->$nodes[ $i ];
+					$result = $ns->{$nodes[ $i ]};
 				}
 			}
 		}
@@ -171,11 +171,11 @@ class ArmConfiguration
 		for ($i = 0; $i < $pathNodes; $i ++)
 		{
 			// If any node along the registry path does not exist, create it
-			if (!isset($ns->$nodes[ $i ]))
+			if (!isset($ns->{$nodes[ $i ]}))
 			{
-				$ns->$nodes[ $i ] = new stdClass();
+				$ns->{$nodes[ $i ]} = new stdClass();
 			}
-			$ns = $ns->$nodes[ $i ];
+			$ns = $ns->{$nodes[ $i ]};
 		}
 
 		// Set the new values
@@ -197,17 +197,17 @@ class ArmConfiguration
 				{
 					$data = str_replace($tag, $content, $data);
 				}
-				$ns->$nodes[ $i ] = $data;
+				$ns->{$nodes[ $i ]} = $data;
 
-				return $ns->$nodes[ $i ];
+				return $ns->{$nodes[ $i ]};
 			}
 		}
 
 		// This is executed if any of the previous two if's is false
 
-		$ns->$nodes[ $i ] = $value;
+		$ns->{$nodes[ $i ]} = $value;
 
-		return $ns->$nodes[ $i ];
+		return $ns->{$nodes[ $i ]};
 	}
 
 	/**
@@ -252,14 +252,14 @@ class ArmConfiguration
 		for ($i = 0; $i < $pathNodes; $i ++)
 		{
 			// If any node along the registry path does not exist, return false
-			if (!isset($ns->$nodes[ $i ]))
+			if (!isset($ns->{$nodes[ $i ]}))
 			{
 				return false;
 			}
-			$ns = $ns->$nodes[ $i ];
+			$ns = $ns->{$nodes[ $i ]};
 		}
 
-		unset($ns->$nodes[ $i ]);
+		unset($ns->{$nodes[ $i ]});
 
 		return true;
 	}
