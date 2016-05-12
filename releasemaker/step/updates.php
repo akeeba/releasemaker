@@ -167,21 +167,14 @@ class ArmStepUpdates implements ArmStepInterface
 			$acl = \Akeeba\Engine\Postproc\Connector\S3v4\Acl::ACL_PRIVATE;
 		}
 
-		try
-		{
-			$bucket    = $config->bucket;
-			$inputFile = realpath($sourcePath);
-			$input     = \Akeeba\Engine\Postproc\Connector\S3v4\Input::createFromFile($inputFile);
+		$bucket    = $config->bucket;
+		$inputFile = realpath($sourcePath);
+		$input     = \Akeeba\Engine\Postproc\Connector\S3v4\Input::createFromFile($inputFile);
 
-			$s3Client->putObject($input, $bucket, $uri, $acl, [
-				'StorageClass' => 'STANDARD',
-				'CacheControl' => 'max-age=600'
-			]);
-		}
-		catch (\Exception $e)
-		{
-			return false;
-		}
+		$s3Client->putObject($input, $bucket, $uri, $acl, [
+			'StorageClass' => 'STANDARD',
+			'CacheControl' => 'max-age=600'
+		]);
 
 		return true;
 	}
