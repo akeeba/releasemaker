@@ -92,6 +92,9 @@ class ArmArs
 
 		if ($raw === false)
 		{
+			$comboURL = $url . http_build_query($postData);
+			echo "\n\n\n$comboURL\n\n\n";
+
 			if (($errno == 22) && strstr($error, ': 403'))
 			{
 				echo 'ARS API communications error; please check common.username, common.password, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n";
@@ -120,7 +123,8 @@ class ArmArs
 			'view'			=> 'releases',
 			'task'			=> 'browse',
 			'category'		=> $category,
-			'version'		=> $version,
+			'version[method]'		=> 'exact',
+			'version[value]'		=> $version,
 			'format'		=> 'json',
 		);
 
