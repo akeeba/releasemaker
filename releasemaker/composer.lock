@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "69bf3283dbf1cc050805de6da15e8f81",
+    "hash": "67dcec623ededa0aab0356a8fb830494",
     "content-hash": "be74067661793b1f401a814e4e6d8bb7",
     "packages": [
         {
@@ -13,7 +13,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/akeeba/s3",
-                "reference": "85183ce1e660589c79415fc0c360acd816799570"
+                "reference": "c02a2953a3f53abc91d99c6373b4b594728042d9"
             },
             "require": {
                 "php": ">=5.3.4"
@@ -40,7 +40,7 @@
             "keywords": [
                 "s3"
             ],
-            "time": "2016-04-01 09:12:00"
+            "time": "2016-08-26 10:33:53"
         }
     ],
     "packages-dev": [],
