@@ -34,13 +34,19 @@ The `pwd` section is designed for documentation but can be used to upload anythi
 * *common.releasegroups* array of integers; numeric IDs of Akeeba Subscriptions levels which will have access to the release. Optional.
 * *common.releaseaccess* integer; numeric ID of Joomla! View Access Level which will have access to the release. Optional.
 * *common.repodir* Absolute path to the local directory containing the Git directory of the files you're publishing
-* *common.update.method* How should I upload the update stream files? "s3", "ftp", "ftps" or "sftp"
+* *common.update.method* How should I upload the update stream files? "s3", "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl". Use the cURL variants whenever possible (wider compatibility).
 * *common.update.ftp.hostname* FTP(S) / SFTP hostname for update streams
 * *common.update.ftp.port* FTP(S) / SFTP port for update streams (default: 21 for FTP(S), 22 for SFTP)
 * *common.update.ftp.username* FTP(S) / SFTP username for update streams
 * *common.update.ftp.password* FTP(S) / SFTP password for update streams
 * *common.update.ftp.passive* Use FTP(S) passive mode for update streams
 * *common.update.ftp.directory* FTP(S) / SFTP initial directory
+* *common.update.ftp.pubkeyfile* Optional. For SFTP certificate authentication only. Absolute path to the Public Key file.
+* *common.update.ftp.privkeyfile* Optional. For SFTP certificate authentication only. Absolute path to the Private Key file. Not required by newer cURL versions.
+* *common.update.ftp.privkeyfile_pass* Optional. For SFTP certificate authentication only. Password for the Private Key file. Does not work when SSH2 or libcurl is compiled against GnuTLS. Always compile against OpenSSL or use unencrypted Private Key files.
+* *common.update.ftp.passive_fix* Optional. For ftpcurl and ftpscurl only. When true ignores the IP sent by the server in response to PASV, using its public IP instead.
+* *common.update.ftp.timeout* Optional. For sftpcurl, ftpcurl and ftpscurl only. Connection _and upload_ timeout in seconds. Default: 3600 (one hour). 
+* *common.update.ftp.verbose* Optional. For sftpcurl, ftpcurl and ftpscurl only. Show cURL output (for debugging only). 
 * *common.update.s3.access* S3 Access Key for update streams
 * *common.update.s3.secret* S3 Secret Key for update streams
 * *common.update.s3.bucket* S3 Bucket for update streams
@@ -60,7 +66,7 @@ The `pwd` section is designed for documentation but can be used to upload anythi
 * *pro.groups* array of integers; numeric IDs of Akeeba Subscriptions levels which will have access to the published file. Optional.
 * *pro.access* integer; numeric ID of Joomla! View Access Level which will have access to the published file. Optional.
 
-All pro.ftp.* options are used when you use pro.method = "ftp", "ftps" or "sftp". They work like common.update.s3.*
+All pro.ftp.* options are used when you use pro.method = "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl". They work like common.update.s3.*
 
 All pro.s3.* options are used when you use pro.method = "s3". They work like common.update.s3.* On top of that you have:
 

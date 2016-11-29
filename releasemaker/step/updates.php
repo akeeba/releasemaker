@@ -42,7 +42,7 @@ class ArmStepUpdates implements ArmStepInterface
 
 		if ($type == 's3')
 		{
-			$config = (object) array(
+			$config = (object)array(
 				'access'      => $conf->get('common.update.s3.access', ''),
 				'secret'      => $conf->get('common.update.s3.secret', ''),
 				'bucket'      => $conf->get('common.update.s3.bucket', ''),
@@ -55,17 +55,20 @@ class ArmStepUpdates implements ArmStepInterface
 		}
 		else
 		{
-			$config = (object) array(
-				'type'      => $type,
-				'hostname'  => $conf->get('common.update.ftp.hostname', ''),
-				'port'      => $conf->get('common.update.ftp.port', ($type == 'sftp') ? 22 : 21),
-				'username'  => $conf->get('common.update.ftp.username', ''),
-				'password'  => $conf->get('common.update.ftp.password', ''),
-				'passive'   => $conf->get('common.update.ftp.passive', true),
-				'directory' => $conf->get('common.update.ftp.directory', ''),
-				'pubkeyfile' => $conf->get('common.update.ftp.pubkeyfile', ''),
-				'privkeyfile' => $conf->get('common.update.ftp.privkeyfile', ''),
+			$config = (object)array(
+				'type'             => $type,
+				'hostname'         => $conf->get('common.update.ftp.hostname', ''),
+				'port'             => $conf->get('common.update.ftp.port', in_array($type, array('sftp', 'sftpcurl')) ? 22 : 21),
+				'username'         => $conf->get('common.update.ftp.username', ''),
+				'password'         => $conf->get('common.update.ftp.password', ''),
+				'passive'          => $conf->get('common.update.ftp.passive', true),
+				'directory'        => $conf->get('common.update.ftp.directory', ''),
+				'pubkeyfile'       => $conf->get('common.update.ftp.pubkeyfile', ''),
+				'privkeyfile'      => $conf->get('common.update.ftp.privkeyfile', ''),
 				'privkeyfile_pass' => $conf->get('common.update.ftp.privkeyfile_pass', ''),
+				'passive_fix'      => $conf->get('common.update.ftp.passive_fix', false),
+				'timeout'          => $conf->get('common.update.ftp.timeout', 3600),
+				'verbose'          => $conf->get('common.update.ftp.verbose', false),
 			);
 		}
 
@@ -123,8 +126,15 @@ class ArmStepUpdates implements ArmStepInterface
 				case 'ftps':
 					$this->uploadFtp($config, $temp_filename);
 					break;
+				case 'ftpcurl':
+				case 'ftpscurl':
+					$this->uploadFtpCurl($config, $temp_filename);
+					break;
 				case 'sftp':
 					$this->uploadSftp($config, $temp_filename);
+					break;
+				case 'sftpcurl':
+					$this->uploadSftpCurl($config, $temp_filename);
 					break;
 			}
 
@@ -173,7 +183,7 @@ class ArmStepUpdates implements ArmStepInterface
 
 		$s3Client->putObject($input, $bucket, $uri, $acl, [
 			'StorageClass' => 'STANDARD',
-			'CacheControl' => 'max-age=600'
+			'CacheControl' => 'max-age=600',
 		]);
 
 		return true;
@@ -190,6 +200,17 @@ class ArmStepUpdates implements ArmStepInterface
 		$ftp->upload($sourcePath, $destName);
 	}
 
+	private function uploadFtpCurl($config, $sourcePath, $destName = null)
+	{
+		if (empty($destName))
+		{
+			$destName = basename($sourcePath);
+		}
+
+		$ftp = new ArmFtpcurl($config);
+		$ftp->upload($sourcePath, $destName);
+	}
+
 	private function uploadSftp($config, $sourcePath, $destName = null)
 	{
 		if (empty($destName))
@@ -198,6 +219,17 @@ class ArmStepUpdates implements ArmStepInterface
 		}
 
 		$sftp = new ArmSftp($config);
+		$sftp->upload($sourcePath, $destName);
+	}
+
+	private function uploadSftpCurl($config, $sourcePath, $destName = null)
+	{
+		if (empty($destName))
+		{
+			$destName = basename($sourcePath);
+		}
+
+		$sftp = new ArmSftpcurl($config);
 		$sftp->upload($sourcePath, $destName);
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akeeba Release Maker
  * An automated script to upload and release a new version of an Akeeba component.
@@ -17,11 +18,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 class ArmSftp
 {
 	private $ssh = null;
-	private $fp = null;
+	private $fp  = null;
 
 	private $config = null;
 
@@ -46,10 +46,10 @@ class ArmSftp
 			if (!@ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
 			{
 				throw new Exception('Could not connect to SFTP server: invalid username or public/private key file (' . $config->username .
-				                    ' - ' . $config->pubkeyfile .
-				                    ' - ' . $config->privkeyfile .
-				                    ' - ' . $config->privkeyfile_pass .
-				                    ')'
+					' - ' . $config->pubkeyfile .
+					' - ' . $config->privkeyfile .
+					' - ' . $config->privkeyfile_pass .
+					')'
 				);
 			}
 
@@ -83,7 +83,7 @@ class ArmSftp
 
 		$realdir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
 		$realdir .= '/' . $dir;
-		$realdir = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
+		$realdir  = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
 		$realname = $realdir . '/' . basename($destPath);
 
 		$fp = @fopen("ssh2.sftp://{$this->fp}$realname", 'w');
@@ -101,7 +101,7 @@ class ArmSftp
 		while (!feof($localfp) && ($res !== false))
 		{
 			$buffer = @fread($localfp, 524288);
-			$res = @fwrite($fp, $buffer);
+			$res    = @fwrite($fp, $buffer);
 		}
 
 		@fclose($fp);
@@ -155,7 +155,7 @@ class ArmSftp
 
 	private function makeDirectory($dir)
 	{
-		$alldirs = explode('/', $dir);
+		$alldirs     = explode('/', $dir);
 		$previousDir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
 		$previousDir = substr($previousDir, 0, 1) == '/' ? $previousDir : '/' . $previousDir;
 
