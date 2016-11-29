@@ -2,7 +2,7 @@
   "name": "akeeba/releasemaker",
   "description": "Automates the deployment of software with Akeeba Release System",
   "minimum-stability": "stable",
-  "license": "GPlv3",
+  "license": "GPLv3",
   "authors": [
     {
       "name": "Nicholas K. Dionysopoulos / Akeeba ltd",
