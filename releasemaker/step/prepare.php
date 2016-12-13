@@ -52,6 +52,12 @@ class ArmStepPrepare implements ArmStepInterface
 		$this->files['pro']  = $this->findFiles('pro');
 		$this->files['pdf']  = $this->findPdfFiles();
 
+		if (empty($this->files['core']) && empty($this->files['pro']))
+		{
+			// No files whatsoever? Oops!
+			throw new RuntimeException('No extension files (Core or Pro) found. Aborting execution.', 500);
+		}
+
 		// Add the files to the volatile config key
 		$conf->set('volatile.files', $this->files);
 
