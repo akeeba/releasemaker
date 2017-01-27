@@ -141,8 +141,11 @@ class ArmStepItems implements ArmStepInterface
 
 					break;
 				case 'ftp':
+				case 'ftpcurl':
 				case 'ftps':
+				case 'ftpscurl':
 				case 'sftp':
+				case 'sftpcurl':
 					$version = $conf->get('common.version');
 					$fileOrURL = $version.'/'.basename($filename);
 					$type = 'file';
