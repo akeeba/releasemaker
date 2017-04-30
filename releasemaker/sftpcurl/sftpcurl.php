@@ -167,6 +167,15 @@ class ArmSftpcurl
 	 */
 	public function upload($localFilename, $remoteFilename)
 	{
+		$remoteDir = $this->config->directory . '/' . dirname($remoteFilename);
+
+		// Make the SFTP directory if necessary
+		if ($this->isDir($remoteDir) === false)
+		{
+			// The directory doesn't exist, let's try to create it...
+			$this->makeDirectory($remoteDir);
+		}
+
 		$fp = @fopen($localFilename, 'rb');
 
 		if ($fp === false)
@@ -175,13 +184,42 @@ class ArmSftpcurl
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
-		try
+		$this->uploadFromHandle($remoteFilename, $fp);
+
+		return true;
+	}
+
+	/**
+	 * Creates a nested directory structure on the remote SFTP server
+	 *
+	 * @param   string       $dir
+	 *
+	 * @return  boolean
+	 */
+	protected function makeDirectory($dir)
+	{
+		$alldirs     = explode('/', $dir);
+		$previousDir = '';
+
+		foreach ($alldirs as $curdir)
 		{
-			$this->uploadFromHandle($remoteFilename, $fp);
-		}
-		catch (\RuntimeException $e)
-		{
-			return false;
+			// Avoid empty dir
+			if (!$curdir)
+			{
+				continue;
+			}
+
+			$check = $previousDir . '/' . $curdir;
+
+			if (!$this->isDir($check))
+			{
+				if ($this->mkdir($check) === false)
+				{
+					throw new RuntimeException('Could not create SFTP directory ' . $check);
+				}
+			}
+
+			$previousDir = $check;
 		}
 
 		return true;
@@ -222,4 +260,167 @@ class ArmSftpcurl
 			throw new \RuntimeException($error, $error_no);
 		}
 	}
+
+	/**
+	 * Checks if the given directory exists
+	 *
+	 * @param   string   $path  The full path of the remote directory to check
+	 *
+	 * @return  boolean  True if the directory exists
+	 */
+	public function isDir($path)
+	{
+		$ch = $this->getCurlHandle($path . '/');
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+		$list = curl_exec($ch);
+
+		$errNo = curl_errno($ch);
+		curl_close($ch);
+
+		if ($errNo)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Create a directory if it doesn't exist. The operation is implicitly recursive, i.e. it will create all
+	 * intermediate directories if they do not already exist.
+	 *
+	 * @param   string   $dirName      The full path of the directory to create
+	 * @param   integer  $permissions  The permissions of the created directory
+	 *
+	 * @return  boolean  True on success
+	 */
+	public function mkdir($dirName, $permissions = 0755)
+	{
+		$targetDir = rtrim($dirName, '/');
+
+		$directories = explode('/', $targetDir);
+
+		$remoteDir = '';
+
+		foreach ($directories as $dir)
+		{
+			if (!$dir)
+			{
+				continue;
+			}
+
+			$remoteDir .= '/' . $dir;
+
+			// Continue if the folder already exists. Otherwise I'll get a an error even if everything is fine
+			if ($this->isDir($remoteDir))
+			{
+				continue;
+			}
+
+			$commands = array(
+				'mkdir ' . $remoteDir,
+			);
+
+			try
+			{
+				$this->executeServerCommands($commands);
+			}
+			catch (\RuntimeException $e)
+			{
+				return false;
+			}
+		}
+
+		$this->chmod($dirName, $permissions);
+
+		return true;
+	}
+
+	/**
+	 * Executes arbitrary SFTP commands
+	 *
+	 * @param   array $commands  An array with the SFTP commands to be executed
+	 *
+	 * @return  string  The output of the executed commands
+	 *
+	 * @throws  \RuntimeException
+	 */
+	protected function executeServerCommands($commands)
+	{
+		$ch = $this->getCurlHandle($this->config->directory . '/');
+
+		curl_setopt($ch, CURLOPT_QUOTE, $commands);
+		curl_setopt($ch, CURLOPT_HEADER, 1);
+		curl_setopt($ch, CURLOPT_NOBODY, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+		$listing = curl_exec($ch);
+		$errNo   = curl_errno($ch);
+		$error   = curl_error($ch);
+		curl_close($ch);
+
+		if ($errNo)
+		{
+			throw new \RuntimeException($error, $errNo);
+		}
+
+		return $listing;
+	}
+
+	/**
+	 * Change the permissions of a file
+	 *
+	 * @param   string   $fileName     The full path of the file whose permissions will change
+	 * @param   integer  $permissions  The new permissions, e.g. 0644 (remember the leading zero in octal numbers!)
+	 *
+	 * @return  boolean  True on success
+	 */
+	public function chmod($fileName, $permissions)
+	{
+		// Make sure permissions are in an octal string representation
+		if (!is_string($permissions))
+		{
+			$permissions = decoct($permissions);
+		}
+
+		$commands = array(
+			'chmod ' . $permissions . ' ' . $this->getPath($fileName),
+		);
+
+		try
+		{
+			$this->executeServerCommands($commands);
+		}
+		catch (\RuntimeException $e)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns the absolute remote path from a path relative to the initial directory configured when creating the
+	 * transfer object.
+	 *
+	 * @param   string  $fileName  The relative path of a file or directory
+	 *
+	 * @return  string  The absolute path for use by the transfer object
+	 */
+	public function getPath($fileName)
+	{
+		$fileName = str_replace('\\', '/', $fileName);
+
+		if (strpos($fileName, $this->config->directory) === 0)
+		{
+			return $fileName;
+		}
+
+		$fileName = trim($fileName, '/');
+		$fileName = rtrim($this->config->directory, '/') . '/' . $fileName;
+
+		return $fileName;
+	}
+
 }
