@@ -198,8 +198,15 @@ class ArmSftpcurl
 	 */
 	protected function makeDirectory($dir)
 	{
-		$alldirs     = explode('/', $dir);
 		$previousDir = '';
+
+		if (strpos($dir, $this->config->directory) === 0)
+		{
+			$dir = ltrim(substr($dir, strlen($this->config->directory)), '/');
+			$previousDir = $this->config->directory;
+		}
+
+		$alldirs     = explode('/', $dir);
 
 		foreach ($alldirs as $curdir)
 		{
