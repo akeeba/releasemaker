@@ -129,6 +129,8 @@ class ArmSftpcurl
 			curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}
 
+		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS , 1);
+
 		return $ch;
 	}
 
@@ -208,7 +210,6 @@ class ArmSftpcurl
 		curl_setopt($ch, CURLOPT_UPLOAD, 1);
 		curl_setopt($ch, CURLOPT_INFILE, $fp);
 		curl_setopt($ch, CURLOPT_INFILESIZE, $filesize);
-		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS , 1);
 
 		curl_exec($ch);
 
