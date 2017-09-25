@@ -20,7 +20,7 @@ There are four sections: `common`, `pro`, `core`, `pdf`. Common settings apply t
 
 `core` and `pro` apply each to free (`core`) and paid (`pro`) versions. If you only have a free version set the `pro.pattern` to something nonexistent, e.g. "THERE-IS-NO-PRO" and leave the other `pro` keys blank. Likewise, if you only have a paid version set `core.pattern` to something nonexistent and let the other keys blank. If you only have one kind of version and you do not know what to do, consider it "pro". The overall idea is that only _one_ item can be published per core/pro position and that file _will_ have a corresponding update stream published.
 
-The `pwd` section is designed for documentation but can be used to upload anything. All files you specify here will be published to either the `core` or the `pro` upload location. The idea is that the files uploaded through this section do *not* have a corresponding update stream (they are supporting files). Since the original supporting files we were publishing on our site were PDF documentation snapshots the name of the section ended up being "pdf".
+The `pdf` section is designed for documentation but can be used to upload anything. All files you specify here will be published to either the `core` or the `pro` upload location. The idea is that the files uploaded through this section do *not* have a corresponding update stream (they are supporting files). Since the original supporting files we were publishing on our site were PDF documentation snapshots the name of the section ended up being "pdf".
 
 ### Common section
 
