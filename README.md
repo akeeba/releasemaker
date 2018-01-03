@@ -2,7 +2,7 @@
 
 An automated script to upload and release a new version of software using an Akeeba Release System installation.
 
-Copyright (c) 2012-2015 Nicholas K. Dionysopoulos / Akeeba Ltd.
+Copyright (c)2006-2018 Nicholas K. Dionysopoulos / Akeeba Ltd
 
 ## Before you begin
 
