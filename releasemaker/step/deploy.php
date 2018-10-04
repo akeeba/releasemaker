@@ -117,7 +117,15 @@ class ArmStepDeploy implements ArmStepInterface
 					$this->uploadFtpCurl($config, $sourcePath);
 					break;
 				case 'sftp':
-					$this->uploadSftp($config, $sourcePath);
+					if (function_exists('ssh2_connect'))
+					{
+						$this->uploadSftp($config, $sourcePath);
+
+						break;
+					}
+
+					// Fallback to SFTP over cURL for build environment with no SSH2 support
+					$this->uploadSftpCurl($config, $sourcePath);
 					break;
 				case 'sftpcurl':
 					$this->uploadSftpCurl($config, $sourcePath);
