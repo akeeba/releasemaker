@@ -1,10 +1,9 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "hash": "67dcec623ededa0aab0356a8fb830494",
     "content-hash": "be74067661793b1f401a814e4e6d8bb7",
     "packages": [
         {
@@ -13,9 +12,10 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/akeeba/s3",
-                "reference": "c02a2953a3f53abc91d99c6373b4b594728042d9"
+                "reference": "4be75c333f61838d0eb58346e66d51977192a3ce"
             },
             "require": {
+                "ext-curl": "*",
                 "php": ">=5.3.4"
             },
             "type": "library",
@@ -40,7 +40,7 @@
             "keywords": [
                 "s3"
             ],
-            "time": "2016-08-26 10:33:53"
+            "time": "2019-08-06T06:37:39+00:00"
         }
     ],
     "packages-dev": [],
