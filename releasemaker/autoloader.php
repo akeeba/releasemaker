@@ -1,11 +1,8 @@
 <?php
 /**
- * Akeeba Release Maker
- * An automated script to upload and release a new version of an Akeeba component.
- *
  * @package    AkeebaReleaseMaker
- * @copyright  Copyright (c)2006-2019 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license    GNU/GPLv3
+ * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license    GNU General Public License version 3, or later
  */
 
 function _arm_autoloader($class_name) {
