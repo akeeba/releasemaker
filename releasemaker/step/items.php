@@ -122,7 +122,7 @@ class ArmStepItems implements ArmStepInterface
 					else
 					{
 						$directory = $conf->get($prefix.'.s3.directory',	$conf->get('common.update.s3.directory', ''));
-						$fileOrURL = 'http://' . $cdnHostname . '/' . $directory . '/' . $destName;
+						$fileOrURL = 'https://' . $cdnHostname . '/' . $directory . '/' . $destName;
 						$type = 'link';
 					}
 
