@@ -106,6 +106,7 @@ foreach($steps as $step) {
 		echo "*** E R R O R\n";
 		echo str_repeat('*', 79) . PHP_EOL . PHP_EOL;
 		echo $exc->getMessage() . PHP_EOL . PHP_EOL;
+		echo $exc->getFile() . '::L' . $exc->getLine() . PHP_EOL . PHP_EOL;
 		echo $exc->getTraceAsString();
 		die(PHP_EOL . PHP_EOL);
 	}
