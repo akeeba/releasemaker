@@ -16,6 +16,7 @@
     }
   ],
   "require": {
+    "php": "^7.1.0",
     "akeeba/s3": "dev-master"
   }
 }

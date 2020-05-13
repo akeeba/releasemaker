@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package    AkeebaReleaseMaker
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
@@ -7,7 +8,7 @@
 class ArmSftp
 {
 	private $ssh = null;
-	private $fp  = null;
+	private $fp = null;
 
 	private $config = null;
 
@@ -31,20 +32,24 @@ class ArmSftp
 		{
 			if (!@ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
 			{
-				throw new Exception('Could not connect to SFTP server: invalid username or public/private key file (' . $config->username .
-					' - ' . $config->pubkeyfile .
-					' - ' . $config->privkeyfile .
-					' - ' . $config->privkeyfile_pass .
-					')'
+				throw new Exception(sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass)
 				);
 			}
 
 		}
-		else
+		elseif ($config->password)
 		{
 			if (!@ssh2_auth_password($this->ssh, $config->username, $config->password))
 			{
-				throw new Exception('Could not connect to SFTP server: invalid username or password (' . $config->username . ':' . $config->password . ')');
+				throw new Exception(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
+			}
+		}
+		else
+		{
+			if (!@ssh2_auth_agent($this->ssh, $config->username))
+			{
+				throw new Exception(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
+				);
 			}
 		}
 
@@ -67,8 +72,8 @@ class ArmSftp
 		$dir = dirname($destPath);
 		$this->chdir($dir);
 
-		$realdir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
-		$realdir .= '/' . $dir;
+		$realdir  = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
+		$realdir  .= '/' . $dir;
 		$realdir  = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
 		$realname = $realdir . '/' . basename($destPath);
 

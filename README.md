@@ -2,7 +2,7 @@
 
 An automated script to upload and release a new version of software using an Akeeba Release System installation.
 
-Copyright (c)2006-2018 Nicholas K. Dionysopoulos / Akeeba Ltd
+Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
 
 ## Before you begin
 
@@ -78,6 +78,40 @@ All core.* options work the same as pro.* options but refer to the "Core" file.
 
 * *pdf.where* How to publish the files. Use "core" or "pro". The publish method and access control will match the corresponding section as configured above.
 * *pdf.files* A list of additional files to publish. They don't have to be PDF files. Any type of files will do.
+
+## SFTP authentication modes
+
+There are three supported authentication modes for SFTP connections.
+
+### Password authentication
+
+Uses a username and password.
+
+This is the simplest authentication method but also the least secure one.
+
+Set the respective `username` and `password` keys.
+
+### Public Key (certificate) authentication
+
+Uses a public and private certificate pair.
+
+This is more secure than a password. However, see the Caveat below.
+
+Set the respective `username`, `pubkeyfile`, `privkeyfile` keys. Leave the `password` key empty. 
+
+If your private key file is password protected you need to also set the `privkeyfile_pass` key. 
+
+Caveat: Ubuntu compiles libssh2 against GnuTLS which _does not_ support password-protected key files. You either need a decrypted private key file (bad idea!) or use the SSH Agent authentication method.
+
+### SSH Agent authentication
+
+Uses the SSH Agent and your SSH configuration file (typically: `~/.ssh/config`). On Windows it usually means using PuTTY.
+
+This is compatible with GPG and GPG SmartCards, including YubiKey Neo or newer. Using this method your secret key can be securely stored in a SmartCard. You will be asked to unlock it with your PIN on SFTP authentication. **VERY STRONGLY RECOMMENDED**.
+
+Only set the respective `username` key. DO NOT set a `password`, DO NOT set `pubkeyfile` or `privkeyfile`.
+
+Caveat: you must ALWAYS provide the username, hostname (and port, if it's other than 22). Neither SSH2 nor cURL can use values for these settings specified in the SSH configuration file.
 
 ## License
 

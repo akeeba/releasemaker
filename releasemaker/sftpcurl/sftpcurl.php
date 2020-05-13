@@ -29,7 +29,7 @@ class ArmSftpcurl
 		$authentication = urlencode($this->config->username);
 
 		// We will only use username and password authentication if there are no certificates configured.
-		if (empty($this->config->pubkeyfile))
+		if (empty($this->config->pubkeyfile) && !empty($this->config->password))
 		{
 			// Remember, both the username and password have to be URL encoded as they're part of a URI!
 			$password = urlencode($this->config->password);
@@ -108,6 +108,11 @@ class ArmSftpcurl
 			{
 				curl_setopt($ch, CURLOPT_KEYPASSWD, $this->config->privkeyfile_pass);
 			}
+		}
+		// Do I have to do SSH Agent authentication?
+		elseif (empty($this->config->password))
+		{
+			curl_setopt($ch, CURLOPT_SSH_AUTH_TYPES, CURLSSH_AUTH_AGENT);
 		}
 
 		// Should I enable verbose output? Useful for debugging.
