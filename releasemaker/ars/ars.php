@@ -19,24 +19,20 @@ class ArmArs
 	/** @var string The password we're going to use to connect to the host */
 	private $password = null;
 
+	/** @var string The API Token we're going to use to connect to the host (if username and password are empty) */
+	private $apiToken = null;
+
 	/**
 	 * Public class constructor
 	 *
 	 * @param   array  $config  The configuration variables for this class
 	 */
-	public function __construct(Array $config = array()) {
-		if (isset($config['host']))
-		{
-			$this->host = $config['host'];
-		}
-		if (isset($config['username']))
-		{
-			$this->username = $config['username'];
-		}
-		if (isset($config['password']))
-		{
-			$this->password = $config['password'];
-		}
+	public function __construct(array $config = [])
+	{
+		$this->host     = $config['host'] ?? '';
+		$this->username = $config['username'] ?? '';
+		$this->password = $config['password'] ?? '';
+		$this->apiToken = $config['apiToken'] ?? '';
 	}
 
 	/**
@@ -44,32 +40,45 @@ class ArmArs
 	 *
 	 * @param   array  $postData  POST variables to send to ARS
 	 */
-	public function doApiCall(array $postData = array())
+	public function doApiCall(array $postData = [])
 	{
-		$arsData = array(
-			'option'				=> 'com_ars',
-			'_fofauthentication'	=> json_encode(array(
-				'username'	=> $this->username,
-				'password'	=> $this->password,
-			))
-		);
+		$arsData  = [
+			'option'             => 'com_ars',
+			'_fofauthentication' => json_encode([
+				'username' => $this->username,
+				'password' => $this->password,
+			]),
+		];
+
 		$postData = array_merge($postData, $arsData);
 
 		$url = rtrim($this->host, '/') . '/index.php';
 
 		$ch = curl_init($url);
 
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION,	1);
-		curl_setopt($ch, CURLOPT_POST,				1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS,		$postData);
-		curl_setopt($ch, CURLOPT_AUTOREFERER,		true);
-		curl_setopt($ch, CURLOPT_FAILONERROR,		true);
-		curl_setopt($ch, CURLOPT_HEADER,			false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER,	true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,	false);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,	30);
-		curl_setopt($ch, CURLOPT_TIMEOUT,			180);
-		curl_setopt($ch, CURLOPT_USERAGENT,			'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
+		// Do I need to use FOF API Token Authentication instead?
+		if (empty($this->username) && !empty($this->apiToken))
+		{
+			// Remove the legacy FOF Transparent Authentication header
+			unset ($postData['_fofauthentication']);
+
+			// Alternatively I could do $postData['_fofToken'] = $this->apiToken;
+			curl_setopt($ch, CURLOPT_HTTPHEADER, [
+				'Authentication: Bearer ' . $this->apiToken
+			]);
+		}
+
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+		curl_setopt($ch, CURLOPT_FAILONERROR, true);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
 
 		$raw = curl_exec($ch);
 
@@ -84,12 +93,13 @@ class ArmArs
 
 			if (($errno == 22) && strstr($error, ': 403'))
 			{
-				echo 'ARS API communications error; please check common.username, common.password, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n";
+				echo 'ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n";
+
 				return json_encode(false);
 			}
 			else
 			{
-				throw new Exception('ARS API communications error; please check common.username, common.password, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
+				throw new Exception('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
 			}
 		}
 
@@ -106,14 +116,14 @@ class ArmArs
 	 */
 	public function getRelease($category, $version)
 	{
-		$arsData = array(
-			'view'			=> 'releases',
-			'task'			=> 'browse',
-			'category'		=> $category,
-			'version[method]'		=> 'exact',
-			'version[value]'		=> $version,
-			'format'		=> 'json',
-		);
+		$arsData = [
+			'view'            => 'releases',
+			'task'            => 'browse',
+			'category'        => $category,
+			'version[method]' => 'exact',
+			'version[value]'  => $version,
+			'format'          => 'json',
+		];
 
 		$response = $this->doApiCall($arsData);
 
@@ -121,27 +131,27 @@ class ArmArs
 
 		if (empty($response))
 		{
-			$response = (object)array(
-				'id'				=> null,
-				'category_id'		=> $category,
-				'version'			=> $version,
-				'alias'				=> null,
-				'maturity'			=> 'stable',
-				'description'		=> null,
-				'notes'				=> null,
-				'groups'			=> null,
-				'hits'				=> 0,
-				'created'			=> 0,
-				'created_by'		=> '0000-00-00 00:00:00',
-				'modified'			=> 0,
-				'modified_by'		=> '0000-00-00 00:00:00',
-				'checked_out'		=> 0,
-				'checked_out_time'	=> '0000-00-00 00:00:00',
-				'ordering'			=> 0,
-				'access'			=> 1,
-				'published'			=> 0,
-				'language'			=> '*'
-			);
+			$response = (object) [
+				'id'               => null,
+				'category_id'      => $category,
+				'version'          => $version,
+				'alias'            => null,
+				'maturity'         => 'stable',
+				'description'      => null,
+				'notes'            => null,
+				'groups'           => null,
+				'hits'             => 0,
+				'created'          => 0,
+				'created_by'       => '0000-00-00 00:00:00',
+				'modified'         => 0,
+				'modified_by'      => '0000-00-00 00:00:00',
+				'checked_out'      => 0,
+				'checked_out_time' => '0000-00-00 00:00:00',
+				'ordering'         => 0,
+				'access'           => 1,
+				'published'        => 0,
+				'language'         => '*',
+			];
 		}
 		else
 		{
@@ -160,13 +170,13 @@ class ArmArs
 	 */
 	public function saveRelease(array $releaseData)
 	{
-		$arsData = array(
-			'view'			=> 'releases',
-			'task'			=> 'save',
-			'format'		=> 'json',
-		);
+		$arsData = [
+			'view'   => 'releases',
+			'task'   => 'save',
+			'format' => 'json',
+		];
 
-		foreach (array('groups') as $key)
+		foreach (['groups'] as $key)
 		{
 			if (empty($releaseData[$key]))
 			{
@@ -202,14 +212,14 @@ class ArmArs
 	{
 		$key = ($type == 'file') ? 'filename' : 'url';
 
-		$arsData = array(
-			'view'			=> 'items',
-			'task'			=> 'browse',
-			'release'		=> $release,
-			'type'			=> $type,
-			$key			=> $fileOrURL,
-			'format'		=> 'json',
-		);
+		$arsData = [
+			'view'    => 'items',
+			'task'    => 'browse',
+			'release' => $release,
+			'type'    => $type,
+			$key      => $fileOrURL,
+			'format'  => 'json',
+		];
 
 		$response = $this->doApiCall($arsData);
 
@@ -217,33 +227,33 @@ class ArmArs
 
 		if (empty($response))
 		{
-			$response = (object)array(
-				'id'				=> null,
-				'release_id'		=> $release,
-				'title'				=> null,
-				'alias'				=> null,
-				'description'		=> null,
-				'type'				=> $type,
-				'filename'			=> ($type == 'file') ? $fileOrURL : null,
-				'url'				=> ($type == 'link') ? $fileOrURL : null,
-				'updatestream'		=> null,
-				'md5'				=> null,
-				'sha1'				=> null,
-				'filesize'			=> null,
-				'groups'			=> '',
-				'hits'				=> 0,
-				'created'			=> 0,
-				'created_by'		=> '0000-00-00 00:00:00',
-				'modified'			=> 0,
-				'modified_by'		=> '0000-00-00 00:00:00',
-				'checked_out'		=> 0,
-				'checked_out_time'	=> '0000-00-00 00:00:00',
-				'ordering'			=> 0,
-				'access'			=> 1,
-				'published'			=> 0,
-				'language'			=> '*',
-				'environments'		=> null,
-			);
+			$response = (object) [
+				'id'               => null,
+				'release_id'       => $release,
+				'title'            => null,
+				'alias'            => null,
+				'description'      => null,
+				'type'             => $type,
+				'filename'         => ($type == 'file') ? $fileOrURL : null,
+				'url'              => ($type == 'link') ? $fileOrURL : null,
+				'updatestream'     => null,
+				'md5'              => null,
+				'sha1'             => null,
+				'filesize'         => null,
+				'groups'           => '',
+				'hits'             => 0,
+				'created'          => 0,
+				'created_by'       => '0000-00-00 00:00:00',
+				'modified'         => 0,
+				'modified_by'      => '0000-00-00 00:00:00',
+				'checked_out'      => 0,
+				'checked_out_time' => '0000-00-00 00:00:00',
+				'ordering'         => 0,
+				'access'           => 1,
+				'published'        => 0,
+				'language'         => '*',
+				'environments'     => null,
+			];
 		}
 		else
 		{
@@ -262,14 +272,14 @@ class ArmArs
 	 */
 	public function saveItem(array $itemData)
 	{
-		$arsData = array(
-			'view'			=> 'items',
-			'task'			=> 'save',
-			'format'		=> 'json',
-			'returnurl'		=> base64_encode('index.php'),
-		);
+		$arsData = [
+			'view'      => 'items',
+			'task'      => 'save',
+			'format'    => 'json',
+			'returnurl' => base64_encode('index.php'),
+		];
 
-		foreach (array('groups', 'environments') as $key)
+		foreach (['groups', 'environments'] as $key)
 		{
 			if (empty($itemData[$key]))
 			{

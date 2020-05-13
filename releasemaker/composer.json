@@ -1,22 +1,24 @@
 {
-  "name": "akeeba/releasemaker",
-  "description": "Automates the deployment of software with Akeeba Release System",
-  "minimum-stability": "stable",
-  "license": "GPLv3",
-  "authors": [
-    {
-      "name": "Nicholas K. Dionysopoulos / Akeeba ltd",
-      "email": "no-reply@akeebabackup.com"
-    }
-  ],
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/akeeba/s3"
-    }
-  ],
-  "require": {
-    "php": "^7.1.0",
-    "akeeba/s3": "dev-master"
-  }
+	"name": "akeeba/releasemaker",
+	"description": "Automates the deployment of software with Akeeba Release System",
+	"minimum-stability": "stable",
+	"license": "GPLv3",
+	"authors": [
+		{
+			"name": "Nicholas K. Dionysopoulos / Akeeba ltd",
+			"email": "no-reply@akeebabackup.com"
+		}
+	],
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/akeeba/s3"
+		}
+	],
+	"require": {
+		"php": "^7.1.0",
+		"akeeba/s3": "dev-master",
+		"ext-json": "*",
+		"ext-curl": "*"
+	}
 }

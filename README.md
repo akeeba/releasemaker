@@ -29,6 +29,7 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 * *common.arsapiurl* URL to the site with Akeeba Release System installed, e.g. http://www.example.com (do NOT include index.php?option=com_ars etc)
 * *common.username* Your login username, needs to have core.manage privilege for ARS or core.admin (Super User) privilege
 * *common.password* Your login password
+* *common.token* Your FOF API Token. Used when username and password are left empty.
 * *common.category* integer; the ARS category where things will be published.
 * *common.releasedir* Absolute path to the local directory containing the files to publish.
 * *common.releasegroups* array of integers; numeric IDs of Akeeba Subscriptions levels which will have access to the release. Optional.

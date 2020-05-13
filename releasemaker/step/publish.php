@@ -10,12 +10,12 @@ class ArmStepPublish implements ArmStepInterface
 	/** @var ArmArs The ARS connector class */
 	private $arsConnector = null;
 
-	private $publishInfo = array(
-		'release'	=> null,
-		'core'		=> array(),
-		'pro'		=> array(),
-		'pdf'		=> array(),
-	);
+	private $publishInfo = [
+		'release' => null,
+		'core'    => [],
+		'pro'     => [],
+		'pdf'     => [],
+	];
 
 	public function execute()
 	{
@@ -47,16 +47,17 @@ class ArmStepPublish implements ArmStepInterface
 	{
 		$conf = ArmConfiguration::getInstance();
 
-		$this->arsConnector = new ArmArs(array(
-			'host'		=> $conf->get('common.arsapiurl', ''),
-			'username'	=> $conf->get('common.username', ''),
-			'password'	=> $conf->get('common.password', ''),
-		));
+		$this->arsConnector = new ArmArs([
+			'host'     => $conf->get('common.arsapiurl', ''),
+			'username' => $conf->get('common.username', ''),
+			'password' => $conf->get('common.password', ''),
+			'apiToken' => $conf->get('common.token', ''),
+		]);
 
 		$this->publishInfo = $conf->get('volatile.publishInfo');
 	}
 
-	private function publishItems(Array $items)
+	private function publishItems(array $items)
 	{
 		if (empty($items))
 		{
@@ -80,8 +81,8 @@ class ArmStepPublish implements ArmStepInterface
 			}
 
 			$item->environments = '';
-			$item->published = 1;
-			$result = $this->arsConnector->saveItem((array) $item);
+			$item->published    = 1;
+			$result             = $this->arsConnector->saveItem((array) $item);
 
 			if ($result !== false)
 			{

@@ -37,14 +37,15 @@ class ArmStepRelease implements ArmStepInterface
 	{
 		$conf = ArmConfiguration::getInstance();
 
-		$this->arsConnector = new ArmArs(array(
-			'host'		=> $conf->get('common.arsapiurl', ''),
-			'username'	=> $conf->get('common.username', ''),
-			'password'	=> $conf->get('common.password', ''),
-		));
+		$this->arsConnector = new ArmArs([
+			'host'     => $conf->get('common.arsapiurl', ''),
+			'username' => $conf->get('common.username', ''),
+			'password' => $conf->get('common.password', ''),
+			'apiToken' => $conf->get('common.token', ''),
+		]);
 
-		$category	= $conf->get('common.category', 0);
-		$version	= $conf->get('common.version', 0);
+		$category = $conf->get('common.category', 0);
+		$version  = $conf->get('common.version', 0);
 
 		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
@@ -53,16 +54,16 @@ class ArmStepRelease implements ArmStepInterface
 	{
 		$conf = ArmConfiguration::getInstance();
 
-		$category	= $conf->get('common.category', 0);
-		$version	= $conf->get('common.version', 0);
-		$releaseDir	= $conf->get('common.releasedir', '');
+		$category      = $conf->get('common.category', 0);
+		$version       = $conf->get('common.version', 0);
+		$releaseDir    = $conf->get('common.releasedir', '');
 		$releaseGroups = $conf->get('common.releasegroups', '');
 		$releaseAccess = $conf->get('common.releaseaccess', 1);
 
 		$this->release->description = $this->readFile('DESCRIPTION.html');
-		$this->release->notes = $this->readFile('RELEASENOTES.html');
-		$this->release->notes .= $this->readChangelog();
-		$this->release->published = 0;
+		$this->release->notes       = $this->readFile('RELEASENOTES.html');
+		$this->release->notes       .= $this->readChangelog();
+		$this->release->published   = 0;
 		if (is_null($this->release->alias))
 		{
 			$this->release->alias = ArmUtilsString::toSlug(str_replace('.', '-', $version));
@@ -95,9 +96,9 @@ class ArmStepRelease implements ArmStepInterface
 
 		$path = $conf->get('common.repodir', '');
 
-		if (file_exists($path.'/'.$filename))
+		if (file_exists($path . '/' . $filename))
 		{
-			return @file_get_contents($path.'/'.$filename);
+			return @file_get_contents($path . '/' . $filename);
 		}
 		else
 		{
@@ -107,9 +108,9 @@ class ArmStepRelease implements ArmStepInterface
 
 	private function getMaturity($version)
 	{
-		$version = strtolower($version);
+		$version      = strtolower($version);
 		$versionParts = explode('.', $version);
-		$lastPart = array_pop($versionParts);
+		$lastPart     = array_pop($versionParts);
 
 		if (substr($lastPart, 0, 1) == 'a')
 		{
@@ -145,7 +146,7 @@ class ArmStepRelease implements ArmStepInterface
 		array_shift($changelog);
 
 		// Loop until you find a blank line
-		$thisChangelog = array();
+		$thisChangelog = [];
 		foreach ($changelog as $line)
 		{
 			$line = trim($line);
@@ -168,19 +169,19 @@ class ArmStepRelease implements ArmStepInterface
 		asort($thisChangelog);
 
 		// Pick lines by type
-		$sorted = array(
-			'security'	=> array(),
-			'bugfix'	=> array(),
-			'language'	=> array(),
-			'new'		=> array(),
-			'change'	=> array(),
-			'misc'		=> array(),
-			'removed'	=> array(),
-			'critical'	=> array(),
-		);
-		foreach($thisChangelog as $line)
+		$sorted = [
+			'security' => [],
+			'bugfix'   => [],
+			'language' => [],
+			'new'      => [],
+			'change'   => [],
+			'misc'     => [],
+			'removed'  => [],
+			'critical' => [],
+		];
+		foreach ($thisChangelog as $line)
 		{
-			list($type, $text) = explode(' ', $line, 2);
+			[$type, $text] = explode(' ', $line, 2);
 			switch ($type)
 			{
 				case '*':

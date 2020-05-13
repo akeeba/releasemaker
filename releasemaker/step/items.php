@@ -13,12 +13,12 @@ class ArmStepItems implements ArmStepInterface
 	/** @var stdClass The release we will be saving items to */
 	private $release = null;
 
-	private $publishInfo = array(
-		'release'	=> null,
-		'core'		=> array(),
-		'pro'		=> array(),
-		'pdf'		=> array(),
-	);
+	private $publishInfo = [
+		'release' => null,
+		'core'    => [],
+		'pro'     => [],
+		'pdf'     => [],
+	];
 
 	public function execute()
 	{
@@ -53,14 +53,15 @@ class ArmStepItems implements ArmStepInterface
 	{
 		$conf = ArmConfiguration::getInstance();
 
-		$this->arsConnector = new ArmArs(array(
-			'host'		=> $conf->get('common.arsapiurl', ''),
-			'username'	=> $conf->get('common.username', ''),
-			'password'	=> $conf->get('common.password', ''),
-		));
+		$this->arsConnector = new ArmArs([
+			'host'     => $conf->get('common.arsapiurl', ''),
+			'username' => $conf->get('common.username', ''),
+			'password' => $conf->get('common.password', ''),
+			'apiToken' => $conf->get('common.token', ''),
+		]);
 
-		$category	= $conf->get('common.category', 0);
-		$version	= $conf->get('common.version', 0);
+		$category = $conf->get('common.category', 0);
+		$version  = $conf->get('common.version', 0);
 
 		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
@@ -71,28 +72,33 @@ class ArmStepItems implements ArmStepInterface
 		if ($isPdf || ($prefix == 'pdf'))
 		{
 			$publishArea = 'pdf';
-			$prefix = 'core';
-			$isPdf = true;
+			$prefix      = 'core';
+			$isPdf       = true;
 		}
 		else
 		{
 			$publishArea = $prefix;
 		}
-		$this->publishInfo[$publishArea] = array();
+		$this->publishInfo[$publishArea] = [];
 
 		$conf = ArmConfiguration::getInstance();
 
-		$type = $conf->get($prefix.'.method', $conf->get('common.update.method', 'sftp'));
+		$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
 
 		$files = $conf->get('volatile.files');
-		if($isPdf) {
+		if ($isPdf)
+		{
 			$coreFiles = $files['pdf'];
-		} else {
+		}
+		else
+		{
 			$coreFiles = $files[$prefix];
 		}
 
-		if(empty($coreFiles)) {
+		if (empty($coreFiles))
+		{
 			echo "\t\tNO FILES\n";
+
 			return;
 		}
 
@@ -101,29 +107,31 @@ class ArmStepItems implements ArmStepInterface
 		$groups = $conf->get("$prefix.groups", "");
 		$access = $conf->get("$prefix.access", "1");
 
-		foreach($coreFiles as $filename) {
+		foreach ($coreFiles as $filename)
+		{
 			// Get the filename and path used in ARS
 			echo "\t\tCreating/updating item for $filename ";
 
-			$type = $conf->get($prefix.'.method', $conf->get('common.update.method', 'sftp'));
+			$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
 
-			switch($type) {
+			switch ($type)
+			{
 				case 's3':
-					$version = $conf->get('common.version');
-					$reldir = $conf->get($prefix.'.s3.reldir');
-					$cdnHostname = $conf->get($prefix.'.s3.cdnhostname');
-					$destName = $version.'/'.basename($filename);
+					$version     = $conf->get('common.version');
+					$reldir      = $conf->get($prefix . '.s3.reldir');
+					$cdnHostname = $conf->get($prefix . '.s3.cdnhostname');
+					$destName    = $version . '/' . basename($filename);
 
 					if (empty($cdnHostname))
 					{
 						$fileOrURL = 's3://' . $reldir . '/' . $destName;
-						$type = 'file';
+						$type      = 'file';
 					}
 					else
 					{
-						$directory = $conf->get($prefix.'.s3.directory',	$conf->get('common.update.s3.directory', ''));
+						$directory = $conf->get($prefix . '.s3.directory', $conf->get('common.update.s3.directory', ''));
 						$fileOrURL = 'https://' . $cdnHostname . '/' . $directory . '/' . $destName;
-						$type = 'link';
+						$type      = 'link';
 					}
 
 					break;
@@ -133,9 +141,9 @@ class ArmStepItems implements ArmStepInterface
 				case 'ftpscurl':
 				case 'sftp':
 				case 'sftpcurl':
-					$version = $conf->get('common.version');
-					$fileOrURL = $version.'/'.basename($filename);
-					$type = 'file';
+					$version   = $conf->get('common.version');
+					$fileOrURL = $version . '/' . basename($filename);
+					$type      = 'file';
 					break;
 			}
 
@@ -143,16 +151,16 @@ class ArmStepItems implements ArmStepInterface
 			$item = $this->arsConnector->getItem($this->release->id, $type, $fileOrURL);
 
 			$item->release_id = $this->release->id;
-			$item->type = $type;
-			$item->filename = ($type == 'file') ? $fileOrURL : '';
-			$item->url = ($type == 'link') ? $fileOrURL : '';
-			$item->groups = $groups;
-			$item->access = $access;
-			$item->published = 0;
+			$item->type       = $type;
+			$item->filename   = ($type == 'file') ? $fileOrURL : '';
+			$item->url        = ($type == 'link') ? $fileOrURL : '';
+			$item->groups     = $groups;
+			$item->access     = $access;
+			$item->published  = 0;
 
 			$this->publishInfo[$publishArea][] = $item;
 
-			$result = $this->arsConnector->saveItem((array)$item);
+			$result = $this->arsConnector->saveItem((array) $item);
 			if ($result !== 'false')
 			{
 				echo " -- OK\n";
