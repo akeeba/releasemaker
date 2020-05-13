@@ -101,6 +101,17 @@ class ArmStepUpdates implements ArmStepInterface
 			$updateURL = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
 
 			$data = file_get_contents($updateURL);
+
+			/**
+			 * When we do not have updates for a specific item we might choose to use a fake update stream ID, e.g.
+			 * 99999. In this case trying to access its URL will throw an error which means that file_get_contents
+			 * returns false. This if-block makes sure this won't break everything.
+			 */
+			if ($data === false)
+			{
+				continue;
+			}
+
 			file_put_contents($temp_filename, $data);
 
 			switch ($type)

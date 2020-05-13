@@ -57,12 +57,13 @@ class ArmArs
 		$ch = curl_init($url);
 
 		// Do I need to use FOF API Token Authentication instead?
-		if (empty($this->username) && !empty($this->apiToken))
+		if (!empty($this->apiToken))
 		{
 			// Remove the legacy FOF Transparent Authentication header
 			unset ($postData['_fofauthentication']);
 
 			// Alternatively I could do $postData['_fofToken'] = $this->apiToken;
+
 			curl_setopt($ch, CURLOPT_HTTPHEADER, [
 				'Authentication: Bearer ' . $this->apiToken
 			]);
@@ -88,9 +89,10 @@ class ArmArs
 
 		if ($raw === false)
 		{
-			$comboURL = $url . http_build_query($postData);
-			echo "\n\n\n$comboURL\n\n\n";
+			// $comboURL = $url . '?' . http_build_query($postData);
+			// echo "\n\n\n$comboURL\n\n\n";
 
+			/**
 			if (($errno == 22) && strstr($error, ': 403'))
 			{
 				echo 'ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n";
@@ -101,6 +103,9 @@ class ArmArs
 			{
 				throw new Exception('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
 			}
+			/**/
+
+			throw new Exception('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
 		}
 
 		return $raw;
