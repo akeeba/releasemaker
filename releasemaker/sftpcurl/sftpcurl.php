@@ -84,9 +84,12 @@ class ArmSftpcurl
 			curl_setopt($ch, CURLOPT_SSH_PUBLIC_KEYFILE, $this->config->pubkeyfile);
 
 			// Since SSH certificates are self-signed we cannot have cURL verify their signatures against a CA.
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYSTATUS, 0);
+//			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+//			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+//			curl_setopt($ch, CURLOPT_SSL_VERIFYSTATUS, 0);
+			curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
 			/**
 			 * This is optional because newer versions of cURL can extract the private key file from a combined

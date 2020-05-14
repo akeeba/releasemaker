@@ -181,9 +181,9 @@ class ArmFtpcurl
 			curl_setopt($ch, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
 			curl_setopt($ch, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_DEFAULT);
 
-			// Most FTPS servers use self-signed certificates. That's the only way to connect to them :(
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		}
 
 		// Should I ignore the server-supplied passive mode IP address?

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package    AkeebaReleaseMaker
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
@@ -28,7 +29,7 @@ class ArmStepUpdates implements ArmStepInterface
 
 		if ($type == 's3')
 		{
-			$config = (object)array(
+			$config = (object) [
 				'access'      => $conf->get('common.update.s3.access', ''),
 				'secret'      => $conf->get('common.update.s3.secret', ''),
 				'bucket'      => $conf->get('common.update.s3.bucket', ''),
@@ -37,14 +38,16 @@ class ArmStepUpdates implements ArmStepInterface
 				'region'      => $conf->get('common.update.s3.region', 'us-east-1'),
 				'directory'   => $conf->get('common.update.s3.directory', ''),
 				'cdnhostname' => $conf->get('common.update.s3.cdnhostname', ''),
-			);
+			];
 		}
 		else
 		{
-			$config = (object)array(
+			$config = (object) [
 				'type'             => $type,
 				'hostname'         => $conf->get('common.update.ftp.hostname', ''),
-				'port'             => $conf->get('common.update.ftp.port', in_array($type, array('sftp', 'sftpcurl')) ? 22 : 21),
+				'port'             => $conf->get('common.update.ftp.port', in_array($type, [
+					'sftp', 'sftpcurl',
+				]) ? 22 : 21),
 				'username'         => $conf->get('common.update.ftp.username', ''),
 				'password'         => $conf->get('common.update.ftp.password', ''),
 				'passive'          => $conf->get('common.update.ftp.passive', true),
@@ -55,11 +58,11 @@ class ArmStepUpdates implements ArmStepInterface
 				'passive_fix'      => $conf->get('common.update.ftp.passive_fix', false),
 				'timeout'          => $conf->get('common.update.ftp.timeout', 3600),
 				'verbose'          => $conf->get('common.update.ftp.verbose', false),
-			);
+			];
 		}
 
 		$stream_id = $conf->get($prefix . '.update.stream', 0);
-		$formats   = $conf->get($prefix . '.update.formats', array());
+		$formats   = $conf->get($prefix . '.update.formats', []);
 		$basename  = $conf->get($prefix . '.update.basename', '');
 		$url       = $conf->get('common.arsapiurl', '');
 
@@ -100,7 +103,17 @@ class ArmStepUpdates implements ArmStepInterface
 
 			$updateURL = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
 
-			$data = file_get_contents($updateURL);
+			$context = stream_context_create([
+				'http' => [
+					'method' => 'GET',
+				],
+				'ssl'  => [
+					'verify_peer'  => true,
+					'cafile'       => AKEEBA_CACERT_PEM,
+					'verify_depth' => 5,
+				],
+			]);
+			$data    = file_get_contents($updateURL, false, $context);
 
 			/**
 			 * When we do not have updates for a specific item we might choose to use a fake update stream ID, e.g.

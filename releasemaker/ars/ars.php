@@ -42,7 +42,7 @@ class ArmArs
 	 */
 	public function doApiCall(array $postData = [])
 	{
-		$arsData  = [
+		$arsData = [
 			'option'             => 'com_ars',
 			'_fofauthentication' => json_encode([
 				'username' => $this->username,
@@ -65,7 +65,7 @@ class ArmArs
 			// Alternatively I could do $postData['_fofToken'] = $this->apiToken;
 
 			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				'Authentication: Bearer ' . $this->apiToken
+				'Authentication: Bearer ' . $this->apiToken,
 			]);
 		}
 
@@ -76,7 +76,10 @@ class ArmArs
 		curl_setopt($ch, CURLOPT_FAILONERROR, true);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 180);
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
@@ -89,22 +92,6 @@ class ArmArs
 
 		if ($raw === false)
 		{
-			// $comboURL = $url . '?' . http_build_query($postData);
-			// echo "\n\n\n$comboURL\n\n\n";
-
-			/**
-			if (($errno == 22) && strstr($error, ': 403'))
-			{
-				echo 'ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n";
-
-				return json_encode(false);
-			}
-			else
-			{
-				throw new Exception('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
-			}
-			/**/
-
 			throw new Exception('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
 		}
 

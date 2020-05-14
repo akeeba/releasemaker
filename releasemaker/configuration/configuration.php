@@ -4,33 +4,18 @@
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
+
 class ArmConfiguration
 {
-
-	/** @var ArmConfiguration Singleton instance */
+	/** @var self Singleton instance */
 	static $instance = null;
 
 	/** @var string Default NameSpace */
 	private $defaultNameSpace = 'arm';
 
 	/** @var array The registry data */
-	private $registry = array();
+	private $registry = [];
 
-
-	/**
-	 * Singleton implementation
-	 *
-	 * @return  ArmConfiguration
-	 */
-	public static function getInstance()
-	{
-		if (!(self::$instance instanceof ArmConfiguration))
-		{
-			self::$instance = new ArmConfiguration();
-		}
-
-		return self::$instance;
-	}
 
 	/**
 	 * Constructor
@@ -45,21 +30,36 @@ class ArmConfiguration
 	}
 
 	/**
+	 * Singleton implementation
+	 *
+	 * @return  self
+	 */
+	public static function getInstance(): self
+	{
+		if (!(self::$instance instanceof ArmConfiguration))
+		{
+			self::$instance = new ArmConfiguration();
+		}
+
+		return self::$instance;
+	}
+
+	/**
 	 * Create a namespace
 	 *
-	 * @param    string $namespace Name of the namespace to create
+	 * @param   string  $namespace  Name of the namespace to create
 	 */
-	public function makeNameSpace($namespace)
+	public function makeNameSpace(string $namespace): void
 	{
-		$this->registry[ $namespace ] = array('data' => new stdClass());
+		$this->registry[$namespace] = ['data' => new stdClass()];
 	}
 
 	/**
 	 * Get the list of namespaces
 	 *
-	 * @return    array    List of namespaces
+	 * @return    string[]    List of namespaces
 	 */
-	public function getNameSpaces()
+	public function getNameSpaces(): array
 	{
 		return array_keys($this->registry);
 	}
@@ -67,17 +67,17 @@ class ArmConfiguration
 	/**
 	 * Get a registry value
 	 *
-	 * @param    string $regpath Registry path (e.g. global.directory.temporary)
-	 * @param    mixed  $default Optional default value
+	 * @param   string  $path     Registry path (e.g. global.directory.temporary)
+	 * @param   mixed   $default  Optional default value
 	 *
 	 * @return    mixed    Value of entry or null
 	 */
-	public function get($regpath, $default = null)
+	public function get(string $path, $default = null)
 	{
 		$result = $default;
 
 		// Explode the registry path into an array
-		if ($nodes = explode('.', $regpath))
+		if ($nodes = explode('.', $path))
 		{
 			// Get the namespace
 			$count = count($nodes);
@@ -91,22 +91,22 @@ class ArmConfiguration
 				$namespace = $nodes[0];
 			}
 
-			if (isset($this->registry[ $namespace ]))
+			if (isset($this->registry[$namespace]))
 			{
-				$ns        = $this->registry[ $namespace ]['data'];
+				$ns        = $this->registry[$namespace]['data'];
 				$pathNodes = $count - 1;
 
-				for ($i = 1; $i < $pathNodes; $i ++)
+				for ($i = 1; $i < $pathNodes; $i++)
 				{
-					if ((isset($ns->{$nodes[ $i ]})))
+					if ((isset($ns->{$nodes[$i]})))
 					{
-						$ns = $ns->{$nodes[ $i ]};
+						$ns = $ns->{$nodes[$i]};
 					}
 				}
 
-				if (isset($ns->{$nodes[ $i ]}))
+				if (isset($ns->{$nodes[$i]}))
 				{
-					$result = $ns->{$nodes[ $i ]};
+					$result = $ns->{$nodes[$i]};
 				}
 			}
 		}
@@ -117,15 +117,15 @@ class ArmConfiguration
 	/**
 	 * Set a registry value
 	 *
-	 * @param    string $regpath Registry Path (e.g. global.directory.temporary)
-	 * @param    mixed  $value   Value of entry
+	 * @param   string  $path   Registry Path (e.g. global.directory.temporary)
+	 * @param   mixed   $value  Value of entry
 	 *
-	 * @return    mixed    Value of old value or boolean false if operation failed
+	 * @return  mixed  Value of old value or boolean false if operation failed
 	 */
-	public function set($regpath, $value)
+	public function set(string $path, $value)
 	{
 		// Explode the registry path into an array
-		$nodes = explode('.', $regpath);
+		$nodes = explode('.', $path);
 
 		// Get the namespace
 		$count = count($nodes);
@@ -137,15 +137,15 @@ class ArmConfiguration
 		else
 		{
 			$namespace = array_shift($nodes);
-			$count --;
+			$count--;
 		}
 
-		if (!isset($this->registry[ $namespace ]))
+		if (!isset($this->registry[$namespace]))
 		{
 			$this->makeNameSpace($namespace);
 		}
 
-		$ns = $this->registry[ $namespace ]['data'];
+		$ns = $this->registry[$namespace]['data'];
 
 		$pathNodes = $count - 1;
 
@@ -154,14 +154,14 @@ class ArmConfiguration
 			$pathNodes = 0;
 		}
 
-		for ($i = 0; $i < $pathNodes; $i ++)
+		for ($i = 0; $i < $pathNodes; $i++)
 		{
 			// If any node along the registry path does not exist, create it
-			if (!isset($ns->{$nodes[ $i ]}))
+			if (!isset($ns->{$nodes[$i]}))
 			{
-				$ns->{$nodes[ $i ]} = new stdClass();
+				$ns->{$nodes[$i]} = new stdClass();
 			}
-			$ns = $ns->{$nodes[ $i ]};
+			$ns = $ns->{$nodes[$i]};
 		}
 
 		// Set the new values
@@ -173,87 +173,25 @@ class ArmConfiguration
 			}
 		}
 
-		// Post-process certain directory-containing variables
-		if ($process_special_vars && in_array($regpath, $this->directory_containing_keys))
+		// Unset keys when they are being set to null
+		if (is_null($value))
 		{
-			if (!empty($stock_directories))
-			{
-				$data = $value;
-				foreach ($stock_directories as $tag => $content)
-				{
-					$data = str_replace($tag, $content, $data);
-				}
-				$ns->{$nodes[ $i ]} = $data;
+			$ret = $ns->{$nodes[$i]};
 
-				return $ns->{$nodes[ $i ]};
-			}
+			unset($ns->{$nodes[$i]});
+
+			return $ret;
 		}
 
-		// This is executed if any of the previous two if's is false
+		$ns->{$nodes[$i]} = $value;
 
-		$ns->{$nodes[ $i ]} = $value;
-
-		return $ns->{$nodes[ $i ]};
-	}
-
-	/**
-	 * Unset (remove) a registry value
-	 *
-	 * @param    string $regpath Registry Path (e.g. global.directory.temporary)
-	 *
-	 * @return    bool    True if the node was removed
-	 */
-	public function remove($regpath)
-	{
-		// Explode the registry path into an array
-		$nodes = explode('.', $regpath);
-
-		// Get the namespace
-		$count = count($nodes);
-
-		if ($count < 2)
-		{
-			$namespace = $this->defaultNameSpace;
-		}
-		else
-		{
-			$namespace = array_shift($nodes);
-			$count --;
-		}
-
-		if (!isset($this->registry[ $namespace ]))
-		{
-			$this->makeNameSpace($namespace);
-		}
-
-		$ns = $this->registry[ $namespace ]['data'];
-
-		$pathNodes = $count - 1;
-
-		if ($pathNodes < 0)
-		{
-			$pathNodes = 0;
-		}
-
-		for ($i = 0; $i < $pathNodes; $i ++)
-		{
-			// If any node along the registry path does not exist, return false
-			if (!isset($ns->{$nodes[ $i ]}))
-			{
-				return false;
-			}
-			$ns = $ns->{$nodes[ $i ]};
-		}
-
-		unset($ns->{$nodes[ $i ]});
-
-		return true;
+		return $ns->{$nodes[$i]};
 	}
 
 	/**
 	 * Resets the registry to the default values
 	 */
-	public function reset()
+	public function reset(): void
 	{
 		$this->loadFile(__DIR__ . '/config.json');
 	}
@@ -262,10 +200,10 @@ class ArmConfiguration
 	 * Merges an associative array of key/value pairs into the registry.
 	 * If noOverride is set, only non set or null values will be applied.
 	 *
-	 * @param    array $array      An associative array. Its keys are registry paths.
-	 * @param    bool  $noOverride [optional] Do not override pre-set values.
+	 * @param   array  $array       An associative array. Its keys are registry paths.
+	 * @param   bool   $noOverride  [optional] Do not override pre-set values.
 	 */
-	public function mergeArray($array, $noOverride = false)
+	public function mergeArray(array $array, bool $noOverride = false): void
 	{
 		if (!$noOverride)
 		{
@@ -273,15 +211,15 @@ class ArmConfiguration
 			{
 				$this->set($key, $value);
 			}
+
+			return;
 		}
-		else
+
+		foreach ($array as $key => $value)
 		{
-			foreach ($array as $key => $value)
+			if (is_null($this->get($key, null)))
 			{
-				if (is_null($this->get($key, null)))
-				{
-					$this->set($key, $value);
-				}
+				$this->set($key, $value);
 			}
 		}
 	}
@@ -289,9 +227,9 @@ class ArmConfiguration
 	/**
 	 * Load configuration from a JSON string
 	 *
-	 * @param   string $json The JSON string to load
+	 * @param   string|null  $json  The JSON string to load
 	 */
-	public function loadJSON($json = null)
+	public function loadJSON(?string $json = null)
 	{
 		$array = json_decode($json, true);
 
@@ -301,16 +239,24 @@ class ArmConfiguration
 		}
 
 		$this->mergeArray($array);
+
+		$this->postProcess();
 	}
 
 	/**
 	 * Load configuration from a JSON file
 	 *
-	 * @param   string $filename The path to the file to load
+	 * @param   string  $filename  The path to the file to load
 	 */
-	public function loadFile($filename = null)
+	public function loadFile(?string $filename = null): void
 	{
+		if (empty($filename))
+		{
+			return;
+		}
+
 		$data = file_get_contents($filename);
+
 		$this->loadJSON($data);
 	}
 
@@ -319,59 +265,79 @@ class ArmConfiguration
 	 *
 	 * @return    string    JSON representation of the registry
 	 */
-	public function exportJSON()
+	public function exportJSON(): string
 	{
-		$data = array();
+		$data = [];
 
 		$namespaces = $this->getNameSpaces();
+
 		foreach ($namespaces as $namespace)
 		{
-			$ns   = $this->registry[ $namespace ]['data'];
+			$ns   = $this->registry[$namespace]['data'];
 			$temp = $this->dumpObject($ns);
 
 			if (!empty($temp))
 			{
 				foreach ($temp as $k => $v)
 				{
-					$data[ $namespace . '.' . $k ] = $v;
+					$data[$namespace . '.' . $k] = $v;
 				}
 			}
 		}
 
-		return json_encode($data);
+		return json_encode($data, JSON_PRETTY_PRINT);
 	}
 
 	/**
-	 * Internal function to dump an object as an array
+	 * Set up a cacert.pem file which merges the built in one with the user-defined one.
 	 *
-	 * @param object $object
-	 * @param string $prefix [optional]
-	 *
-	 * @return
+	 * @return  string
 	 */
-	private function dumpObject($object, $prefix = '')
+	public function getCustomCacertPem(): string
 	{
-		$data = array();
-		$vars = get_object_vars($object);
-		foreach ($vars as $key => $value)
+		global $cacertPemFilePointer;
+
+		$cacertPemFile   = __DIR__ . '/../assets/cacert.pem';
+		$customCacertPem = $this->get('common.cacert');
+
+		if (empty($customCacertPem))
 		{
-			if (is_array($value))
-			{
-				$value = '###json###' . json_encode($value);
-			}
-			$data[ (empty($prefix) ? '' : $prefix . '.') . $key ] = $value;
+			return $cacertPemFile;
 		}
 
-		return $data;
+		$customContents = null;
+
+		if (!empty($customCacertPem) && @is_readable($customCacertPem))
+		{
+			$customContents = @file_get_contents($customCacertPem);
+		}
+
+		if (empty($customContents))
+		{
+			return $cacertPemFile;
+		}
+
+		// Let's use the tmpfile trick. The file will removed once the self::$cacertPemFilePointer goes out of scope.
+		$cacertPemFilePointer = tmpfile();
+		$cacertPemFile        = stream_get_meta_data($cacertPemFilePointer)['uri'];
+
+		// Combine the original cacert.pem with the provided certificate / certificate storage
+		fwrite($cacertPemFilePointer, file_get_contents(__DIR__ . '/../assets/cacert.pem') . "\n\n" . $customContents);
+
+		// DO NOT CALL fclose(). THAT WOULD DELETE OUR TEMPORARY FILE!
+		return $cacertPemFile;
 	}
 
-	public function postProcess()
+	/**
+	 * Post-process the configuration, filling in any gaps
+	 */
+	private function postProcess(): void
 	{
 		$v = $this->get('pro.pattern', null);
 
 		if (empty($v))
 		{
-			$this->set('pro.pattern', 'com_*pro.zip');
+			$this->set('pro.pattern', 'pkg_*pro.zip');
 		}
 
 		$pro_method = $this->get('pro.method', null);
@@ -380,7 +346,8 @@ class ArmConfiguration
 		{
 			$this->set('pro.method', 'sftp');
 		}
-		elseif ($pro_method == 's3')
+
+		if ($pro_method == 's3')
 		{
 			$v = $this->get('pro.s3.access', null);
 
@@ -408,7 +375,7 @@ class ArmConfiguration
 
 		if (empty($v))
 		{
-			$this->set('core.pattern', 'com_*core.zip');
+			$this->set('core.pattern', 'pkg_*core.zip');
 		}
 
 		$core_method = $this->get('core.method', null);
@@ -417,7 +384,8 @@ class ArmConfiguration
 		{
 			$this->set('core.method', 'sftp');
 		}
-		elseif ($core_method == 's3')
+
+		if ($core_method == 's3')
 		{
 			$v = $this->get('core.s3.access', null);
 
@@ -447,6 +415,31 @@ class ArmConfiguration
 		{
 			$this->set('pdf.where', 'core');
 		}
-		/**/
+	}
+
+	/**
+	 * Internal function to dump an object as an array
+	 *
+	 * @param   object  $object
+	 * @param   string  $prefix  [optional]
+	 *
+	 * @return  array
+	 */
+	private function dumpObject(object $object, string $prefix = ''): array
+	{
+		$data = [];
+		$vars = get_object_vars($object);
+
+		foreach ($vars as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$value = '###json###' . json_encode($value);
+			}
+
+			$data[(empty($prefix) ? '' : $prefix . '.') . $key] = $value;
+		}
+
+		return $data;
 	}
 }

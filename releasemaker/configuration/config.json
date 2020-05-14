@@ -9,6 +9,15 @@
 	"common.releasegroups": "",
 	"common.releaseaccess": "",
 	"common.repodir": "",
+	"common.cacert": "",
+	"common.steps": [
+		"prepare",
+		"deploy",
+		"release",
+		"items",
+		"publish",
+		"updates"
+	],
 	"common.update.method": "s3",
 	"common.update.ftp.hostname": "",
 	"common.update.ftp.port": "",
