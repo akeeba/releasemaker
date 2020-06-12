@@ -18,7 +18,6 @@
 		"akeeba/s3": "dev-development",
 		"knplabs/github-api": "^2.0",
 		"php-http/guzzle6-adapter": "^1.1",
-		"czproject/git-php": "^3.10.0",
 		"ext-json": "*",
 		"ext-curl": "*"
 	},
