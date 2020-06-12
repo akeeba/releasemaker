@@ -5,13 +5,15 @@
  * @license    GNU General Public License version 3, or later
  */
 
+namespace Akeeba\ReleaseMaker\Step;
+
 /**
  * Interace for step classes
  */
-interface ArmStepInterface
+interface StepInterface
 {
 	/**
 	 * Execute this step
 	 */
-	public function execute();
+	public function execute(): void;
 }

@@ -10,18 +10,17 @@
 			"role": "Lead Developer"
 		}
 	],
-	"config": {
-		"vendor-dir": "releasemaker/vendor"
-	},
 	"require": {
 		"php": "^7.2",
 		"akeeba/s3": "dev-development",
 		"knplabs/github-api": "^2.0",
 		"php-http/guzzle6-adapter": "^1.1",
 		"ext-json": "*",
-		"ext-curl": "*"
+		"ext-curl": "*",
+		"ext-zip": "*"
 	},
 	"suggest": {
-		"ext-ssh2": "*"
+		"ext-ssh2": "*",
+		"ext-ftp": "*"
 	}
 }

@@ -4,7 +4,12 @@
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
-class ArmFtpcurl
+
+namespace Akeeba\ReleaseMaker\Transfer;
+
+use RuntimeException;
+
+class FTPcURL
 {
 	private $config = null;
 
@@ -13,32 +18,6 @@ class ArmFtpcurl
 		$this->config = $config;
 
 		$this->connect();
-	}
-
-	/**
-	 * Test the connection to the FTP server and whether the initial directory is correct. This is done by attempting to
-	 * list the contents of the initial directory. The listing is not parsed (we don't really care!) and we do NOT check
-	 * if we can upload files to that remote folder.
-	 *
-	 * @throws  \RuntimeException
-	 */
-	protected function connect()
-	{
-		$ch = $this->getCurlHandle($this->config->directory . '/');
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_NOBODY, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-		curl_exec($ch);
-
-		$errNo   = curl_errno($ch);
-		$error   = curl_error($ch);
-		curl_close($ch);
-
-		if ($errNo)
-		{
-			throw new \RuntimeException("cURL Error $errNo connecting to remote FTP server: $error", 500);
-		}
 	}
 
 	/**
@@ -55,7 +34,7 @@ class ArmFtpcurl
 
 		if ($fp === false)
 		{
-			throw new \RuntimeException("Unreadable local file $localFilename");
+			throw new RuntimeException("Unreadable local file $localFilename");
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
@@ -63,12 +42,38 @@ class ArmFtpcurl
 		{
 			$this->uploadFromHandle($remoteFilename, $fp);
 		}
-		catch (\RuntimeException $e)
+		catch (RuntimeException $e)
 		{
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Test the connection to the FTP server and whether the initial directory is correct. This is done by attempting to
+	 * list the contents of the initial directory. The listing is not parsed (we don't really care!) and we do NOT check
+	 * if we can upload files to that remote folder.
+	 *
+	 * @throws  RuntimeException
+	 */
+	protected function connect()
+	{
+		$ch = $this->getCurlHandle($this->config->directory . '/');
+		curl_setopt($ch, CURLOPT_HEADER, 1);
+		curl_setopt($ch, CURLOPT_NOBODY, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+		curl_exec($ch);
+
+		$errNo = curl_errno($ch);
+		$error = curl_error($ch);
+		curl_close($ch);
+
+		if ($errNo)
+		{
+			throw new RuntimeException("cURL Error $errNo connecting to remote FTP server: $error", 500);
+		}
 	}
 
 	/**
@@ -79,7 +84,7 @@ class ArmFtpcurl
 	 *
 	 * @return  void
 	 *
-	 * @throws  \RuntimeException
+	 * @throws  RuntimeException
 	 */
 	protected function uploadFromHandle($remoteFilename, $fp)
 	{
@@ -108,14 +113,15 @@ class ArmFtpcurl
 
 		if ($error_no)
 		{
-			throw new \RuntimeException($error, $error_no);
+			throw new RuntimeException($error, $error_no);
 		}
 	}
 
 	/**
 	 * Returns a cURL resource handler for the remote FTP server
 	 *
-	 * @param   string  $remoteFile  Optional. The remote file / folder on the FTP server you'll be manipulating with cURL.
+	 * @param   string  $remoteFile  Optional. The remote file / folder on the FTP server you'll be manipulating with
+	 *                               cURL.
 	 *
 	 * @return  resource
 	 */
@@ -155,7 +161,7 @@ class ArmFtpcurl
 				$dirname = '';
 			}
 
-			$dirname = trim($dirname, '/');
+			$dirname  = trim($dirname, '/');
 			$basename = basename($remoteFile);
 
 			if ((substr($remoteFile, -1) == '/') && !empty($basename))
@@ -211,7 +217,7 @@ class ArmFtpcurl
 			curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}
 
-		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS , 1);
+		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
 
 		return $ch;
 	}

@@ -1,13 +1,18 @@
 <?php
-
 /**
  * @package    AkeebaReleaseMaker
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
-class ArmSftp
+
+namespace Akeeba\ReleaseMaker\Transfer;
+
+use RuntimeException;
+
+class SFTP
 {
 	private $ssh = null;
+
 	private $fp = null;
 
 	private $config = null;
@@ -18,21 +23,21 @@ class ArmSftp
 
 		if (!function_exists('ssh2_connect'))
 		{
-			throw new Exception('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
+			throw new RuntimeException('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
 		}
 
 		$this->ssh = ssh2_connect($config->hostname, $config->port);
 
 		if (!$this->ssh)
 		{
-			throw new Exception('Could not connect to SFTP server: invalid hostname or port');
+			throw new RuntimeException('Could not connect to SFTP server: invalid hostname or port');
 		}
 
 		if ($config->pubkeyfile && $config->privkeyfile)
 		{
 			if (!@ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
 			{
-				throw new Exception(sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass)
+				throw new RuntimeException(sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass)
 				);
 			}
 
@@ -41,14 +46,14 @@ class ArmSftp
 		{
 			if (!@ssh2_auth_password($this->ssh, $config->username, $config->password))
 			{
-				throw new Exception(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
+				throw new RuntimeException(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
 			}
 		}
 		else
 		{
 			if (!@ssh2_auth_agent($this->ssh, $config->username))
 			{
-				throw new Exception(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
+				throw new RuntimeException(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
 				);
 			}
 		}
@@ -58,12 +63,12 @@ class ArmSftp
 
 		if ($this->fp === false)
 		{
-			throw new Exception('Could not connect to SFTP server: no SFTP support on this SSH server');
+			throw new RuntimeException('Could not connect to SFTP server: no SFTP support on this SSH server');
 		}
 
 		if (!@ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new Exception('Could not connect to SFTP server: invalid directory (' . $config->directory . ')');
+			throw new RuntimeException('Could not connect to SFTP server: invalid directory (' . $config->directory . ')');
 		}
 	}
 
@@ -78,17 +83,21 @@ class ArmSftp
 		$realname = $realdir . '/' . basename($destPath);
 
 		$fp = @fopen("ssh2.sftp://{$this->fp}$realname", 'w');
+
 		if ($fp === false)
 		{
-			throw new Exception("Could not open remote file $realname for writing");
+			throw new RuntimeException("Could not open remote file $realname for writing");
 		}
+
 		$localfp = @fopen($sourcePath, 'rb');
+
 		if ($localfp === false)
 		{
-			throw new Exception("Could not open local file $sourceName for reading");
+			throw new RuntimeException("Could not open local file $sourcePath for reading");
 		}
 
 		$res = true;
+
 		while (!feof($localfp) && ($res !== false))
 		{
 			$buffer = @fread($localfp, 524288);
@@ -101,23 +110,24 @@ class ArmSftp
 		if (!$res)
 		{
 			// If the file was unreadable, just skip it...
-			if (is_readable($sourceName))
+			if (is_readable($sourcePath))
 			{
-				throw new Exception('Uploading ' . $targetName . ' has failed.');
+				throw new RuntimeException('Uploading ' . $destPath . ' has failed.');
 			}
 			else
 			{
-				throw new Exception('Uploading ' . $targetName . ' has failed because the file is unreadable.');
+				throw new RuntimeException('Uploading ' . $destPath . ' has failed because the file is unreadable.');
 			}
 		}
 	}
 
-	private function chdir($dir)
+	private function chdir(string $dir): bool
 	{
 		$dir = ltrim($dir, '/');
+
 		if (empty($dir))
 		{
-			return;
+			return false;
 		}
 
 		$realdir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
@@ -128,17 +138,15 @@ class ArmSftp
 		if ($result === false)
 		{
 			// The directory doesn't exist, let's try to create it...
-			if ($this->makeDirectory($dir))
-			{
-				;
-			}
+			$this->makeDirectory($dir);
+
 			// After creating it, change into it
 			$result = @ssh2_sftp_stat($this->fp, $realdir);
 		}
 
 		if (!$result)
 		{
-			throw new Exception("Cannot change into $realdir directory");
+			throw new RuntimeException("Cannot change into $realdir directory");
 		}
 
 		return true;
@@ -157,7 +165,7 @@ class ArmSftp
 			{
 				if (@ssh2_sftp_mkdir($this->fp, $check, 0755, true) === false)
 				{
-					throw new Exception('Could not create directory ' . $check);
+					throw new RuntimeException('Could not create directory ' . $check);
 				}
 			}
 			$previousDir = $check;

@@ -12,7 +12,7 @@ Run `composer install` to update the external requirements.
 
 ## Sample release.json file
 
-See [`releasemaker/configuration/config.json`](releasemaker/configuration/config.json).
+See [`releasemaker/configuration/config.json`](src/config.json).
 
 There are four sections: `common`, `pro`, `core`, `pdf`. Common settings apply to everything.
 

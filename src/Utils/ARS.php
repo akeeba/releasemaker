@@ -5,10 +5,14 @@
  * @license    GNU General Public License version 3, or later
  */
 
+namespace Akeeba\ReleaseMaker\Utils;
+
+use RuntimeException;
+
 /**
  * Akeeba Release System API integration for Akeeba Release Maker
  */
-class ArmArs
+class ARS
 {
 	/** @var string The hostname of the site where ARS is installed, without the index.php */
 	private $host = null;
@@ -92,7 +96,7 @@ class ArmArs
 
 		if ($raw === false)
 		{
-			throw new Exception('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
+			throw new RuntimeException('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
 		}
 
 		return $raw;
@@ -104,9 +108,9 @@ class ArmArs
 	 * @param   integer  $category  The category ID inside which the version is expected
 	 * @param   string   $version   The version tag
 	 *
-	 * @return  stdClass  The data object of the release
+	 * @return  object  The data object of the release
 	 */
-	public function getRelease($category, $version)
+	public function getRelease(int $category, string $version): object
 	{
 		$arsData = [
 			'view'            => 'releases',
@@ -181,7 +185,7 @@ class ArmArs
 	 * @param   string   $type       The item type, one of 'file' or 'link'
 	 * @param   string   $fileOrURL  The relative path or absolute URL of the item
 	 *
-	 * @return  stdClass  The data object of the item
+	 * @return  object  The data object of the item
 	 */
 	public function getItem($release, $type, $fileOrURL)
 	{

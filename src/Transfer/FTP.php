@@ -4,7 +4,12 @@
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
-class ArmFtp
+
+namespace Akeeba\ReleaseMaker\Transfer;
+
+use RuntimeException;
+
+class FTP
 {
 	private $fp = null;
 
@@ -25,17 +30,17 @@ class ArmFtp
 
 		if (!$this->fp)
 		{
-			throw new Exception('Could not connect to FTP/FTPS server: invalid hostname or port');
+			throw new RuntimeException('Could not connect to FTP/FTPS server: invalid hostname or port');
 		}
 
 		if (!@ftp_login($this->fp, $config->username, $config->password))
 		{
-			throw new Exception('Could not connect to FTP/FTPS server: invalid username or password');
+			throw new RuntimeException('Could not connect to FTP/FTPS server: invalid username or password');
 		}
 
 		if (!@ftp_chdir($this->fp, $config->directory))
 		{
-			throw new Exception('Could not connect to FTP/FTPS server: invalid directory');
+			throw new RuntimeException('Could not connect to FTP/FTPS server: invalid directory');
 		}
 
 		@ftp_pasv($this->fp, $config->passive);
@@ -67,10 +72,10 @@ class ArmFtp
 			// If the file was unreadable, just skip it...
 			if (is_readable($sourcePath))
 			{
-				throw new Exception('Uploading ' . $destPath . ' has failed.');
+				throw new RuntimeException('Uploading ' . $destPath . ' has failed.');
 			}
 
-			throw new Exception('Uploading ' . $destPath . ' has failed because the file is unreadable.');
+			throw new RuntimeException('Uploading ' . $destPath . ' has failed because the file is unreadable.');
 		}
 		else
 		{
@@ -104,7 +109,7 @@ class ArmFtp
 
 		if (!$result)
 		{
-			throw new Exception("Cannot change into $realDirectory directory");
+			throw new RuntimeException("Cannot change into $realDirectory directory");
 		}
 	}
 
@@ -122,7 +127,7 @@ class ArmFtp
 			{
 				if (@ftp_mkdir($this->fp, $check) === false)
 				{
-					throw new Exception('Could not create directory ' . $check);
+					throw new RuntimeException('Could not create directory ' . $check);
 				}
 
 				@ftp_chmod($this->fp, 0755, $check);

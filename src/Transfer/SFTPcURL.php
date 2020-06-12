@@ -5,7 +5,11 @@
  * @license    GNU General Public License version 3, or later
  */
 
-class ArmSftpcurl
+namespace Akeeba\ReleaseMaker\Transfer;
+
+use RuntimeException;
+
+class SFTPcURL
 {
 	private $config = null;
 
@@ -17,9 +21,40 @@ class ArmSftpcurl
 	}
 
 	/**
+	 * Uploads a local file to the remote storage
+	 *
+	 * @param   string  $localFilename   The full path to the local file
+	 * @param   string  $remoteFilename  The full path to the remote file
+	 *
+	 * @return  boolean  True on success
+	 */
+	public function upload($localFilename, $remoteFilename)
+	{
+		$fp = @fopen($localFilename, 'rb');
+
+		if ($fp === false)
+		{
+			throw new RuntimeException("Unreadable local file $localFilename");
+		}
+
+		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
+		try
+		{
+			$this->uploadFromHandle($remoteFilename, $fp);
+		}
+		catch (RuntimeException $e)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Returns a cURL resource handler for the remote SFTP server
 	 *
-	 * @param   string $remoteFile Optional. The remote file / folder on the SFTP server you'll be manipulating with cURL.
+	 * @param   string  $remoteFile  Optional. The remote file / folder on the SFTP server you'll be manipulating with
+	 *                               cURL.
 	 *
 	 * @return  resource
 	 */
@@ -32,7 +67,7 @@ class ArmSftpcurl
 		if (empty($this->config->pubkeyfile) && !empty($this->config->password))
 		{
 			// Remember, both the username and password have to be URL encoded as they're part of a URI!
-			$password = urlencode($this->config->password);
+			$password       = urlencode($this->config->password);
 			$authentication .= ':' . $password;
 		}
 
@@ -62,7 +97,7 @@ class ArmSftpcurl
 				$dirname = '';
 			}
 
-			$dirname = trim($dirname, '/');
+			$dirname  = trim($dirname, '/');
 			$basename = basename($remoteFile);
 
 			if ((substr($remoteFile, -1) == '/') && !empty($basename))
@@ -84,9 +119,6 @@ class ArmSftpcurl
 			curl_setopt($ch, CURLOPT_SSH_PUBLIC_KEYFILE, $this->config->pubkeyfile);
 
 			// Since SSH certificates are self-signed we cannot have cURL verify their signatures against a CA.
-//			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-//			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-//			curl_setopt($ch, CURLOPT_SSL_VERIFYSTATUS, 0);
 			curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
@@ -124,17 +156,17 @@ class ArmSftpcurl
 			curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}
 
-		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS , 1);
+		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
 
 		return $ch;
 	}
 
 	/**
-	 * Test the connection to the SFTP server and whether the initial directory is correct. This is done by attempting to
-	 * list the contents of the initial directory. The listing is not parsed (we don't really care!) and we do NOT check
-	 * if we can upload files to that remote folder.
+	 * Test the connection to the SFTP server and whether the initial directory is correct. This is done by attempting
+	 * to list the contents of the initial directory. The listing is not parsed (we don't really care!) and we do NOT
+	 * check if we can upload files to that remote folder.
 	 *
-	 * @throws  \RuntimeException
+	 * @throws  RuntimeException
 	 */
 	protected function connect()
 	{
@@ -150,49 +182,19 @@ class ArmSftpcurl
 
 		if ($errNo)
 		{
-			throw new \RuntimeException("cURL Error $errNo connecting to remote SFTP server: $error", 500);
+			throw new RuntimeException("cURL Error $errNo connecting to remote SFTP server: $error", 500);
 		}
-	}
-
-	/**
-	 * Uploads a local file to the remote storage
-	 *
-	 * @param   string  $localFilename   The full path to the local file
-	 * @param   string  $remoteFilename  The full path to the remote file
-	 *
-	 * @return  boolean  True on success
-	 */
-	public function upload($localFilename, $remoteFilename)
-	{
-		$fp = @fopen($localFilename, 'rb');
-
-		if ($fp === false)
-		{
-			throw new \RuntimeException("Unreadable local file $localFilename");
-		}
-
-		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
-		try
-		{
-			$this->uploadFromHandle($remoteFilename, $fp);
-		}
-		catch (\RuntimeException $e)
-		{
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
 	 * Uploads a file using file contents provided through a file handle
 	 *
-	 * @param   string   $remoteFilename
-	 * @param   resource $fp
+	 * @param   string    $remoteFilename
+	 * @param   resource  $fp
 	 *
 	 * @return  void
 	 *
-	 * @throws  \RuntimeException
+	 * @throws  RuntimeException
 	 */
 	protected function uploadFromHandle($remoteFilename, $fp)
 	{
@@ -216,7 +218,7 @@ class ArmSftpcurl
 
 		if ($error_no)
 		{
-			throw new \RuntimeException($error, $error_no);
+			throw new RuntimeException($error, $error_no);
 		}
 	}
 }

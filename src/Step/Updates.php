@@ -1,13 +1,24 @@
 <?php
-
 /**
  * @package    AkeebaReleaseMaker
  * @copyright  Copyright (c)2012-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
-class ArmStepUpdates implements ArmStepInterface
+
+namespace Akeeba\ReleaseMaker\Step;
+
+use Akeeba\Engine\Postproc\Connector\S3v4\Acl;
+use Akeeba\Engine\Postproc\Connector\S3v4\Configuration;
+use Akeeba\Engine\Postproc\Connector\S3v4\Connector;
+use Akeeba\Engine\Postproc\Connector\S3v4\Input;
+use Akeeba\ReleaseMaker\Transfer\FTP;
+use Akeeba\ReleaseMaker\Transfer\FTPcURL;
+use Akeeba\ReleaseMaker\Transfer\SFTP;
+use Akeeba\ReleaseMaker\Transfer\SFTPcURL;
+
+class Updates implements StepInterface
 {
-	public function execute()
+	public function execute(): void
 	{
 		echo "PUSHING UPDATE INFORMATION\n";
 		echo str_repeat('-', 79) . PHP_EOL;
@@ -23,7 +34,7 @@ class ArmStepUpdates implements ArmStepInterface
 
 	private function deployUpdates(string $prefix = 'core'): void
 	{
-		$conf = ArmConfiguration::getInstance();
+		$conf = \Akeeba\ReleaseMaker\Configuration::getInstance();
 
 		$type = $conf->get('common.update.method', 'sftp');
 
@@ -79,7 +90,7 @@ class ArmStepUpdates implements ArmStepInterface
 			return;
 		}
 
-		$tempPath = realpath(__DIR__ . '/../tmp/');
+		$tempPath = realpath(__DIR__ . '/../../tmp/');
 
 		foreach ($formats as $format_raw)
 		{
@@ -107,8 +118,7 @@ class ArmStepUpdates implements ArmStepInterface
 			}
 
 			$temp_filename = $tempPath . '/' . $basename . $extension;
-
-			$updateURL = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
+			$updateURL     = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
 
 			$context = stream_context_create([
 				'http' => [
@@ -138,15 +148,21 @@ class ArmStepUpdates implements ArmStepInterface
 			{
 				case 's3':
 					$this->uploadS3($config, $temp_filename);
+
 					break;
+
 				case 'ftp':
 				case 'ftps':
 					$this->uploadFtp($config, $temp_filename);
+
 					break;
+
 				case 'ftpcurl':
 				case 'ftpscurl':
 					$this->uploadFtpCurl($config, $temp_filename);
+
 					break;
+
 				case 'sftp':
 					if (function_exists('ssh2_connect'))
 					{
@@ -155,12 +171,14 @@ class ArmStepUpdates implements ArmStepInterface
 						break;
 					}
 
-
 					// Fallback to SFTP over cURL for build environment with no SSH2 support
 					$this->uploadSftpCurl($config, $temp_filename);
+
 					break;
+
 				case 'sftpcurl':
 					$this->uploadSftpCurl($config, $temp_filename);
+
 					break;
 			}
 
@@ -168,11 +186,11 @@ class ArmStepUpdates implements ArmStepInterface
 		}
 	}
 
-	private function uploadS3(object $config, string $sourcePath, ?string $destName = null): bool
+	private function uploadS3(object $config, string $sourcePath, ?string $destName = null): void
 	{
 		$config->signature = ($config->signature == 'v4') ? 'v4' : 'v2';
 
-		$configuration = new \Akeeba\Engine\Postproc\Connector\S3v4\Configuration(
+		$configuration = new Configuration(
 			$config->access, $config->secret, $config->signature, $config->region
 		);
 
@@ -185,7 +203,7 @@ class ArmStepUpdates implements ArmStepInterface
 		$configuration->setSSL($config->usessl);
 
 		// Create the S3 client instance
-		$s3Client = new \Akeeba\Engine\Postproc\Connector\S3v4\Connector($configuration);
+		$s3Client = new Connector($configuration);
 
 		if (empty($destName))
 		{
@@ -193,69 +211,68 @@ class ArmStepUpdates implements ArmStepInterface
 		}
 
 		$uri = $config->directory . '/' . $destName;
+		$acl = Acl::ACL_PRIVATE;
 
 		if (!empty($config->cdnhostname))
 		{
-			$acl = \Akeeba\Engine\Postproc\Connector\S3v4\Acl::ACL_PUBLIC_READ;
-		}
-		else
-		{
-			$acl = \Akeeba\Engine\Postproc\Connector\S3v4\Acl::ACL_PRIVATE;
+			$acl = Acl::ACL_PUBLIC_READ;
 		}
 
 		$bucket    = $config->bucket;
 		$inputFile = realpath($sourcePath);
-		$input     = \Akeeba\Engine\Postproc\Connector\S3v4\Input::createFromFile($inputFile);
+		$input     = Input::createFromFile($inputFile);
 
 		$s3Client->putObject($input, $bucket, $uri, $acl, [
 			'StorageClass' => 'STANDARD',
 			'CacheControl' => 'max-age=600',
 		]);
-
-		return true;
 	}
 
-	private function uploadFtp($config, $sourcePath, $destName = null)
+	private function uploadFtp(object $config, string $sourcePath, ?string $destName = null): void
 	{
 		if (empty($destName))
 		{
 			$destName = basename($sourcePath);
 		}
 
-		$ftp = new ArmFtp($config);
+		$ftp = new FTP($config);
+
 		$ftp->upload($sourcePath, $destName);
 	}
 
-	private function uploadFtpCurl($config, $sourcePath, $destName = null)
+	private function uploadFtpCurl(object $config, string $sourcePath, ?string $destName = null): void
 	{
 		if (empty($destName))
 		{
 			$destName = basename($sourcePath);
 		}
 
-		$ftp = new ArmFtpcurl($config);
+		$ftp = new FTPcURL($config);
+
 		$ftp->upload($sourcePath, $destName);
 	}
 
-	private function uploadSftp($config, $sourcePath, $destName = null)
+	private function uploadSftp(object $config, string $sourcePath, ?string $destName = null): void
 	{
 		if (empty($destName))
 		{
 			$destName = basename($sourcePath);
 		}
 
-		$sftp = new ArmSftp($config);
+		$sftp = new SFTP($config);
+
 		$sftp->upload($sourcePath, $destName);
 	}
 
-	private function uploadSftpCurl($config, $sourcePath, $destName = null)
+	private function uploadSftpCurl(object $config, string $sourcePath, ?string $destName = null): void
 	{
 		if (empty($destName))
 		{
 			$destName = basename($sourcePath);
 		}
 
-		$sftp = new ArmSftpcurl($config);
+		$sftp = new SFTPcURL($config);
+
 		$sftp->upload($sourcePath, $destName);
 	}
 }

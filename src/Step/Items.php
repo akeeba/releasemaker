@@ -5,9 +5,15 @@
  * @license    GNU General Public License version 3, or later
  */
 
-class ArmStepItems implements ArmStepInterface
+namespace Akeeba\ReleaseMaker\Step;
+
+use Akeeba\ReleaseMaker\Configuration;
+use Akeeba\ReleaseMaker\Utils\ARS;
+use stdClass;
+
+class Items implements StepInterface
 {
-	/** @var ArmArs The ARS connector class */
+	/** @var ARS The ARS connector class */
 	private $arsConnector = null;
 
 	/** @var stdClass The release we will be saving items to */
@@ -20,40 +26,44 @@ class ArmStepItems implements ArmStepInterface
 		'pdf'     => [],
 	];
 
-	public function execute()
+	public function execute(): void
 	{
 		echo "CREATING OR UPDATING ITEMS\n";
 		echo str_repeat('-', 79) . PHP_EOL;
 
 		echo "\tGetting release information\n";
-		$this->getReleaseId();
+
+		$this->retrieveReleaseInfo();
 		$this->publishInfo['release'] = $this->release;
 
 		echo "\tCreating items for Core files\n";
+
 		$this->deployFiles('core');
 
 		echo "\tCreating items for Pro files\n";
+
 		$this->deployFiles('pro');
 
 		echo "\tCreating items for PDF files\n";
+
 		$this->deployFiles('core', true);
 
 		echo "\tSaving publish information\n";
-		$conf = ArmConfiguration::getInstance();
+
+		$conf = Configuration::getInstance();
 		$conf->set('volatile.publishInfo', $this->publishInfo);
 
 		echo PHP_EOL;
 	}
 
 	/**
-	 * Get the record for the release we will be using to save items to and
-	 * save it in the private $release class property
+	 * Set $this->release to the record for the release we will be using to save items to.
 	 */
-	private function getReleaseId()
+	private function retrieveReleaseInfo(): void
 	{
-		$conf = ArmConfiguration::getInstance();
+		$conf = Configuration::getInstance();
 
-		$this->arsConnector = new ArmArs([
+		$this->arsConnector = new ARS([
 			'host'     => $conf->get('common.arsapiurl', ''),
 			'username' => $conf->get('common.username', ''),
 			'password' => $conf->get('common.password', ''),
@@ -66,33 +76,27 @@ class ArmStepItems implements ArmStepInterface
 		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
 
-	private function deployFiles($prefix = 'core', $isPdf = false)
+	private function deployFiles(string $prefix = 'core', bool $isPdf = false): void
 	{
 		// Get the files
+		$publishArea = $prefix;
+
 		if ($isPdf || ($prefix == 'pdf'))
 		{
 			$publishArea = 'pdf';
 			$prefix      = 'core';
 			$isPdf       = true;
 		}
-		else
-		{
-			$publishArea = $prefix;
-		}
+
 		$this->publishInfo[$publishArea] = [];
 
-		$conf = ArmConfiguration::getInstance();
+		$conf      = Configuration::getInstance();
+		$files     = $conf->get('volatile.files');
+		$coreFiles = $files[$prefix] ?? [];
 
-		$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
-
-		$files = $conf->get('volatile.files');
 		if ($isPdf)
 		{
-			$coreFiles = $files['pdf'];
-		}
-		else
-		{
-			$coreFiles = $files[$prefix];
+			$coreFiles = $files['pdf'] ?? [];
 		}
 
 		if (empty($coreFiles))
@@ -101,8 +105,6 @@ class ArmStepItems implements ArmStepInterface
 
 			return;
 		}
-
-		$path = $conf->get('common.releasedir');
 
 		$access = $conf->get("$prefix.access", "1");
 
@@ -115,6 +117,8 @@ class ArmStepItems implements ArmStepInterface
 
 			switch ($type)
 			{
+				// TODO Add GitHub case
+
 				case 's3':
 					$version     = $conf->get('common.version');
 					$reldir      = $conf->get($prefix . '.s3.reldir');
@@ -134,12 +138,14 @@ class ArmStepItems implements ArmStepInterface
 					}
 
 					break;
+
 				case 'ftp':
 				case 'ftpcurl':
 				case 'ftps':
 				case 'ftpscurl':
 				case 'sftp':
 				case 'sftpcurl':
+				default:
 					$version   = $conf->get('common.version');
 					$fileOrURL = $version . '/' . basename($filename);
 					$type      = 'file';
@@ -159,15 +165,16 @@ class ArmStepItems implements ArmStepInterface
 			$this->publishInfo[$publishArea][] = $item;
 
 			$result = $this->arsConnector->saveItem((array) $item);
+
 			if ($result !== 'false')
 			{
 				echo " -- OK\n";
+
+				return;
 			}
-			else
-			{
-				echo " -- FAILED\n";
-				die("\n");
-			}
+
+			echo " -- FAILED\n";
+			die("\n");
 		}
 	}
 }

@@ -6,6 +6,8 @@
  */
 
 // DEBUG
+use Akeeba\ReleaseMaker\Configuration;
+
 ini_set('display_errors', true);
 error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
 
@@ -25,11 +27,8 @@ See LICENSE.txt for more information.
 
 ENDBANNER;
 
-// Load our class autoloader
-require_once __DIR__ . '/autoloader.php';
-
 // Laod the Composer autoloader
-if (!file_exists(__DIR__ . '/vendor/autoload.php'))
+if (!file_exists(__DIR__ . '/../vendor/autoload.php'))
 {
 	echo <<< OOPS
 
@@ -48,7 +47,7 @@ OOPS;
 
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // Get the path to the configuration file
 $json_file = $argv[count($argv) - 1];
@@ -78,7 +77,7 @@ if (empty($json_file) || !@file_exists($json_file) || !@is_readable($json_file))
 try
 {
 	// Load the configuration
-	$config = ArmConfiguration::getInstance();
+	$config = Configuration::getInstance();
 	$config->loadFile($json_file);
 
 	// Set up the cacert.pem location
@@ -96,7 +95,7 @@ try
 	// Run each and every step
 	foreach ($steps as $step)
 	{
-		$stepClass  = 'ArmStep' . ucfirst($step);
+		$stepClass  = '\\Akeeba\\ReleaseMaker\\Step\\' . ucfirst($step);
 		$stepObject = new $stepClass;
 		$stepObject->execute();
 	}

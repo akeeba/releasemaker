@@ -2,7 +2,7 @@
 .idea
 
 # Composer vendor directory
-/releasemaker/vendor
+/vendor
 
-# Temporary stuff
-/sample
+# Temp folder
+/tmp

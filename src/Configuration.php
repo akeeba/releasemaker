@@ -5,7 +5,11 @@
  * @license    GNU General Public License version 3, or later
  */
 
-class ArmConfiguration
+namespace Akeeba\ReleaseMaker;
+
+use stdClass;
+
+class Configuration
 {
 	/** @var self Singleton instance */
 	static $instance = null;
@@ -36,9 +40,9 @@ class ArmConfiguration
 	 */
 	public static function getInstance(): self
 	{
-		if (!(self::$instance instanceof ArmConfiguration))
+		if (!(self::$instance instanceof Configuration))
 		{
-			self::$instance = new ArmConfiguration();
+			self::$instance = new Configuration();
 		}
 
 		return self::$instance;
@@ -297,7 +301,7 @@ class ArmConfiguration
 	{
 		global $cacertPemFilePointer;
 
-		$cacertPemFile   = __DIR__ . '/../assets/cacert.pem';
+		$cacertPemFile   = __DIR__ . '/cacert.pem';
 		$customCacertPem = $this->get('common.cacert');
 
 		if (empty($customCacertPem))
@@ -322,7 +326,7 @@ class ArmConfiguration
 		$cacertPemFile        = stream_get_meta_data($cacertPemFilePointer)['uri'];
 
 		// Combine the original cacert.pem with the provided certificate / certificate storage
-		fwrite($cacertPemFilePointer, file_get_contents(__DIR__ . '/../assets/cacert.pem') . "\n\n" . $customContents);
+		fwrite($cacertPemFilePointer, file_get_contents(__DIR__ . '/cacert.pem') . "\n\n" . $customContents);
 
 		// DO NOT CALL fclose(). THAT WOULD DELETE OUR TEMPORARY FILE!
 		return $cacertPemFile;
