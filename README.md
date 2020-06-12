@@ -1,8 +1,6 @@
 # Akeeba Release Maker
 
-An automated script to upload and release a new version of software using an Akeeba Release System installation.
-
-Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+Release software and make it available to your Joomla-based site's Akeeba Release System installation.
 
 ## Before you begin
 
@@ -14,7 +12,7 @@ Run `composer install` to update the external requirements.
 
 ## Sample release.json file
 
-See `configuration/config.json`
+See [`releasemaker/configuration/config.json`](releasemaker/configuration/config.json).
 
 There are four sections: `common`, `pro`, `core`, `pdf`. Common settings apply to everything.
 
@@ -37,7 +35,7 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 * *common.repodir* Absolute path to the local directory containing the Git directory of the files you're publishing
 * *common.cacert* Absolute path to a custom CA cache file or PEM-encoded certificate to be considered valid for SSL/TLS connections.
 * *common.steps* Array of the steps to execute during the release. Do not set to use the default steps.
-* *common.update.method* How should I upload the update stream files? "s3", "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl". Use the cURL variants whenever possible (wider compatibility).
+* *common.update.method* How should I upload the update stream files? "none", """s3", "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl". Use the cURL variants whenever possible (wider compatibility).
 * *common.update.ftp.hostname* FTP(S) / SFTP hostname for update streams
 * *common.update.ftp.port* FTP(S) / SFTP port for update streams (default: 21 for FTP(S), 22 for SFTP)
 * *common.update.ftp.username* FTP(S) / SFTP username for update streams
@@ -62,7 +60,7 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 ### Pro and core section
 
 * *pro.pattern* Filesystem match pattern for Pro file to publish, e.g. `com_foobar*.zip`
-* *pro.method* How should I upload Pro files? "s3", "ftp", "ftps" or "sftp"
+* *pro.method* How should I upload Pro files? "s3", "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl", "github"
 * *pro.update.stream* Numeric ID of ARS update stream for the Pro file
 * *pro.update.basename* Base filename for the update stream file, e.g. `something`. Used in conjunction with pro.update.formats to decide the file name of the uploaded update stream files.
 * *pro.update.formats* Which update stream format(s) should I upload for the Pro version? One or more of "ini" (`something.ini` containing Live Update INI data), "inibare" (`something` containing Live Update INI data), "xml" (`something.xml` containing Joomla! XML update stream data)
