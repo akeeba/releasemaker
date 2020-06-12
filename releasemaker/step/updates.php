@@ -21,11 +21,18 @@ class ArmStepUpdates implements ArmStepInterface
 		echo PHP_EOL;
 	}
 
-	private function deployUpdates($prefix = 'core')
+	private function deployUpdates(string $prefix = 'core'): void
 	{
 		$conf = ArmConfiguration::getInstance();
 
 		$type = $conf->get('common.update.method', 'sftp');
+
+		if ($type === 'none')
+		{
+			echo sprintf("\t\tSkipping %s updates (format set to “none”)\n", ucfirst($prefix));
+
+			return;
+		}
 
 		if ($type == 's3')
 		{
@@ -161,7 +168,7 @@ class ArmStepUpdates implements ArmStepInterface
 		}
 	}
 
-	private function uploadS3($config, $sourcePath, $destName = null)
+	private function uploadS3(object $config, string $sourcePath, ?string $destName = null): bool
 	{
 		$config->signature = ($config->signature == 'v4') ? 'v4' : 'v2';
 

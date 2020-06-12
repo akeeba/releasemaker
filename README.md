@@ -35,7 +35,7 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 * *common.repodir* Absolute path to the local directory containing the Git directory of the files you're publishing
 * *common.cacert* Absolute path to a custom CA cache file or PEM-encoded certificate to be considered valid for SSL/TLS connections.
 * *common.steps* Array of the steps to execute during the release. Do not set to use the default steps.
-* *common.update.method* How should I upload the update stream files? "none", """s3", "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl". Use the cURL variants whenever possible (wider compatibility).
+* *common.update.method* How should I upload the update stream files? "none", "s3", "ftp", "ftps", "sftp", "ftpcurl", "ftpscurl", "sftpcurl". Use the cURL variants whenever possible (wider compatibility).
 * *common.update.ftp.hostname* FTP(S) / SFTP hostname for update streams
 * *common.update.ftp.port* FTP(S) / SFTP port for update streams (default: 21 for FTP(S), 22 for SFTP)
 * *common.update.ftp.username* FTP(S) / SFTP username for update streams
