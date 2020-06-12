@@ -104,7 +104,6 @@ class ArmStepItems implements ArmStepInterface
 
 		$path = $conf->get('common.releasedir');
 
-		$groups = $conf->get("$prefix.groups", "");
 		$access = $conf->get("$prefix.access", "1");
 
 		foreach ($coreFiles as $filename)
@@ -154,7 +153,6 @@ class ArmStepItems implements ArmStepInterface
 			$item->type       = $type;
 			$item->filename   = ($type == 'file') ? $fileOrURL : '';
 			$item->url        = ($type == 'link') ? $fileOrURL : '';
-			$item->groups     = $groups;
 			$item->access     = $access;
 			$item->published  = 0;
 

@@ -57,29 +57,28 @@ class ArmStepRelease implements ArmStepInterface
 		$category      = $conf->get('common.category', 0);
 		$version       = $conf->get('common.version', 0);
 		$releaseDir    = $conf->get('common.releasedir', '');
-		$releaseGroups = $conf->get('common.releasegroups', '');
 		$releaseAccess = $conf->get('common.releaseaccess', 1);
 
 		$this->release->description = $this->readFile('DESCRIPTION.html');
 		$this->release->notes       = $this->readFile('RELEASENOTES.html');
 		$this->release->notes       .= $this->readChangelog();
 		$this->release->published   = 0;
+
 		if (is_null($this->release->alias))
 		{
 			$this->release->alias = ArmUtilsString::toSlug(str_replace('.', '-', $version));
 		}
+
 		if (empty($this->release->description))
 		{
 			$this->release->description = "<p>Version $version</p>";
 		}
+
 		if (empty($this->release->notes))
 		{
 			$this->release->notes = "<p>No notes for this release</p>";
 		}
-		if (empty($this->release->groups))
-		{
-			$this->release->groups = $releaseGroups;
-		}
+
 		if (!empty($releaseAccess))
 		{
 			$this->release->access = $releaseAccess;

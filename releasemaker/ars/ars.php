@@ -131,7 +131,6 @@ class ArmArs
 				'maturity'         => 'stable',
 				'description'      => null,
 				'notes'            => null,
-				'groups'           => null,
 				'hits'             => 0,
 				'created'          => 0,
 				'created_by'       => '0000-00-00 00:00:00',
@@ -167,22 +166,6 @@ class ArmArs
 			'task'   => 'save',
 			'format' => 'json',
 		];
-
-		foreach (['groups'] as $key)
-		{
-			if (empty($releaseData[$key]))
-			{
-				$releaseData[$key] = '';
-			}
-
-			if (is_array($releaseData[$key]))
-			{
-				$releaseData[$key] = array_map(function ($x) {
-					return trim($x);
-				}, $releaseData[$key]);
-				$releaseData[$key] = implode(',', $releaseData[$key]);
-			}
-		}
 
 		$arsData = array_merge($releaseData, $arsData);
 
@@ -232,7 +215,6 @@ class ArmArs
 				'md5'              => null,
 				'sha1'             => null,
 				'filesize'         => null,
-				'groups'           => '',
 				'hits'             => 0,
 				'created'          => 0,
 				'created_by'       => '0000-00-00 00:00:00',
@@ -270,22 +252,6 @@ class ArmArs
 			'format'    => 'json',
 			'returnurl' => base64_encode('index.php'),
 		];
-
-		foreach (['groups', 'environments'] as $key)
-		{
-			if (empty($itemData[$key]))
-			{
-				$itemData[$key] = '';
-			}
-
-			if (is_array($itemData[$key]))
-			{
-				$itemData[$key] = array_map(function ($x) {
-					return trim($x);
-				}, $itemData[$key]);
-				$itemData[$key] = implode(',', $itemData[$key]);
-			}
-		}
 
 		$arsData = array_merge($itemData, $arsData);
 
