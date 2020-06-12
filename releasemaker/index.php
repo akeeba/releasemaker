@@ -18,7 +18,7 @@ echo <<< ENDBANNER
 Akeeba Release Maker
 ================================================================================
 An automated script to upload and release a new version of an Akeeba component.
-Copyright (c)2006-$year Nicholas K. Dionysopoulos / Akeeba Ltd
+Copyright (c)2012-$year Nicholas K. Dionysopoulos / Akeeba Ltd
 This is Free Software distributed under the terms of the GNU GPL v3 or later.
 See LICENSE.txt for more information.
 
