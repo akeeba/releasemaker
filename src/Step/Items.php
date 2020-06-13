@@ -8,10 +8,11 @@
 namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration;
+use Akeeba\ReleaseMaker\Exception\FatalProblem;
 use Akeeba\ReleaseMaker\Utils\ARS;
 use stdClass;
 
-class Items implements StepInterface
+class Items extends AbstractStep
 {
 	/** @var ARS The ARS connector class */
 	private $arsConnector = null;
@@ -28,32 +29,34 @@ class Items implements StepInterface
 
 	public function execute(): void
 	{
-		echo "CREATING OR UPDATING ITEMS\n";
-		echo str_repeat('-', 79) . PHP_EOL;
+		$this->io->section('Creating or updating items');
 
-		echo "\tGetting release information\n";
+		$this->io->writeln("<info>Getting release information</info>");
 
 		$this->retrieveReleaseInfo();
+
+		$this->io->text(sprintf("Retrieved information for release %u", $this->release->id));
+
 		$this->publishInfo['release'] = $this->release;
 
-		echo "\tCreating items for Core files\n";
+		$this->io->writeln("<info>Creating items for Core files</info>");
 
 		$this->deployFiles('core');
 
-		echo "\tCreating items for Pro files\n";
+		$this->io->writeln("<info>Creating items for Pro files</info>");
 
 		$this->deployFiles('pro');
 
-		echo "\tCreating items for PDF files\n";
+		$this->io->writeln("<info>Creating items for PDF files</info>");
 
 		$this->deployFiles('core', true);
 
-		echo "\tSaving publish information\n";
+		$this->io->writeln("<info>Saving publish information</info>");
 
 		$conf = Configuration::getInstance();
 		$conf->set('volatile.publishInfo', $this->publishInfo);
 
-		echo PHP_EOL;
+		$this->io->newLine();
 	}
 
 	/**
@@ -101,7 +104,7 @@ class Items implements StepInterface
 
 		if (empty($coreFiles))
 		{
-			echo "\t\tNO FILES\n";
+			$this->io->note(sprintf('No %s files found', $prefix));
 
 			return;
 		}
@@ -111,7 +114,7 @@ class Items implements StepInterface
 		foreach ($coreFiles as $filename)
 		{
 			// Get the filename and path used in ARS
-			echo "\t\tCreating/updating item for $filename ";
+			$this->io->text(sprintf("Creating/updating item for %s", $filename));
 
 			$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
 
@@ -154,6 +157,7 @@ class Items implements StepInterface
 
 			// Fetch a record of the file
 			$item = $this->arsConnector->getItem($this->release->id, $type, $fileOrURL);
+			$oldId = $item->id;
 
 			$item->release_id = $this->release->id;
 			$item->type       = $type;
@@ -168,13 +172,17 @@ class Items implements StepInterface
 
 			if ($result !== 'false')
 			{
-				echo " -- OK\n";
+				$action = $oldId ? "updated" : "created";
+				$itemMeta = json_decode($result);
+
+				$this->io->success(sprintf("Item %u has been $action", $itemMeta->id));
 
 				return;
 			}
 
-			echo " -- FAILED\n";
-			die("\n");
+			$this->io->error("Failed to create item");
+
+			throw new FatalProblem(sprintf("Failed to create item for file %s, uploaded via %s", $filename, $type), 40);
 		}
 	}
 }

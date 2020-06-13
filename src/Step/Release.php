@@ -11,7 +11,7 @@ use Akeeba\ReleaseMaker\Configuration;
 use Akeeba\ReleaseMaker\Utils\ARS;
 use Akeeba\ReleaseMaker\Utils\StringHelper;
 
-class Release implements StepInterface
+class Release extends AbstractStep
 {
 	/** @var  ARS  ARS API connector */
 	private $arsConnector = null;
@@ -20,26 +20,24 @@ class Release implements StepInterface
 
 	public function execute(): void
 	{
-		echo "CREATING OR UPDATING RELEASE\n";
+		$this->io->section("Creating or updating release");
 
-		echo str_repeat('-', 79) . PHP_EOL;
-
-		echo "\tChecking release status\n";
+		$this->io->writeln("<info>Checking release status</info>");
 
 		$this->checkRelease();
 
 		if (is_null($this->release->id))
 		{
-			echo "\tCreating release\n";
+			$this->io->text("Creating release");
 		}
 		else
 		{
-			echo "\tUpdating release\n";
+			$this->io->text(sprintf("Updating release %u", $this->release->id));
 		}
 
 		$this->editRelease();
 
-		echo PHP_EOL;
+		$this->io->newLine();
 	}
 
 	private function checkRelease(): void

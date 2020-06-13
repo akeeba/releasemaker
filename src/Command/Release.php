@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class Release
 {
-	public function __invoke(string $json, bool $debug, bool $silent, OutputInterface $output)
+	public function __invoke(string $json, bool $debug, OutputInterface $output)
 	{
 		// Enable debug mode if necessary
 		if ($debug)
@@ -33,15 +33,10 @@ class Release
 		$io    = new SymfonyStyle($input, $output);
 
 		// Display the banner if necessary
-		if (!$silent)
-		{
-			$this->banner($io);
-		}
-
-		// TODO Create a message listener
+		$this->banner($io);
 
 		// Load the configuration
-		$jsonFile = $this->getJsonPath($json, $silent, $io);
+		$jsonFile = $this->getJsonPath($json, $io);
 		$config   = Configuration::getInstance();
 		$config->loadFile($jsonFile);
 
@@ -79,7 +74,7 @@ class Release
 		{
 			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . ucfirst($step);
 			/** @var StepInterface $stepObject */
-			$stepObject = new $stepClass();
+			$stepObject = new $stepClass($io);
 			$stepObject->execute();
 		}
 	}
@@ -104,10 +99,9 @@ class Release
 	 * Get the absolute path to the JSON file. Errors out if the file doesn't exist.
 	 *
 	 * @param   string        $json
-	 * @param   bool          $silent
 	 * @param   SymfonyStyle  $io
 	 */
-	private function getJsonPath(string $json, bool $silent, SymfonyStyle $io): string
+	private function getJsonPath(string $json, SymfonyStyle $io): string
 	{
 		if (strtolower(substr($json, -5)) != '.json')
 		{
@@ -141,10 +135,7 @@ class Release
 
 		if (empty($json) || !@file_exists($json) || !@is_readable($json))
 		{
-			if (!$silent)
-			{
-				$io->error("Configuration file not found.");
-			}
+			$io->error("Configuration file not found.");
 
 			throw new FatalProblem("Configuration file not found.", 10);
 		}

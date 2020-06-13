@@ -16,20 +16,21 @@ use Akeeba\ReleaseMaker\Transfer\FTPcURL;
 use Akeeba\ReleaseMaker\Transfer\SFTP;
 use Akeeba\ReleaseMaker\Transfer\SFTPcURL;
 
-class Updates implements StepInterface
+class Updates extends AbstractStep
 {
 	public function execute(): void
 	{
-		echo "PUSHING UPDATE INFORMATION\n";
-		echo str_repeat('-', 79) . PHP_EOL;
+		$this->io->section("Pushing update information");
 
-		echo "\tPushing Core updates\n";
+		$this->io->writeln("<info>Pushing Core updates</info>");
+
 		$this->deployUpdates('core');
 
-		echo "\tPushing Pro updates\n";
+		$this->io->writeln("<info>Pushing Pro updates</info>");
+
 		$this->deployUpdates('pro');
 
-		echo PHP_EOL;
+		$this->io->newLine();
 	}
 
 	private function deployUpdates(string $prefix = 'core'): void
@@ -40,7 +41,7 @@ class Updates implements StepInterface
 
 		if ($type === 'none')
 		{
-			echo sprintf("\t\tSkipping %s updates (format set to “none”)\n", ucfirst($prefix));
+			$this->io->note(sprintf("Skipping %s updates (format set to “none”)", ucfirst($prefix)));
 
 			return;
 		}
@@ -87,6 +88,8 @@ class Updates implements StepInterface
 		// No base name means that no updates are set here
 		if (empty($basename))
 		{
+			$this->io->note(sprintf("There are no %s updates", ucfirst($prefix)));
+
 			return;
 		}
 
@@ -94,7 +97,7 @@ class Updates implements StepInterface
 
 		foreach ($formats as $format_raw)
 		{
-			echo "\t\tPushing $format_raw update format over $type\n";
+			$this->io->text(sprintf("Pushing %s update format over %s", $format_raw, $type));
 
 			switch ($format_raw)
 			{

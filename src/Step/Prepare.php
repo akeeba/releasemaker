@@ -12,7 +12,7 @@ use Akeeba\ReleaseMaker\Exception\FatalProblem;
 use DirectoryIterator;
 use ZipArchive;
 
-class Prepare implements StepInterface
+class Prepare extends AbstractStep
 {
 	private $path = null;
 
@@ -20,8 +20,7 @@ class Prepare implements StepInterface
 
 	public function execute(): void
 	{
-		echo "PREPARATION\n";
-		echo str_repeat('-', 79) . PHP_EOL;
+		$this->io->section("Preparation");
 
 		// Get the configuration
 		$conf       = Configuration::getInstance();
@@ -55,12 +54,12 @@ class Prepare implements StepInterface
 		// Add the files to the volatile config key
 		$conf->set('volatile.files', $this->files);
 
-		echo PHP_EOL;
+		$this->io->newLine();
 	}
 
 	private function findFiles(string $type = 'core'): array
 	{
-		echo "\tFinding $type files\n";
+		$this->io->writeln(sprintf("<info>Finding %s files</info>", ucfirst($type)));
 
 		$ret = [];
 
@@ -95,7 +94,12 @@ class Prepare implements StepInterface
 
 			$ret[] = $fn;
 
-			echo "\t\t" . basename($fn) . "\n";
+			$this->io->comment(sprintf("Found %s", basename($fn)));
+		}
+
+		if (empty($ret))
+		{
+			$this->io->caution(sprintf("No %s files were found", ucfirst($type)));
 		}
 
 		return $ret;
@@ -103,7 +107,7 @@ class Prepare implements StepInterface
 
 	private function findPdfFiles(): array
 	{
-		echo "\tFinding pdf files\n";
+		$this->io->writeln("<info>Finding PDF / miscellaneous files</info>");
 
 		$ret = [];
 
@@ -160,30 +164,28 @@ class Prepare implements StepInterface
 
 					// Add the ZIP file to the list
 					$ret[] = basename($zipFileName);
-
-					echo "\t\t" . basename($fn) . "\n";
 				}
 				elseif ($fn == $file . '.pdf.zip')
 				{
 					// Just add compressed PDF file
 					$ret[] = $fn;
-
-					echo "\t\t" . basename($fn) . "\n";
 				}
 				elseif ($fn == $file . '.zip')
 				{
 					// Just add compressed file
 					$ret[] = $fn;
-
-					echo "\t\t" . basename($fn) . "\n";
 				}
 				elseif ($fn == $file)
 				{
 					// Just add bespoke file, including extension
 					$ret[] = $fn;
-
-					echo "\t\t" . basename($fn) . "\n";
 				}
+				else
+				{
+					continue;
+				}
+
+				$this->io->comment(sprintf("Found %s", basename($fn)));
 			}
 		}
 

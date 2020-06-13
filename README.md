@@ -13,7 +13,6 @@ Run `composer install` to update the external requirements.
 Optional parameters:
 
 * `--debug` Enable debug mode (full error reporting)
-* `--silent` Suppress all standard output. Error output will still be generated.
 
 A non-zero exit code indicates a failure. Unhandled exceptions always set the exit code to 255.
 

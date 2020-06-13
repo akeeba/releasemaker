@@ -7,17 +7,15 @@
 
 namespace Akeeba\ReleaseMaker\Step;
 
+
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-/**
- * Interace for step classes
- */
-interface StepInterface
+abstract class AbstractStep implements StepInterface
 {
-	public function __construct(SymfonyStyle $io);
+	protected $io;
 
-	/**
-	 * Execute this step
-	 */
-	public function execute(): void;
+	public function __construct(SymfonyStyle $io)
+	{
+		$this->io     = $io;
+	}
 }

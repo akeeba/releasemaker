@@ -17,12 +17,11 @@ use Akeeba\ReleaseMaker\Transfer\FTPcURL;
 use Akeeba\ReleaseMaker\Transfer\SFTP;
 use Akeeba\ReleaseMaker\Transfer\SFTPcURL;
 
-class Deploy implements StepInterface
+class Deploy extends AbstractStep
 {
 	public function execute(): void
 	{
-		echo "FILE DEPLOYMENT\n";
-		echo str_repeat('-', 79) . PHP_EOL;
+		$this->io->section('File deployment');
 
 		$prefixes = [
 			'core',
@@ -34,15 +33,21 @@ class Deploy implements StepInterface
 			$this->deployFiles($prefix);
 		}
 
-		echo "\tDeploying PDF files\n";
 		$this->deployPdf();
 
-		echo PHP_EOL;
+		$this->io->newLine();
 	}
 
 	private function deployFiles(string $prefix, bool $isPdf = false): void
 	{
-		echo "\tDeploying " . ucfirst($prefix) . " files\n";
+		if (!$isPdf)
+		{
+			$this->io->text(sprintf("<info>Deploying %s files</info>", ucfirst($prefix)));
+		}
+		else
+		{
+			$this->io->text(sprintf("<info>Deploying PDF files</info>", ucfirst($prefix)));
+		}
 
 		$conf = Configuration::getInstance();
 		$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
@@ -99,7 +104,7 @@ class Deploy implements StepInterface
 
 		foreach ($files as $filename)
 		{
-			echo "\t\tUploading $filename\n";
+			$this->io->comment(sprintf("Uploading %s", $filename));
 
 			$sourcePath = $path . DIRECTORY_SEPARATOR . $filename;
 
@@ -186,7 +191,7 @@ class Deploy implements StepInterface
 			$acl = Acl::ACL_PUBLIC_READ;
 		}
 
-		echo "\t\t          with $acl ACL\n";
+		$this->io->comment(sprintf("with %s ACL", $acl));
 
 		$bucket    = $config->bucket;
 		$inputFile = realpath($sourcePath);

@@ -10,7 +10,7 @@ namespace Akeeba\ReleaseMaker\Step;
 use Akeeba\ReleaseMaker\Configuration;
 use Akeeba\ReleaseMaker\Utils\ARS;
 
-class Publish implements StepInterface
+class Publish extends AbstractStep
 {
 	/** @var ARS The ARS connector class */
 	private $arsConnector = null;
@@ -24,30 +24,29 @@ class Publish implements StepInterface
 
 	public function execute(): void
 	{
-		echo "PUBLISHING RELEASE AND ITEMS\n";
-		echo str_repeat('-', 79) . PHP_EOL;
+		$this->io->section('Publishing release and items');
 
-		echo "\tInitialisation\n";
+		$this->io->writeln("<info>Initialisation</info>");
 
 		$this->init();
 
-		echo "\tPublishing Core items\n";
+		$this->io->writeln("<info>Publishing Core items</info>");
 
 		$this->publishItems($this->publishInfo['core']);
 
-		echo "\tPublishing Pro items\n";
+		$this->io->writeln("<info>Publishing Pro items</info>");
 
 		$this->publishItems($this->publishInfo['pro']);
 
-		echo "\tPublishing PDF items\n";
+		$this->io->writeln("<info>Publishing PDF items</info>");
 
 		$this->publishItems($this->publishInfo['pdf']);
 
-		echo "\tPublishing release\n";
+		$this->io->writeln("<info>Publishing Release</info>");
 
 		$this->publishRelease($this->publishInfo['release']);
 
-		echo PHP_EOL;
+		$this->io->newLine();
 	}
 
 	private function init(): void
@@ -75,17 +74,16 @@ class Publish implements StepInterface
 		{
 			$fileOrURL = ($item->type == 'file') ? $item->filename : $item->url;
 
-			echo "\t\t" . basename($fileOrURL);
+			$this->io->writeln(sprintf("Publishing %s", basename($fileOrURL)));
 
 			$item = $this->arsConnector->getItem($this->publishInfo['release']->id, $item->type, $fileOrURL);
 
 			if (!$item->id)
 			{
-				echo " -- NOT EXISTS!\n";
+				$this->io->caution(sprintf("Item for %s does not exist.", basename($fileOrURL)));
 
 				continue;
 			}
-			echo " ({$item->id})";
 
 			$item->environments = '';
 			$item->published    = 1;
@@ -93,12 +91,12 @@ class Publish implements StepInterface
 
 			if ($result !== false)
 			{
-				echo " -- OK!\n";
+				$this->io->success(sprintf("Item %u has been published", $item->id));
 
 				return;
 			}
 
-			echo " -- FAILED\n";
+			$this->io->caution(sprintf("Item %u has NOT been published -- Please check manually", $item->id));
 		}
 	}
 
