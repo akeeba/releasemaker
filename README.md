@@ -12,7 +12,7 @@ Run `composer install` to update the external requirements.
 
 ## Sample release.json file
 
-See [`releasemaker/configuration/config.json`](src/config.json).
+See [`src/config.json`](src/config.json).
 
 There are four sections: `common`, `pro`, `core`, `pdf`. Common settings apply to everything.
 
@@ -30,7 +30,6 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 * *common.token* Your FOF API Token. Used when username and password are left empty.
 * *common.category* integer; the ARS category where things will be published.
 * *common.releasedir* Absolute path to the local directory containing the files to publish.
-* *common.releasegroups* array of integers; numeric IDs of Akeeba Subscriptions levels which will have access to the release. Optional.
 * *common.releaseaccess* integer; numeric ID of Joomla! View Access Level which will have access to the release. Optional.
 * *common.repodir* Absolute path to the local directory containing the Git directory of the files you're publishing
 * *common.cacert* Absolute path to a custom CA cache file or PEM-encoded certificate to be considered valid for SSL/TLS connections.

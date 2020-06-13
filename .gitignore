@@ -6,3 +6,6 @@
 
 # Temp folder
 /tmp
+
+# Manual testing during development
+/demo_source

@@ -4,9 +4,10 @@
 	"common.arsapiurl": "",
 	"common.username": "",
 	"common.password": "",
-	"common.category": "",
+	"common.token": "",
+	"common.category": 0,
 	"common.releasedir": "",
-	"common.releaseaccess": "",
+	"common.releaseaccess": 1,
 	"common.repodir": "",
 	"common.cacert": "",
 	"common.steps": [
@@ -34,7 +35,7 @@
 	"common.update.s3.secret": "",
 	"common.update.s3.bucket": "",
 	"common.update.s3.usessl": true,
-	"common.update.s3.signature": "s3",
+	"common.update.s3.signature": "v4",
 	"common.update.s3.region": "us-east-1",
 	"common.update.s3.directory": "",
 	"common.update.s3.cdnhostname": "",
@@ -48,7 +49,7 @@
 		"xml"
 	],
 	"pro.update.basename": "",
-	"pro.access": "",
+	"pro.access": 2,
 	"pro.ftp.hostname": "",
 	"pro.ftp.port": "",
 	"pro.ftp.username": "",
@@ -62,7 +63,7 @@
 	"pro.s3.secret": "",
 	"pro.s3.bucket": "",
 	"pro.s3.usessl": true,
-	"pro.s3.signature": "s3",
+	"pro.s3.signature": "v4",
 	"pro.s3.region": "us-east-1",
 	"pro.s3.directory": "",
 	"pro.s3.cdnhostname": "",
@@ -77,7 +78,7 @@
 		"xml"
 	],
 	"core.update.basename": "",
-	"core.access": "",
+	"core.access": 1,
 	"core.ftp.hostname": "",
 	"core.ftp.port": "",
 	"core.ftp.username": "",
@@ -91,12 +92,12 @@
 	"core.s3.secret": "",
 	"core.s3.bucket": "",
 	"core.s3.usessl": true,
-	"core.s3.signature": "s3",
+	"core.s3.signature": "v4",
 	"core.s3.region": "us-east-1",
 	"core.s3.directory": "",
 	"core.s3.cdnhostname": "",
 	"core.s3.reldir": "",
 
 	"pdf.where": "core",
-	"pdf.files": ""
+	"pdf.files": []
 }
