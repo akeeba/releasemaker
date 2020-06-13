@@ -22,5 +22,10 @@
 	"suggest": {
 		"ext-ssh2": "*",
 		"ext-ftp": "*"
+	},
+	"autoload" : {
+		"psr-4": {
+			"Akeeba\\ReleaseMaker\\": "src/"
+		}
 	}
 }
