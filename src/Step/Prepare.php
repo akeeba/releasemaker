@@ -8,8 +8,8 @@
 namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration;
+use Akeeba\ReleaseMaker\Exception\FatalProblem;
 use DirectoryIterator;
-use RuntimeException;
 use ZipArchive;
 
 class Prepare implements StepInterface
@@ -29,16 +29,16 @@ class Prepare implements StepInterface
 
 		if (empty($this->path))
 		{
-			throw new RuntimeException('common.releasedir path is empty');
+			throw new FatalProblem('common.releasedir path is empty', 20);
 		}
 		if (!is_dir($this->path))
 		{
-			throw new RuntimeException('common.releasedir path is not a directory');
+			throw new FatalProblem('common.releasedir path is not a directory', 21);
 		}
 
 		if (!is_readable($this->path))
 		{
-			throw new RuntimeException('common.releasedir path is not readable');
+			throw new FatalProblem('common.releasedir path is not readable', 22);
 		}
 
 		// Find the files
@@ -49,7 +49,7 @@ class Prepare implements StepInterface
 		if (empty($this->files['core']) && empty($this->files['pro']))
 		{
 			// No files whatsoever? Oops!
-			throw new RuntimeException('No extension files (Core or Pro) found. Aborting execution.', 500);
+			throw new FatalProblem('No extension files (Core or Pro) found. Aborting execution.', 23);
 		}
 
 		// Add the files to the volatile config key

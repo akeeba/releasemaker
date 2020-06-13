@@ -7,6 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Transfer;
 
+use Akeeba\ReleaseMaker\Exception\FatalProblem;
 use RuntimeException;
 
 class FTPcURL
@@ -34,7 +35,7 @@ class FTPcURL
 
 		if ($fp === false)
 		{
-			throw new RuntimeException("Unreadable local file $localFilename");
+			throw new FatalProblem("Unreadable local file $localFilename", 80);
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
@@ -72,7 +73,7 @@ class FTPcURL
 
 		if ($errNo)
 		{
-			throw new RuntimeException("cURL Error $errNo connecting to remote FTP server: $error", 500);
+			throw new FatalProblem("cURL Error $errNo connecting to remote FTP server: $error", 80);
 		}
 	}
 

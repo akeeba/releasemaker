@@ -100,7 +100,7 @@ class Release implements StepInterface
 	{
 		$conf = Configuration::getInstance();
 		$path = $conf->get('common.repodir', '');
-		$ret = @file_get_contents($path . '/' . $filename);
+		$ret  = @file_get_contents($path . '/' . $filename);
 
 		if ($ret === false)
 		{
@@ -136,8 +136,8 @@ class Release implements StepInterface
 
 	private function changelogAsHtml(): string
 	{
-		$conf = Configuration::getInstance();
-		$filename = rtrim($conf->get('common.repodir', ''), '/') . '/CHANGELOG';
+		$conf      = Configuration::getInstance();
+		$filename  = rtrim($conf->get('common.repodir', ''), '/') . '/CHANGELOG';
 		$changelog = @file($filename);
 
 		if (!is_array($changelog) || (count($changelog) == 0))

@@ -8,7 +8,14 @@ Run `composer install` to update the external requirements.
 
 ## How to use
 
-`php /path/to/releasemaker/index.php /other/path/to/release.json`
+`php /path/to/this/repository/releasemaker.php /your/path/to/release.json`
+
+Optional parameters:
+
+* `--debug` Enable debug mode (full error reporting)
+* `--silent` Suppress all standard output. Error output will still be generated.
+
+A non-zero exit code indicates a failure. Unhandled exceptions always set the exit code to 255.
 
 ## Sample release.json file
 

@@ -7,7 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Utils;
 
-use RuntimeException;
+use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
 /**
  * Akeeba Release System API integration for Akeeba Release Maker
@@ -75,7 +75,7 @@ class ARS
 
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_FAILONERROR, true);
 		curl_setopt($ch, CURLOPT_HEADER, false);
@@ -96,7 +96,7 @@ class ARS
 
 		if ($raw === false)
 		{
-			throw new RuntimeException('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n");
+			throw new FatalProblem('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n", 30);
 		}
 
 		return $raw;

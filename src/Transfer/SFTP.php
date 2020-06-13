@@ -7,7 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Transfer;
 
-use RuntimeException;
+use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
 class SFTP
 {
@@ -23,21 +23,22 @@ class SFTP
 
 		if (!function_exists('ssh2_connect'))
 		{
-			throw new RuntimeException('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
+			throw new FatalProblem('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.', 80);
 		}
 
 		$this->ssh = ssh2_connect($config->hostname, $config->port);
 
 		if (!$this->ssh)
 		{
-			throw new RuntimeException('Could not connect to SFTP server: invalid hostname or port');
+			throw new FatalProblem('Could not connect to SFTP server: invalid hostname or port', 80);
 		}
 
 		if ($config->pubkeyfile && $config->privkeyfile)
 		{
 			if (!@ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
 			{
-				throw new RuntimeException(sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass)
+				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass),
+					80
 				);
 			}
 
@@ -46,14 +47,15 @@ class SFTP
 		{
 			if (!@ssh2_auth_password($this->ssh, $config->username, $config->password))
 			{
-				throw new RuntimeException(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
+				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password), 80);
 			}
 		}
 		else
 		{
 			if (!@ssh2_auth_agent($this->ssh, $config->username))
 			{
-				throw new RuntimeException(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
+				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username),
+					80
 				);
 			}
 		}
@@ -63,12 +65,12 @@ class SFTP
 
 		if ($this->fp === false)
 		{
-			throw new RuntimeException('Could not connect to SFTP server: no SFTP support on this SSH server');
+			throw new FatalProblem('Could not connect to SFTP server: no SFTP support on this SSH server', 80);
 		}
 
 		if (!@ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new RuntimeException('Could not connect to SFTP server: invalid directory (' . $config->directory . ')');
+			throw new FatalProblem('Could not connect to SFTP server: invalid directory (' . $config->directory . ')', 80);
 		}
 	}
 
@@ -86,14 +88,14 @@ class SFTP
 
 		if ($fp === false)
 		{
-			throw new RuntimeException("Could not open remote file $realname for writing");
+			throw new FatalProblem("Could not open remote file $realname for writing", 80);
 		}
 
 		$localfp = @fopen($sourcePath, 'rb');
 
 		if ($localfp === false)
 		{
-			throw new RuntimeException("Could not open local file $sourcePath for reading");
+			throw new FatalProblem("Could not open local file $sourcePath for reading", 80);
 		}
 
 		$res = true;
@@ -112,11 +114,11 @@ class SFTP
 			// If the file was unreadable, just skip it...
 			if (is_readable($sourcePath))
 			{
-				throw new RuntimeException('Uploading ' . $destPath . ' has failed.');
+				throw new FatalProblem('Uploading ' . $destPath . ' has failed.', 80);
 			}
 			else
 			{
-				throw new RuntimeException('Uploading ' . $destPath . ' has failed because the file is unreadable.');
+				throw new FatalProblem('Uploading ' . $destPath . ' has failed because the file is unreadable.', 80);
 			}
 		}
 	}
@@ -146,7 +148,7 @@ class SFTP
 
 		if (!$result)
 		{
-			throw new RuntimeException("Cannot change into $realdir directory");
+			throw new FatalProblem("Cannot change into $realdir directory", 80);
 		}
 
 		return true;
@@ -165,7 +167,7 @@ class SFTP
 			{
 				if (@ssh2_sftp_mkdir($this->fp, $check, 0755, true) === false)
 				{
-					throw new RuntimeException('Could not create directory ' . $check);
+					throw new FatalProblem('Could not create directory ' . $check, 80);
 				}
 			}
 			$previousDir = $check;

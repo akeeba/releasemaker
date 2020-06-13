@@ -7,7 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Transfer;
 
-use RuntimeException;
+use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
 class FTP
 {
@@ -30,17 +30,17 @@ class FTP
 
 		if (!$this->fp)
 		{
-			throw new RuntimeException('Could not connect to FTP/FTPS server: invalid hostname or port');
+			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid hostname or port', 80);
 		}
 
 		if (!@ftp_login($this->fp, $config->username, $config->password))
 		{
-			throw new RuntimeException('Could not connect to FTP/FTPS server: invalid username or password');
+			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid username or password', 80);
 		}
 
 		if (!@ftp_chdir($this->fp, $config->directory))
 		{
-			throw new RuntimeException('Could not connect to FTP/FTPS server: invalid directory');
+			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid directory', 80);
 		}
 
 		@ftp_pasv($this->fp, $config->passive);
@@ -72,10 +72,10 @@ class FTP
 			// If the file was unreadable, just skip it...
 			if (is_readable($sourcePath))
 			{
-				throw new RuntimeException('Uploading ' . $destPath . ' has failed.');
+				throw new FatalProblem('Uploading ' . $destPath . ' has failed.', 80);
 			}
 
-			throw new RuntimeException('Uploading ' . $destPath . ' has failed because the file is unreadable.');
+			throw new FatalProblem('Uploading ' . $destPath . ' has failed because the file is unreadable.', 80);
 		}
 		else
 		{
@@ -109,7 +109,7 @@ class FTP
 
 		if (!$result)
 		{
-			throw new RuntimeException("Cannot change into $realDirectory directory");
+			throw new FatalProblem("Cannot change into $realDirectory directory", 80);
 		}
 	}
 
@@ -127,7 +127,7 @@ class FTP
 			{
 				if (@ftp_mkdir($this->fp, $check) === false)
 				{
-					throw new RuntimeException('Could not create directory ' . $check);
+					throw new FatalProblem('Could not create directory ' . $check, 80);
 				}
 
 				@ftp_chmod($this->fp, 0755, $check);
