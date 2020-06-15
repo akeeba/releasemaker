@@ -12,6 +12,9 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+// Required for the S3 library
+define('AKEEBAENGINE', 1);
+
 if (!is_file(__DIR__ . '/vendor/autoload.php'))
 {
 	echo "\n\n\n";
