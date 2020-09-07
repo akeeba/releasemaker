@@ -56,7 +56,8 @@ class ARS
 
 		$postData = array_merge($postData, $arsData);
 
-		$url = rtrim($this->host, '/') . '/index.php';
+		$url = rtrim($this->host, '/');
+		$url = (substr($url, -4) === '.php') ? $url : ($url . '/index.php');
 
 		$ch = curl_init($url);
 

@@ -121,7 +121,8 @@ class Updates extends AbstractStep
 			}
 
 			$temp_filename = $tempPath . '/' . $basename . $extension;
-			$updateURL     = $url . "/index.php?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
+			$url           = (substr($url, -4) === '.php') ? $url : ($url . '/index.php');
+			$updateURL     = $url . "?option=com_ars&view=update$task&format=$format&id=$stream_id" . $task;
 
 			$context = stream_context_create([
 				'http' => [
