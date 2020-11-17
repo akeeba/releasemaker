@@ -71,6 +71,7 @@ class ARS
 
 			curl_setopt($ch, CURLOPT_HTTPHEADER, [
 				'Authentication: Bearer ' . $this->apiToken,
+				'X-FOF-Token: ' . $this->apiToken,
 			]);
 		}
 
