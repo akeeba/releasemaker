@@ -176,13 +176,12 @@ class Items extends AbstractStep
 				$itemMeta = json_decode($result);
 
 				$this->io->success(sprintf("Item %u has been $action", $itemMeta->id));
-
-				return;
 			}
+            else {
+                $this->io->error("Failed to create item");
 
-			$this->io->error("Failed to create item");
-
-			throw new FatalProblem(sprintf("Failed to create item for file %s, uploaded via %s", $filename, $type), 40);
-		}
+                throw new FatalProblem(sprintf("Failed to create item for file %s, uploaded via %s", $filename, $type), 40);
+            }
+        }
 	}
 }

@@ -92,11 +92,11 @@ class Publish extends AbstractStep
 			if ($result !== false)
 			{
 				$this->io->success(sprintf("Item %u has been published", $item->id));
-
-				return;
 			}
-
-			$this->io->caution(sprintf("Item %u has NOT been published -- Please check manually", $item->id));
+            else
+            {
+    			$this->io->caution(sprintf("Item %u has NOT been published -- Please check manually", $item->id));
+            }
 		}
 	}
 
