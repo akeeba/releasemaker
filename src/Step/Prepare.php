@@ -124,16 +124,9 @@ class Prepare extends AbstractStep
 			$files = [$files];
 		}
 
-		$dir = new DirectoryIterator($this->path);
-
-		foreach ($dir as $fileinfo)
+		foreach ((new DirectoryIterator($this->path)) as $fileinfo)
 		{
-			if ($fileinfo->isDot())
-			{
-				continue;
-			}
-
-			if (!$fileinfo->isFile())
+			if ($fileinfo->isDot() || !$fileinfo->isFile())
 			{
 				continue;
 			}
@@ -142,47 +135,44 @@ class Prepare extends AbstractStep
 
 			foreach ($files as $file)
 			{
-				if ($fn == $file . '.pdf')
+				switch ($fn)
 				{
-					// Get the ZIP filename
-					$zipFileName = $this->path . DIRECTORY_SEPARATOR . $file . '.pdf.zip';
+					// PDF Files: Zip them
+					case $file . '.pdf':
+						// Get the ZIP filename
+						$zipFileName = $this->path . DIRECTORY_SEPARATOR . $file . '.pdf.zip';
 
-					// Remove old ZIP file
-					if (file_exists($zipFileName))
-					{
-						unlink($zipFileName);
-					}
+						// Remove old ZIP file
+						if (file_exists($zipFileName))
+						{
+							unlink($zipFileName);
+						}
 
-					// Compress the PDF
-					$zip = new ZipArchive();
-					$zip->open($zipFileName, ZIPARCHIVE::CREATE);
-					$zip->addFile($this->path . DIRECTORY_SEPARATOR . $fn, basename($fn));
-					$zip->close();
+						// Compress the PDF
+						$zip = new ZipArchive();
+						$zip->open($zipFileName, ZIPARCHIVE::CREATE);
+						$zip->addFile($this->path . DIRECTORY_SEPARATOR . $fn, basename($fn));
+						$zip->close();
 
-					// Remove the PDF file
-					unlink($this->path . DIRECTORY_SEPARATOR . $fn);
+						// Remove the PDF file
+						unlink($this->path . DIRECTORY_SEPARATOR . $fn);
 
-					// Add the ZIP file to the list
-					$ret[] = basename($zipFileName);
-				}
-				elseif ($fn == $file . '.pdf.zip')
-				{
-					// Just add compressed PDF file
-					$ret[] = $fn;
-				}
-				elseif ($fn == $file . '.zip')
-				{
-					// Just add compressed file
-					$ret[] = $fn;
-				}
-				elseif ($fn == $file)
-				{
-					// Just add bespoke file, including extension
-					$ret[] = $fn;
-				}
-				else
-				{
-					continue;
+						// Add the ZIP file to the list
+						$ret[] = basename($zipFileName);
+
+						break;
+
+
+					case $file . '.pdf.zip':
+					case $file . '.zip':
+					case $file:
+						// Just add compressed PDF, compressed or bespoke file
+						$ret[] = $fn;
+
+						break;
+
+					default:
+						continue 2;
 				}
 
 				$this->io->comment(sprintf("Found %s", basename($fn)));

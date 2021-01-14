@@ -50,16 +50,12 @@ class SFTP
 				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password), 80);
 			}
 		}
-		else
+		elseif (!@ssh2_auth_agent($this->ssh, $config->username))
 		{
-			if (!@ssh2_auth_agent($this->ssh, $config->username))
-			{
-				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username),
-					80
-				);
-			}
+			throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username),
+				80
+			);
 		}
-
 
 		$this->fp = ssh2_sftp($this->ssh);
 
@@ -163,12 +159,9 @@ class SFTP
 		foreach ($alldirs as $curdir)
 		{
 			$check = $previousDir . '/' . $curdir;
-			if (!@ssh2_sftp_stat($this->fp, $check))
+			if (!@ssh2_sftp_stat($this->fp, $check) && !@ssh2_sftp_mkdir($this->fp, $check, 0755, true))
 			{
-				if (@ssh2_sftp_mkdir($this->fp, $check, 0755, true) === false)
-				{
-					throw new FatalProblem(sprintf("Could not create directory %s", $check), 80);
-				}
+				throw new FatalProblem(sprintf("Could not create directory %s", $check), 80);
 			}
 			$previousDir = $check;
 		}

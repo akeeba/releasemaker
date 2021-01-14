@@ -47,7 +47,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 	 */
 	$parameters->set(Option::EXCLUDE_RECTORS, [
 		// This Rector seems to die consistently in Rector 0.8
-		//\Rector\CodeQuality\Rector\Isset_\IssetOnPropertyObjectToPropertyExistsRector::class,
+		\Rector\CodeQuality\Rector\Isset_\IssetOnPropertyObjectToPropertyExistsRector::class,
 
 		// WATCH OUT! This does crazy things, like convert $ret['ErrorException'] to $ret[\ErrorException::class] which
 		// is unfortunate and messes everything up.
@@ -70,8 +70,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 //	    SetList::PHP_72,
 //	    SetList::PSR_4,
 //	    SetList::PRIVATIZATION,
-		SetList::CODING_STYLE,
-//	    SetList::CODE_QUALITY,
+//		SetList::CODING_STYLE,
+	    SetList::CODE_QUALITY,
 //	    SetList::CODE_QUALITY_STRICT,
 //	    SetList::DEAD_CLASSES,
 //	    SetList::GMAGICK_TO_IMAGICK,

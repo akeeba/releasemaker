@@ -174,7 +174,7 @@ class ARS
 	 *
 	 * @return  bool  As returned by ARS' JSON API
 	 */
-	public function saveItem(array $itemData)
+	public function saveItem(array $itemData): bool
 	{
 		$arsData = [
 			'view'      => 'items',
@@ -185,7 +185,7 @@ class ARS
 
 		$arsData = array_merge($itemData, $arsData);
 
-		return $this->doApiCall($arsData);
+		return (bool) $this->doApiCall($arsData);
 	}
 
 	/**

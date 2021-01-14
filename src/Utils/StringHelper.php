@@ -38,7 +38,7 @@ class StringHelper
 
 		return preg_replace(
 			['/&szlig;/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'],
-			['ss', "$1", "$1" . 'e', "$1"],
+			['ss', '$1', '$1e', '$1'],
 			$string);
 	}
 }

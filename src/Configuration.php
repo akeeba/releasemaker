@@ -61,10 +61,13 @@ class Configuration
 		$result = $default;
 
 		// Explode the registry path into an array
-		if ($nodes = explode('.', $path))
+		$nodes = explode('.', $path);
+
+		if ($nodes !== [])
 		{
 			// Get the namespace
 			$count = count($nodes);
+
 			if ($count < 2)
 			{
 				$namespace = $this->defaultNameSpace;
@@ -149,12 +152,9 @@ class Configuration
 		}
 
 		// Set the new values
-		if (is_string($value))
+		if (is_string($value) && substr($value, 0, 10) == '###json###')
 		{
-			if (substr($value, 0, 10) == '###json###')
-			{
-				$value = json_decode(substr($value, 10));
-			}
+			$value = json_decode(substr($value, 10));
 		}
 
 		// Unset keys when they are being set to null

@@ -98,7 +98,7 @@ class FTP
 
 		$result = @ftp_chdir($this->fp, $realDirectory);
 
-		if ($result === false)
+		if (!$result)
 		{
 			// The directory doesn't exist, let's try to create it...
 			$this->makeDirectory($dir);

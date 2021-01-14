@@ -89,7 +89,7 @@ class Publish extends AbstractStep
 			$item->published    = 1;
 			$result             = $this->arsConnector->saveItem((array) $item);
 
-			if ($result !== false)
+			if ($result)
 			{
 				$this->io->success(sprintf("Item %u has been published", $item->id));
 

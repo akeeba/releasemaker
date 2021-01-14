@@ -181,7 +181,7 @@ class SFTPcURL
 		$error   = curl_error($ch);
 		curl_close($ch);
 
-		if ($errNo)
+		if ($errNo !== 0)
 		{
 			throw new FatalProblem(sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error), 80);
 		}
@@ -217,7 +217,7 @@ class SFTPcURL
 		curl_close($ch);
 		fclose($fp);
 
-		if ($error_no)
+		if ($error_no !== 0)
 		{
 			throw new RuntimeException($error, $error_no);
 		}
