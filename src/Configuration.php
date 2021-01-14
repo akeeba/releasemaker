@@ -12,7 +12,7 @@ use stdClass;
 class Configuration
 {
 	/** @var self Singleton instance */
-	static $instance = null;
+	static $instance;
 
 	/** @var string Default NameSpace */
 	private $defaultNameSpace = 'arm';
@@ -221,7 +221,7 @@ class Configuration
 
 		foreach ($array as $key => $value)
 		{
-			if (is_null($this->get($key, null)))
+			if (is_null($this->get($key)))
 			{
 				$this->set($key, $value);
 			}
@@ -280,13 +280,10 @@ class Configuration
 			$ns   = $this->registry[$namespace]['data'];
 			$temp = $this->dumpObject($ns);
 
-			if (!empty($temp))
-			{
-				foreach ($temp as $k => $v)
+			foreach ($temp as $k => $v)
 				{
 					$data[$namespace . '.' . $k] = $v;
 				}
-			}
 		}
 
 		return json_encode($data, JSON_PRETTY_PRINT);
@@ -337,14 +334,14 @@ class Configuration
 	 */
 	private function postProcess(): void
 	{
-		$v = $this->get('pro.pattern', null);
+		$v = $this->get('pro.pattern');
 
 		if (empty($v))
 		{
 			$this->set('pro.pattern', 'pkg_*pro.zip');
 		}
 
-		$pro_method = $this->get('pro.method', null);
+		$pro_method = $this->get('pro.method');
 
 		if (empty($pro_method))
 		{
@@ -353,21 +350,21 @@ class Configuration
 
 		if ($pro_method == 's3')
 		{
-			$v = $this->get('pro.s3.access', null);
+			$v = $this->get('pro.s3.access');
 
 			if (empty($v))
 			{
 				$this->set('pro.s3.access', $this->get('common.update.s3.access'));
 			}
 
-			$v = $this->get('pro.s3.secret', null);
+			$v = $this->get('pro.s3.secret');
 
 			if (empty($v))
 			{
 				$this->set('pro.s3.secret', $this->get('common.update.s3.secret'));
 			}
 
-			$v = $this->get('pro.s3.reldir', null);
+			$v = $this->get('pro.s3.reldir');
 
 			if (empty($v))
 			{
@@ -375,14 +372,14 @@ class Configuration
 			}
 		}
 
-		$v = $this->get('core.pattern', null);
+		$v = $this->get('core.pattern');
 
 		if (empty($v))
 		{
 			$this->set('core.pattern', 'pkg_*core.zip');
 		}
 
-		$core_method = $this->get('core.method', null);
+		$core_method = $this->get('core.method');
 
 		if (empty($core_method))
 		{
@@ -391,21 +388,21 @@ class Configuration
 
 		if ($core_method == 's3')
 		{
-			$v = $this->get('core.s3.access', null);
+			$v = $this->get('core.s3.access');
 
 			if (empty($v))
 			{
 				$this->set('core.s3.access', $this->get('common.update.s3.access'));
 			}
 
-			$v = $this->get('core.s3.secret', null);
+			$v = $this->get('core.s3.secret');
 
 			if (empty($v))
 			{
 				$this->set('core.s3.secret', $this->get('common.update.s3.secret'));
 			}
 
-			$v = $this->get('core.s3.reldir', null);
+			$v = $this->get('core.s3.reldir');
 
 			if (empty($v))
 			{
@@ -413,7 +410,7 @@ class Configuration
 			}
 		}
 
-		$v = $this->get('pdf.where', null);
+		$v = $this->get('pdf.where');
 
 		if (empty($v))
 		{

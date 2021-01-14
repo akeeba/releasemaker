@@ -13,7 +13,7 @@ use Akeeba\ReleaseMaker\Utils\ARS;
 class Publish extends AbstractStep
 {
 	/** @var ARS The ARS connector class */
-	private $arsConnector = null;
+	private $arsConnector;
 
 	private $publishInfo = [
 		'release' => null,

@@ -24,7 +24,7 @@ class Updates extends AbstractStep
 
 		$this->io->writeln("<info>Pushing Core updates</info>");
 
-		$this->deployUpdates('core');
+		$this->deployUpdates();
 
 		$this->io->writeln("<info>Pushing Pro updates</info>");
 

@@ -11,9 +11,9 @@ use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
 class FTP
 {
-	private $fp = null;
+	private $fp;
 
-	private $config = null;
+	private $config;
 
 	public function __construct($config)
 	{

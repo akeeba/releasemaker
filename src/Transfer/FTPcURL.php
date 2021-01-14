@@ -12,7 +12,7 @@ use RuntimeException;
 
 class FTPcURL
 {
-	private $config = null;
+	private $config;
 
 	public function __construct($config)
 	{

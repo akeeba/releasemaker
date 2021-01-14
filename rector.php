@@ -59,12 +59,11 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 	// Define what rule sets will be applied
     $parameters->set(Option::SETS, [
         SetList::EARLY_RETURN,
+	    SetList::DEAD_CODE,
 //	    SetList::CODE_QUALITY,
 //	    SetList::CODE_QUALITY_STRICT,
 //	    SetList::CODING_STYLE,
 //	    SetList::DEAD_CLASSES,
-//	    SetList::DEAD_CODE,
-//	    SetList::DEAD_DOC_BLOCK,
 //	    SetList::GMAGICK_TO_IMAGICK,
 //	    SetList::NAMING,
 //	    SetList::ORDER,
@@ -80,6 +79,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 //	    SetList::PRIVATIZATION,
 //	    SetList::PSR_4,
 //	    SetList::UNWRAP_COMPAT,
+
+	    // Only valid in Rector 0.9
+	    // SetList::DEAD_DOC_BLOCK,
     ]);
 
     // get services (needed for register a single rule)

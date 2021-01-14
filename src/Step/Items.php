@@ -15,10 +15,10 @@ use stdClass;
 class Items extends AbstractStep
 {
 	/** @var ARS The ARS connector class */
-	private $arsConnector = null;
+	private $arsConnector;
 
 	/** @var stdClass The release we will be saving items to */
-	private $release = null;
+	private $release;
 
 	private $publishInfo = [
 		'release' => null,
@@ -41,7 +41,7 @@ class Items extends AbstractStep
 
 		$this->io->writeln("<info>Creating items for Core files</info>");
 
-		$this->deployFiles('core');
+		$this->deployFiles();
 
 		$this->io->writeln("<info>Creating items for Pro files</info>");
 

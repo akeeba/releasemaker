@@ -15,16 +15,16 @@ use Akeeba\ReleaseMaker\Exception\FatalProblem;
 class ARS
 {
 	/** @var string The hostname of the site where ARS is installed, without the index.php */
-	private $host = null;
+	private $host;
 
 	/** @var string The username we're going to use to connect to the host */
-	private $username = null;
+	private $username;
 
 	/** @var string The password we're going to use to connect to the host */
-	private $password = null;
+	private $password;
 
 	/** @var string The API Token we're going to use to connect to the host (if username and password are empty) */
-	private $apiToken = null;
+	private $apiToken;
 
 	/**
 	 * Public class constructor
@@ -129,7 +129,7 @@ class ARS
 
 		if (empty($response))
 		{
-			$response = (object) [
+			return (object) [
 				'id'               => null,
 				'category_id'      => $category,
 				'version'          => $version,
@@ -150,12 +150,8 @@ class ARS
 				'language'         => '*',
 			];
 		}
-		else
-		{
-			$response = array_shift($response);
-		}
 
-		return $response;
+		return array_shift($response);
 	}
 
 	/**
@@ -175,9 +171,7 @@ class ARS
 
 		$arsData = array_merge($releaseData, $arsData);
 
-		$response = $this->doApiCall($arsData);
-
-		return $response;
+		return $this->doApiCall($arsData);
 	}
 
 	/**
@@ -203,44 +197,39 @@ class ARS
 		];
 
 		$response = $this->doApiCall($arsData);
-
 		$response = json_decode($response);
 
-		if (empty($response))
+		if (!empty($response))
 		{
-			$response = (object) [
-				'id'               => null,
-				'release_id'       => $release,
-				'title'            => null,
-				'alias'            => null,
-				'description'      => null,
-				'type'             => $type,
-				'filename'         => ($type == 'file') ? $fileOrURL : null,
-				'url'              => ($type == 'link') ? $fileOrURL : null,
-				'updatestream'     => null,
-				'md5'              => null,
-				'sha1'             => null,
-				'filesize'         => null,
-				'hits'             => 0,
-				'created'          => 0,
-				'created_by'       => '0000-00-00 00:00:00',
-				'modified'         => 0,
-				'modified_by'      => '0000-00-00 00:00:00',
-				'checked_out'      => 0,
-				'checked_out_time' => '0000-00-00 00:00:00',
-				'ordering'         => 0,
-				'access'           => 1,
-				'published'        => 0,
-				'language'         => '*',
-				'environments'     => null,
-			];
-		}
-		else
-		{
-			$response = array_shift($response);
+			return array_shift($response);
 		}
 
-		return $response;
+		return (object) [
+			'id'               => null,
+			'release_id'       => $release,
+			'title'            => null,
+			'alias'            => null,
+			'description'      => null,
+			'type'             => $type,
+			'filename'         => ($type == 'file') ? $fileOrURL : null,
+			'url'              => ($type == 'link') ? $fileOrURL : null,
+			'updatestream'     => null,
+			'md5'              => null,
+			'sha1'             => null,
+			'filesize'         => null,
+			'hits'             => 0,
+			'created'          => 0,
+			'created_by'       => '0000-00-00 00:00:00',
+			'modified'         => 0,
+			'modified_by'      => '0000-00-00 00:00:00',
+			'checked_out'      => 0,
+			'checked_out_time' => '0000-00-00 00:00:00',
+			'ordering'         => 0,
+			'access'           => 1,
+			'published'        => 0,
+			'language'         => '*',
+			'environments'     => null,
+		];
 	}
 
 	/**
@@ -261,9 +250,7 @@ class ARS
 
 		$arsData = array_merge($itemData, $arsData);
 
-		$response = $this->doApiCall($arsData);
-
-		return $response;
+		return $this->doApiCall($arsData);
 	}
 
 }

@@ -14,7 +14,7 @@ use ZipArchive;
 
 class Prepare extends AbstractStep
 {
-	private $path = null;
+	private $path;
 
 	private $files = [];
 
@@ -41,7 +41,7 @@ class Prepare extends AbstractStep
 		}
 
 		// Find the files
-		$this->files['core'] = $this->findFiles('core');
+		$this->files['core'] = $this->findFiles();
 		$this->files['pro']  = $this->findFiles('pro');
 		$this->files['pdf']  = $this->findPdfFiles();
 

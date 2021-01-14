@@ -14,9 +14,9 @@ use Akeeba\ReleaseMaker\Utils\StringHelper;
 class Release extends AbstractStep
 {
 	/** @var  ARS  ARS API connector */
-	private $arsConnector = null;
+	private $arsConnector;
 
-	private $release = null;
+	private $release;
 
 	public function execute(): void
 	{

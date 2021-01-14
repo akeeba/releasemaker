@@ -12,7 +12,7 @@ use RuntimeException;
 
 class SFTPcURL
 {
-	private $config = null;
+	private $config;
 
 	public function __construct($config)
 	{
