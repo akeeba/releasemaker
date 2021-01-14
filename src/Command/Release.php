@@ -26,6 +26,7 @@ class Release
 		{
 			\ini_set('display_errors', true);
 			\error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
+			define('ARM_DEBUG', 1);
 		}
 
 		// Create a Symfony styled output handler

@@ -31,6 +31,7 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 * *common.version* Version number, e.g. 1.2.3
 * *common.date* Release date, e.g. 2015-04-03
 * *common.arsapiurl* URL to the site with Akeeba Release System installed, e.g. http://www.example.com (do NOT include index.php?option=com_ars etc)
+* *common.ars.communication* How you want to access the ARS API. `curl` to use cURL (legacy, doesn't return verbose error information if the API call fails), `php` to use PHP's native HTTP stream wrapper (preferred, default).
 * *common.username* Your login username, needs to have core.manage privilege for ARS or core.admin (Super User) privilege
 * *common.password* Your login password
 * *common.token* Your FOF API Token. Used when username and password are left empty.

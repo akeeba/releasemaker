@@ -2,6 +2,7 @@
 	"common.version": "",
 	"common.date": "",
 	"common.arsapiurl": "",
+	"common.ars.communication": "php",
 	"common.username": "",
 	"common.password": "",
 	"common.token": "",

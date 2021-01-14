@@ -7,6 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Utils;
 
+use Akeeba\ReleaseMaker\Configuration;
 use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
 /**
@@ -14,16 +15,32 @@ use Akeeba\ReleaseMaker\Exception\FatalProblem;
  */
 class ARS
 {
-	/** @var string The hostname of the site where ARS is installed, without the index.php */
+	/**
+	 * The hostname of the site where ARS is installed, without the index.php
+	 *
+	 * @var string
+	 */
 	private $host;
 
-	/** @var string The username we're going to use to connect to the host */
+	/**
+	 * The username we're going to use to connect to the host
+	 *
+	 * @var string
+	 */
 	private $username;
 
-	/** @var string The password we're going to use to connect to the host */
+	/**
+	 * The password we're going to use to connect to the host
+	 *
+	 * @var string
+	 */
 	private $password;
 
-	/** @var string The API Token we're going to use to connect to the host (if username and password are empty) */
+	/**
+	 * The API Token we're going to use to connect to the host (if username and password are empty)
+	 *
+	 * @var string
+	 */
 	private $apiToken;
 
 	/**
@@ -50,7 +67,7 @@ class ARS
 	public function getRelease(int $category, string $version): object
 	{
 		$arsData = [
-			'view'            => 'releases',
+			'view'            => 'Releases',
 			'task'            => 'browse',
 			'category'        => $category,
 			'version[method]' => 'exact',
@@ -99,7 +116,7 @@ class ARS
 	public function saveRelease(array $releaseData)
 	{
 		$arsData = [
-			'view'   => 'releases',
+			'view'   => 'Releases',
 			'task'   => 'save',
 			'format' => 'json',
 		];
@@ -123,7 +140,7 @@ class ARS
 		$key = ($type == 'file') ? 'filename' : 'url';
 
 		$arsData = [
-			'view'    => 'items',
+			'view'    => 'Items',
 			'task'    => 'browse',
 			'release' => $release,
 			'type'    => $type,
@@ -172,12 +189,12 @@ class ARS
 	 *
 	 * @param   array  $itemData  The item data to save.
 	 *
-	 * @return  bool  As returned by ARS' JSON API
+	 * @return  string  As returned by ARS' JSON API
 	 */
-	public function saveItem(array $itemData): bool
+	public function saveItem(array $itemData): string
 	{
 		$arsData = [
-			'view'      => 'items',
+			'view'      => 'Items',
 			'task'      => 'save',
 			'format'    => 'json',
 			'returnurl' => \base64_encode('index.php'),
@@ -185,7 +202,7 @@ class ARS
 
 		$arsData = \array_merge($itemData, $arsData);
 
-		return (bool) $this->doApiCall($arsData);
+		return $this->doApiCall($arsData);
 	}
 
 	/**
@@ -208,6 +225,30 @@ class ARS
 		$url = \rtrim($this->host, '/');
 		$url = (\substr($url, -4) === '.php') ? $url : ($url . '/index.php');
 
+		$conf                = Configuration::getInstance();
+		$communicationMethod = $conf->get('common.ars.communication', 'php');
+
+		switch ($communicationMethod)
+		{
+			case 'curl':
+				return $this->postWithCurl($url, $postData) ?? false;
+
+			case 'php':
+			default:
+				return $this->postWithPhp($url, $postData) ?? false;
+		}
+	}
+
+	/**
+	 * Do a POST request with cURL.
+	 *
+	 * @param   string  $url       The URL to POST data to
+	 * @param   array   $postData  The POST body data
+	 *
+	 * @return  null|string
+	 */
+	private function postWithCurl(string $url, array $postData): ?string
+	{
 		$ch = \curl_init($url);
 
 		// Do I need to use FOF API Token Authentication instead?
@@ -224,8 +265,8 @@ class ARS
 			]);
 		}
 
-		\curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		\curl_setopt($ch, CURLOPT_POST, 1);
+		\curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		\curl_setopt($ch, CURLOPT_POST, true);
 		\curl_setopt($ch, CURLOPT_POSTFIELDS, \http_build_query($postData));
 		\curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		\curl_setopt($ch, CURLOPT_FAILONERROR, true);
@@ -236,8 +277,14 @@ class ARS
 		\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 		\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		\curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-		\curl_setopt($ch, CURLOPT_TIMEOUT, 180);
-		\curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
+		\curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		\curl_setopt($ch, CURLOPT_USERAGENT, 'AkeebaReleaseMaker/1.0');
+
+		// In Debug mode I have cURL output everything that's going on to STDERR
+		if (defined('ARM_DEBUG'))
+		{
+			\curl_setopt($ch, CURLOPT_VERBOSE, true);
+		}
 
 		$raw = \curl_exec($ch);
 
@@ -253,4 +300,151 @@ class ARS
 		return $raw;
 	}
 
+	/**
+	 * Do a POST with PHP's native HTTP stream wrappers.
+	 *
+	 * @param   string  $url       The URL to POST data to
+	 * @param   array   $postData  The POST body data
+	 *
+	 * @return  null|string
+	 */
+	private function postWithPhp(string $url, array $postData): ?string
+	{
+		$headers = [
+			'Content-type' => 'application/x-www-form-urlencoded',
+		];
+
+		// Do I need to use FOF API Token Authentication instead?
+		if (!empty($this->apiToken))
+		{
+			// Remove the legacy FOF Transparent Authentication header
+			unset ($postData['_fofauthentication']);
+
+			$headers = array_merge($headers, [
+				'Authentication' => sprintf("Bearer %s", $this->apiToken),
+				'X-FOF-Token'    => $this->apiToken,
+			]);
+		}
+
+		$streamOptions = [
+			'http' => [
+				'header'           => \implode("\r\n", \array_map(function ($key, $value) {
+					return \sprintf("%s: %s", $key, $value);
+				}, \array_keys($headers), $headers)),
+				'method'           => 'POST',
+				'user_agent'       => 'AkeebaReleaseMaker/2.0',
+				'content'          => \http_build_query($postData),
+				'follow_location'  => 1,
+				'protocol_version' => '1.1',
+				'timeout'          => 30.0,
+				'ignore_errors'    => true,
+			],
+			'ssl'  => [
+				'verify_peer'       => true,
+				'allow_self_signed' => false,
+				'cafile'            => AKEEBA_CACERT_PEM,
+				'verify_depth'      => 8,
+			],
+		];
+
+		$context  = stream_context_create($streamOptions);
+		$result   = @file_get_contents($url, false, $context);
+		$headers  = $this->getParsedHeaders($http_response_header);
+		$httpCode = $headers['HTTP_RESPONSE_CODE'] ?? 200;
+
+		if ($httpCode === 403)
+		{
+			throw new FatalProblem(\sprintf("access denied; please check common.username, common.password, common.token, common.arsapiurl and your network status.\nHTTP error %s\n", $httpCode), 30);
+		}
+
+		if ($httpCode === 500 && !empty($result))
+		{
+			$errorMessage = $this->getParsedARSError($result);
+		}
+
+		if (empty($errorMessage) && ($result === false) && ($httpCode === 200))
+		{
+			$errorMessage = 'The request probably timed out (we got no result)';
+		}
+
+		if (empty($errorMessage) && ($result === false))
+		{
+			$errorMessage = $errorMessage ?? sprintf('HTTP status %d', $httpCode);
+		}
+
+		if (!empty($errorMessage))
+		{
+			throw new FatalProblem(\sprintf('ARS API communications error: %s', $errorMessage));
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Parse PHP's $http_response_header superglobal data.
+	 *
+	 * IMPORTANT! $http_response_header is only available right after the file_get_contents() call and only in the
+	 * code block context that initiated the stream wrapper access. This means we can't use it directly in this method.
+	 * We need to be passed its data as a parameter. DO NOT ATTEMPT TO REFACTOR THIS!
+	 *
+	 * @param   array  $httpResponseHeader  The data from PHP's $http_response_header
+	 *
+	 * @return  array  The parsed headers.
+	 */
+	private function getParsedHeaders(array $httpResponseHeader): array
+	{
+		$headers = [];
+
+		foreach ($httpResponseHeader as $k => $v)
+		{
+			$parts = explode(':', $v, 2);
+
+			if (isset($parts[1]))
+			{
+				$headers[trim($parts[0])] = trim($parts[1]);
+
+				continue;
+			}
+
+			$headers[] = $v;
+
+			if (preg_match("#HTTP/[0-9.]+\s+([0-9]+)#", $v, $out))
+			{
+				$headers['HTTP_RESPONSE_CODE'] = (int) ($out[1]);
+			}
+		}
+
+		return $headers;
+	}
+
+	/**
+	 * Extracts the ARS error messages from the ARS error JSON response
+	 *
+	 * @param   string  $rawResponse  The raw, JSON-encoded ARS error response
+	 *
+	 * @return  string|null The human readable error. NULL if no message is detected.
+	 */
+	private function getParsedARSError(string $rawResponse): ?string
+	{
+		$parsedResponse = @\json_decode($rawResponse, true);
+
+		if (!\is_array($parsedResponse) || (\count($parsedResponse) === 0))
+		{
+			return null;
+		}
+
+		if ($parsedResponse['success'] ?? true)
+		{
+			return null;
+		}
+
+		$message = $parsedResponse['data'] ?? $parsedResponse['message'] ?? \implode("\n", $parsedResponse['messages'] ?? []);
+
+		if (empty(\trim($message)))
+		{
+			return null;
+		}
+
+		return $message;
+	}
 }
