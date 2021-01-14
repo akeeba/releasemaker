@@ -44,7 +44,7 @@ class ARS
 	 *
 	 * @param   array  $postData  POST variables to send to ARS
 	 */
-	public function doApiCall(array $postData = [])
+	private function doApiCall(array $postData = [])
 	{
 		$arsData = [
 			'option'             => 'com_ars',

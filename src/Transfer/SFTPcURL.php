@@ -59,7 +59,7 @@ class SFTPcURL
 	 *
 	 * @return  resource
 	 */
-	protected function getCurlHandle($remoteFile = '')
+	private function getCurlHandle($remoteFile = '')
 	{
 		// Remember, the username has to be URL encoded as it's part of a URI!
 		$authentication = urlencode($this->config->username);
@@ -169,7 +169,7 @@ class SFTPcURL
 	 *
 	 * @throws  RuntimeException
 	 */
-	protected function connect()
+	private function connect()
 	{
 		$ch = $this->getCurlHandle($this->config->directory . '/');
 		curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -197,7 +197,7 @@ class SFTPcURL
 	 *
 	 * @throws  RuntimeException
 	 */
-	protected function uploadFromHandle($remoteFilename, $fp)
+	private function uploadFromHandle($remoteFilename, $fp)
 	{
 		// We need the file size. We can do that by getting the file position at EOF
 		fseek($fp, 0, SEEK_END);

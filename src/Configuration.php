@@ -53,7 +53,7 @@ class Configuration
 	 *
 	 * @param   string  $namespace  Name of the namespace to create
 	 */
-	public function makeNameSpace(string $namespace): void
+	private function makeNameSpace(string $namespace): void
 	{
 		$this->registry[$namespace] = ['data' => new stdClass()];
 	}
@@ -63,7 +63,7 @@ class Configuration
 	 *
 	 * @return    string[]    List of namespaces
 	 */
-	public function getNameSpaces(): array
+	private function getNameSpaces(): array
 	{
 		return array_keys($this->registry);
 	}
@@ -195,7 +195,7 @@ class Configuration
 	/**
 	 * Resets the registry to the default values
 	 */
-	public function reset(): void
+	private function reset(): void
 	{
 		$this->loadFile(__DIR__ . '/config.json');
 	}
@@ -207,7 +207,7 @@ class Configuration
 	 * @param   array  $array       An associative array. Its keys are registry paths.
 	 * @param   bool   $noOverride  [optional] Do not override pre-set values.
 	 */
-	public function mergeArray(array $array, bool $noOverride = false): void
+	private function mergeArray(array $array, bool $noOverride = false): void
 	{
 		if (!$noOverride)
 		{
@@ -233,7 +233,7 @@ class Configuration
 	 *
 	 * @param   string|null  $json  The JSON string to load
 	 */
-	public function loadJSON(?string $json = null)
+	private function loadJSON(?string $json = null)
 	{
 		$array = json_decode($json, true);
 
@@ -265,9 +265,10 @@ class Configuration
 	}
 
 	/**
-	 * Exports the current registry snapshot as an JOSN string.
+	 * Exports the current registry snapshot as an JSON string.
 	 *
 	 * @return    string    JSON representation of the registry
+	 * @noRector  \Rector\Privatization\Rector\ClassMethod\PrivatizeLocalOnlyMethodRector
 	 */
 	public function exportJSON(): string
 	{

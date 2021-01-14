@@ -58,7 +58,7 @@ class FTPcURL
 	 *
 	 * @throws  RuntimeException
 	 */
-	protected function connect()
+	private function connect()
 	{
 		$ch = $this->getCurlHandle($this->config->directory . '/');
 		curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -87,7 +87,7 @@ class FTPcURL
 	 *
 	 * @throws  RuntimeException
 	 */
-	protected function uploadFromHandle($remoteFilename, $fp)
+	private function uploadFromHandle($remoteFilename, $fp)
 	{
 		// We need the file size. We can do that by getting the file position at EOF
 		fseek($fp, 0, SEEK_END);
@@ -126,7 +126,7 @@ class FTPcURL
 	 *
 	 * @return  resource
 	 */
-	protected function getCurlHandle($remoteFile = '')
+	private function getCurlHandle($remoteFile = '')
 	{
 		/**
 		 * Get the FTP URI
