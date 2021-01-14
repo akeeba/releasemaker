@@ -18,8 +18,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 		define('AKEEBAENGINE', 1);
 	}
 
-    // get parameters
-    $parameters = $containerConfigurator->parameters();
+	// get parameters
+	$parameters = $containerConfigurator->parameters();
 
 	// Use PHP 7.2 features
 	$parameters->set(Option::PHP_VERSION_FEATURES, '7.2');
@@ -57,7 +57,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 	]);
 
 	// Define what rule sets will be applied
-    $parameters->set(Option::SETS, [
+	$parameters->set(Option::SETS, [
 //      SetList::EARLY_RETURN,
 //	    SetList::DEAD_CODE,
 //	    SetList::PHP_52,
@@ -69,10 +69,10 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 //	    SetList::PHP_71,
 //	    SetList::PHP_72,
 //	    SetList::PSR_4,
-	    SetList::PRIVATIZATION,
+//	    SetList::PRIVATIZATION,
+		SetList::CODING_STYLE,
 //	    SetList::CODE_QUALITY,
 //	    SetList::CODE_QUALITY_STRICT,
-//	    SetList::CODING_STYLE,
 //	    SetList::DEAD_CLASSES,
 //	    SetList::GMAGICK_TO_IMAGICK,
 //	    SetList::NAMING,
@@ -80,13 +80,13 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 //	    SetList::PERFORMANCE,
 //	    SetList::UNWRAP_COMPAT,
 
-	    // Only valid in Rector 0.9
-	    // SetList::DEAD_DOC_BLOCK,
-    ]);
+		// Only valid in Rector 0.9
+		// SetList::DEAD_DOC_BLOCK,
+	]);
 
-    // get services (needed for register a single rule)
-    // $services = $containerConfigurator->services();
+	// get services (needed for register a single rule)
+	// $services = $containerConfigurator->services();
 
-    // register a single rule
-    // $services->set(TypedPropertyRector::class);
+	// register a single rule
+	// $services->set(TypedPropertyRector::class);
 };

@@ -34,8 +34,8 @@ $app
 	->descriptions(
 		'Generates type hints for a specific Joomla! version or installed site',
 		[
-			'json'     => 'JSON configuration file for the release. Default: src/config.json (will error out)',
-			'--debug'  => 'Enable debug mode',
+			'json'    => 'JSON configuration file for the release. Default: src/config.json (will error out)',
+			'--debug' => 'Enable debug mode',
 		]
 	);
 

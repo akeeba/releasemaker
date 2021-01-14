@@ -156,7 +156,7 @@ class Items extends AbstractStep
 			}
 
 			// Fetch a record of the file
-			$item = $this->arsConnector->getItem($this->release->id, $type, $fileOrURL);
+			$item  = $this->arsConnector->getItem($this->release->id, $type, $fileOrURL);
 			$oldId = $item->id;
 
 			$item->release_id = $this->release->id;
@@ -172,7 +172,7 @@ class Items extends AbstractStep
 
 			if ($result !== 'false')
 			{
-				$action = $oldId ? "updated" : "created";
+				$action   = $oldId ? "updated" : "created";
 				$itemMeta = json_decode($result);
 
 				$this->io->success(sprintf("Item %u has been $action", $itemMeta->id));
