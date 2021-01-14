@@ -74,13 +74,13 @@ class Publish extends AbstractStep
 		{
 			$fileOrURL = ($item->type == 'file') ? $item->filename : $item->url;
 
-			$this->io->writeln(sprintf("Publishing %s", basename($fileOrURL)));
+			$this->io->writeln(\sprintf("Publishing %s", \basename($fileOrURL)));
 
 			$item = $this->arsConnector->getItem($this->publishInfo['release']->id, $item->type, $fileOrURL);
 
 			if (!$item->id)
 			{
-				$this->io->caution(sprintf("Item for %s does not exist.", basename($fileOrURL)));
+				$this->io->caution(\sprintf("Item for %s does not exist.", \basename($fileOrURL)));
 
 				continue;
 			}
@@ -91,12 +91,12 @@ class Publish extends AbstractStep
 
 			if ($result)
 			{
-				$this->io->success(sprintf("Item %u has been published", $item->id));
+				$this->io->success(\sprintf("Item %u has been published", $item->id));
 
 				return;
 			}
 
-			$this->io->caution(sprintf("Item %u has NOT been published -- Please check manually", $item->id));
+			$this->io->caution(\sprintf("Item %u has NOT been published -- Please check manually", $item->id));
 		}
 	}
 

@@ -35,7 +35,7 @@ class Items extends AbstractStep
 
 		$this->retrieveReleaseInfo();
 
-		$this->io->text(sprintf("Retrieved information for release %u", $this->release->id));
+		$this->io->text(\sprintf("Retrieved information for release %u", $this->release->id));
 
 		$this->publishInfo['release'] = $this->release;
 
@@ -104,17 +104,17 @@ class Items extends AbstractStep
 
 		if (empty($coreFiles))
 		{
-			$this->io->note(sprintf('No %s files found', $prefix));
+			$this->io->note(\sprintf('No %s files found', $prefix));
 
 			return;
 		}
 
-		$access = $conf->get(sprintf("%s.access", $prefix), "1");
+		$access = $conf->get(\sprintf("%s.access", $prefix), "1");
 
 		foreach ($coreFiles as $filename)
 		{
 			// Get the filename and path used in ARS
-			$this->io->text(sprintf("Creating/updating item for %s", $filename));
+			$this->io->text(\sprintf("Creating/updating item for %s", $filename));
 
 			$type = $conf->get($prefix . '.method', $conf->get('common.update.method', 'sftp'));
 
@@ -126,7 +126,7 @@ class Items extends AbstractStep
 					$version     = $conf->get('common.version');
 					$reldir      = $conf->get($prefix . '.s3.reldir');
 					$cdnHostname = $conf->get($prefix . '.s3.cdnhostname');
-					$destName    = $version . '/' . basename($filename);
+					$destName    = $version . '/' . \basename($filename);
 
 					if (empty($cdnHostname))
 					{
@@ -150,7 +150,7 @@ class Items extends AbstractStep
 				case 'sftpcurl':
 				default:
 					$version   = $conf->get('common.version');
-					$fileOrURL = $version . '/' . basename($filename);
+					$fileOrURL = $version . '/' . \basename($filename);
 					$type      = 'file';
 					break;
 			}
@@ -173,16 +173,16 @@ class Items extends AbstractStep
 			if ($result !== 'false')
 			{
 				$action   = $oldId ? "updated" : "created";
-				$itemMeta = json_decode($result);
+				$itemMeta = \json_decode($result);
 
-				$this->io->success(sprintf("Item %u has been %s", $itemMeta->id, $action));
+				$this->io->success(\sprintf("Item %u has been %s", $itemMeta->id, $action));
 
 				return;
 			}
 
 			$this->io->error("Failed to create item");
 
-			throw new FatalProblem(sprintf("Failed to create item for file %s, uploaded via %s", $filename, $type), 40);
+			throw new FatalProblem(\sprintf("Failed to create item for file %s, uploaded via %s", $filename, $type), 40);
 		}
 	}
 }

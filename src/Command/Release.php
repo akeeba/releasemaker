@@ -24,8 +24,8 @@ class Release
 		// Enable debug mode if necessary
 		if ($debug)
 		{
-			ini_set('display_errors', true);
-			error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
+			\ini_set('display_errors', true);
+			\error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
 		}
 
 		// Create a Symfony styled output handler
@@ -46,7 +46,7 @@ class Release
 		$cacertPemFilePointer = null;
 		$caCertPemFile        = $config->getCustomCacertPem();
 
-		define('AKEEBA_CACERT_PEM', $caCertPemFile);
+		\define('AKEEBA_CACERT_PEM', $caCertPemFile);
 
 		// Set up the steps to process
 		$defaultSteps = ['prepare', 'deploy', 'release', 'items', 'publish', 'updates'];
@@ -56,23 +56,23 @@ class Release
 		// Make sure all steps exist
 		foreach ($steps as $step)
 		{
-			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . ucfirst($step);
+			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . \ucfirst($step);
 
-			if (!class_exists($stepClass))
+			if (!\class_exists($stepClass))
 			{
-				throw new InvalidArgumentException(sprintf("Class %s does not exist.", $stepClass), 91);
+				throw new InvalidArgumentException(\sprintf("Class %s does not exist.", $stepClass), 91);
 			}
 
-			if (!class_implements($stepClass, StepInterface::class))
+			if (!\class_implements($stepClass, StepInterface::class))
 			{
-				throw new LogicException(sprintf("Class %s does not implement StepInterface.", $stepClass), 91);
+				throw new LogicException(\sprintf("Class %s does not implement StepInterface.", $stepClass), 91);
 			}
 		}
 
 		// Run each and every step in the order specified
 		foreach ($steps as $step)
 		{
-			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . ucfirst($step);
+			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . \ucfirst($step);
 			/** @var StepInterface $stepObject */
 			$stepObject = new $stepClass($io);
 			$stepObject->execute();
@@ -87,9 +87,9 @@ class Release
 	private function banner(OutputStyle $io)
 	{
 		$io->writeln('<info>Akeeba Release Maker</info>');
-		$io->writeln(sprintf('<info>%s</info>', str_repeat('=', 80)));
+		$io->writeln(\sprintf('<info>%s</info>', \str_repeat('=', 80)));
 		$io->writeln('<info>An automated script to upload and release a new version of an Akeeba component.</info>');
-		$io->writeln(sprintf('<info>Copyright (c)2012-%s Nicholas K. Dionysopoulos / Akeeba Ltd</info>', date('Y')));
+		$io->writeln(\sprintf('<info>Copyright (c)2012-%s Nicholas K. Dionysopoulos / Akeeba Ltd</info>', \date('Y')));
 		$io->writeln('<info>This is Free Software distributed under the terms of the GNU GPL v3 or later.</info>');
 		$io->writeln('<info>See LICENSE.txt for more information.</info>');
 		$io->newLine(1);
@@ -103,21 +103,21 @@ class Release
 	 */
 	private function getJsonPath(string $json, SymfonyStyle $io): string
 	{
-		if (strtolower(substr($json, -5)) != '.json')
+		if (\strtolower(\substr($json, -5)) != '.json')
 		{
 			$json = null;
 		}
 
-		if (!@file_exists($json))
+		if (!@\file_exists($json))
 		{
 			$candidates = [
-				$json = getcwd() . '/' . $json,
+				$json = \getcwd() . '/' . $json,
 				$json = __DIR__ . '/' . $json,
 			];
 
 			foreach ($candidates as $file)
 			{
-				if (!file_exists($file))
+				if (!\file_exists($file))
 				{
 					continue;
 				}
@@ -128,12 +128,12 @@ class Release
 			}
 		}
 
-		if (!@file_exists($json))
+		if (!@\file_exists($json))
 		{
 			$json = null;
 		}
 
-		if (empty($json) || !@file_exists($json) || !@is_readable($json))
+		if (empty($json) || !@\file_exists($json) || !@\is_readable($json))
 		{
 			$io->error("Configuration file not found.");
 

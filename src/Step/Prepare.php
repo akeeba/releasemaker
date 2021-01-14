@@ -30,12 +30,12 @@ class Prepare extends AbstractStep
 		{
 			throw new FatalProblem('common.releasedir path is empty', 20);
 		}
-		if (!is_dir($this->path))
+		if (!\is_dir($this->path))
 		{
 			throw new FatalProblem('common.releasedir path is not a directory', 21);
 		}
 
-		if (!is_readable($this->path))
+		if (!\is_readable($this->path))
 		{
 			throw new FatalProblem('common.releasedir path is not readable', 22);
 		}
@@ -59,7 +59,7 @@ class Prepare extends AbstractStep
 
 	private function findFiles(string $type = 'core'): array
 	{
-		$this->io->writeln(sprintf("<info>Finding %s files</info>", ucfirst($type)));
+		$this->io->writeln(\sprintf("<info>Finding %s files</info>", \ucfirst($type)));
 
 		$ret = [];
 
@@ -87,19 +87,19 @@ class Prepare extends AbstractStep
 
 			$fn = $fileinfo->getFilename();
 
-			if (!fnmatch($pattern, $fn))
+			if (!\fnmatch($pattern, $fn))
 			{
 				continue;
 			}
 
 			$ret[] = $fn;
 
-			$this->io->comment(sprintf("Found %s", basename($fn)));
+			$this->io->comment(\sprintf("Found %s", \basename($fn)));
 		}
 
 		if (empty($ret))
 		{
-			$this->io->caution(sprintf("No %s files were found", ucfirst($type)));
+			$this->io->caution(\sprintf("No %s files were found", \ucfirst($type)));
 		}
 
 		return $ret;
@@ -119,7 +119,7 @@ class Prepare extends AbstractStep
 			return $ret;
 		}
 
-		if (is_string($files))
+		if (\is_string($files))
 		{
 			$files = [$files];
 		}
@@ -143,22 +143,22 @@ class Prepare extends AbstractStep
 						$zipFileName = $this->path . DIRECTORY_SEPARATOR . $file . '.pdf.zip';
 
 						// Remove old ZIP file
-						if (file_exists($zipFileName))
+						if (\file_exists($zipFileName))
 						{
-							unlink($zipFileName);
+							\unlink($zipFileName);
 						}
 
 						// Compress the PDF
 						$zip = new ZipArchive();
 						$zip->open($zipFileName, ZIPARCHIVE::CREATE);
-						$zip->addFile($this->path . DIRECTORY_SEPARATOR . $fn, basename($fn));
+						$zip->addFile($this->path . DIRECTORY_SEPARATOR . $fn, \basename($fn));
 						$zip->close();
 
 						// Remove the PDF file
-						unlink($this->path . DIRECTORY_SEPARATOR . $fn);
+						\unlink($this->path . DIRECTORY_SEPARATOR . $fn);
 
 						// Add the ZIP file to the list
-						$ret[] = basename($zipFileName);
+						$ret[] = \basename($zipFileName);
 
 						break;
 
@@ -175,7 +175,7 @@ class Prepare extends AbstractStep
 						continue 2;
 				}
 
-				$this->io->comment(sprintf("Found %s", basename($fn)));
+				$this->io->comment(\sprintf("Found %s", \basename($fn)));
 			}
 		}
 

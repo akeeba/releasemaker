@@ -31,11 +31,11 @@ class FTPcURL
 	 */
 	public function upload($localFilename, $remoteFilename)
 	{
-		$fp = @fopen($localFilename, 'rb');
+		$fp = @\fopen($localFilename, 'rb');
 
 		if ($fp === false)
 		{
-			throw new FatalProblem(sprintf("Unreadable local file %s", $localFilename), 80);
+			throw new FatalProblem(\sprintf("Unreadable local file %s", $localFilename), 80);
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
@@ -61,19 +61,19 @@ class FTPcURL
 	private function connect()
 	{
 		$ch = $this->getCurlHandle($this->config->directory . '/');
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_NOBODY, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		\curl_setopt($ch, CURLOPT_HEADER, 1);
+		\curl_setopt($ch, CURLOPT_NOBODY, 1);
+		\curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		curl_exec($ch);
+		\curl_exec($ch);
 
-		$errNo = curl_errno($ch);
-		$error = curl_error($ch);
-		curl_close($ch);
+		$errNo = \curl_errno($ch);
+		$error = \curl_error($ch);
+		\curl_close($ch);
 
 		if ($errNo !== 0)
 		{
-			throw new FatalProblem(sprintf("cURL Error %s connecting to remote FTP server: %s", $errNo, $error), 80);
+			throw new FatalProblem(\sprintf("cURL Error %s connecting to remote FTP server: %s", $errNo, $error), 80);
 		}
 	}
 
@@ -90,9 +90,9 @@ class FTPcURL
 	private function uploadFromHandle($remoteFilename, $fp)
 	{
 		// We need the file size. We can do that by getting the file position at EOF
-		fseek($fp, 0, SEEK_END);
-		$filesize = ftell($fp);
-		rewind($fp);
+		\fseek($fp, 0, SEEK_END);
+		$filesize = \ftell($fp);
+		\rewind($fp);
 
 		/**
 		 * The ;type=i suffix forces Binary file transfer mode
@@ -100,17 +100,17 @@ class FTPcURL
 		 * @see  https://curl.haxx.se/mail/archive-2008-05/0089.html
 		 */
 		$ch = $this->getCurlHandle($remoteFilename . ';type=i');
-		curl_setopt($ch, CURLOPT_UPLOAD, 1);
-		curl_setopt($ch, CURLOPT_INFILE, $fp);
-		curl_setopt($ch, CURLOPT_INFILESIZE, $filesize);
+		\curl_setopt($ch, CURLOPT_UPLOAD, 1);
+		\curl_setopt($ch, CURLOPT_INFILE, $fp);
+		\curl_setopt($ch, CURLOPT_INFILESIZE, $filesize);
 
-		curl_exec($ch);
+		\curl_exec($ch);
 
-		$error_no = curl_errno($ch);
-		$error    = curl_error($ch);
+		$error_no = \curl_errno($ch);
+		$error    = \curl_error($ch);
 
-		curl_close($ch);
-		fclose($fp);
+		\curl_close($ch);
+		\fclose($fp);
 
 		if ($error_no !== 0)
 		{
@@ -138,7 +138,7 @@ class FTPcURL
 		$ftpUri = 'ftp://' . $this->config->hostname . '/';
 
 		// Relative path? Append the initial directory.
-		if (substr($remoteFile, 0, 1) != '/')
+		if (\substr($remoteFile, 0, 1) != '/')
 		{
 			$ftpUri .= $this->config->directory;
 		}
@@ -148,13 +148,13 @@ class FTPcURL
 		{
 			$suffix = '';
 
-			if (substr($remoteFile, -7, 6) == ';type=')
+			if (\substr($remoteFile, -7, 6) == ';type=')
 			{
-				$suffix     = substr($remoteFile, -7);
-				$remoteFile = substr($remoteFile, 0, -7);
+				$suffix     = \substr($remoteFile, -7);
+				$remoteFile = \substr($remoteFile, 0, -7);
 			}
 
-			$dirname = dirname($remoteFile);
+			$dirname = \dirname($remoteFile);
 
 			// Windows messing up dirname('/'). KILL ME.
 			if ($dirname == '\\')
@@ -162,41 +162,41 @@ class FTPcURL
 				$dirname = '';
 			}
 
-			$dirname  = trim($dirname, '/');
-			$basename = basename($remoteFile);
+			$dirname  = \trim($dirname, '/');
+			$basename = \basename($remoteFile);
 
-			if ((substr($remoteFile, -1) == '/') && !empty($basename))
+			if ((\substr($remoteFile, -1) == '/') && !empty($basename))
 			{
 				$suffix = '/' . $suffix;
 			}
 
-			$ftpUri .= '/' . $dirname . (empty($dirname) ? '' : '/') . urlencode($basename) . $suffix;
+			$ftpUri .= '/' . $dirname . (empty($dirname) ? '' : '/') . \urlencode($basename) . $suffix;
 		}
 
 		// Colons in usernames must be URL escaped
-		$username = str_replace(':', '%3A', $this->config->username);
+		$username = \str_replace(':', '%3A', $this->config->username);
 
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $ftpUri);
-		curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $this->config->password);
-		curl_setopt($ch, CURLOPT_PORT, $this->config->port);
-		curl_setopt($ch, CURLOPT_TIMEOUT, $this->config->timeout);
+		$ch = \curl_init();
+		\curl_setopt($ch, CURLOPT_URL, $ftpUri);
+		\curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $this->config->password);
+		\curl_setopt($ch, CURLOPT_PORT, $this->config->port);
+		\curl_setopt($ch, CURLOPT_TIMEOUT, $this->config->timeout);
 
 		// Should I enable Implict SSL?
 		if ($this->config->method == 'ftpscurl')
 		{
-			curl_setopt($ch, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
-			curl_setopt($ch, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_DEFAULT);
+			\curl_setopt($ch, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
+			\curl_setopt($ch, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_DEFAULT);
 
-			curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+			\curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+			\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+			\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		}
 
 		// Should I ignore the server-supplied passive mode IP address?
 		if ($this->config->passive && $this->config->passive_fix)
 		{
-			curl_setopt($ch, CURLOPT_FTP_SKIP_PASV_IP, 1);
+			\curl_setopt($ch, CURLOPT_FTP_SKIP_PASV_IP, 1);
 		}
 
 		// Should I enable active mode?
@@ -209,16 +209,16 @@ class FTPcURL
 			 *
 			 * @see https://curl.haxx.se/libcurl/c/CURLOPT_FTPPORT.html
 			 */
-			curl_setopt($ch, CURLOPT_FTPPORT, '-');
+			\curl_setopt($ch, CURLOPT_FTPPORT, '-');
 		}
 
 		// Should I enable verbose output? Useful for debugging.
 		if ($this->config->verbose)
 		{
-			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			\curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}
 
-		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
+		\curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
 
 		return $ch;
 	}

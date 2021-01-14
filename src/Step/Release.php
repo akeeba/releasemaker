@@ -26,13 +26,13 @@ class Release extends AbstractStep
 
 		$this->checkRelease();
 
-		if (is_null($this->release->id))
+		if (\is_null($this->release->id))
 		{
 			$this->io->text("Creating release");
 		}
 		else
 		{
-			$this->io->text(sprintf("Updating release %u", $this->release->id));
+			$this->io->text(\sprintf("Updating release %u", $this->release->id));
 		}
 
 		$this->editRelease();
@@ -69,14 +69,14 @@ class Release extends AbstractStep
 		$this->release->notes       .= $this->changelogAsHtml();
 		$this->release->published   = 0;
 
-		if (is_null($this->release->alias))
+		if (\is_null($this->release->alias))
 		{
-			$this->release->alias = StringHelper::toSlug(str_replace('.', '-', $version));
+			$this->release->alias = StringHelper::toSlug(\str_replace('.', '-', $version));
 		}
 
 		if (empty($this->release->description))
 		{
-			$this->release->description = sprintf("<p>Version %s</p>", $version);
+			$this->release->description = \sprintf("<p>Version %s</p>", $version);
 		}
 
 		if (empty($this->release->notes))
@@ -98,7 +98,7 @@ class Release extends AbstractStep
 	{
 		$conf = Configuration::getInstance();
 		$path = $conf->get('common.repodir', '');
-		$ret  = @file_get_contents($path . '/' . $filename);
+		$ret  = @\file_get_contents($path . '/' . $filename);
 
 		if ($ret === false)
 		{
@@ -110,21 +110,21 @@ class Release extends AbstractStep
 
 	private function getMaturity(string $version): string
 	{
-		$version      = strtolower($version);
-		$versionParts = explode('.', $version);
-		$lastPart     = array_pop($versionParts);
+		$version      = \strtolower($version);
+		$versionParts = \explode('.', $version);
+		$lastPart     = \array_pop($versionParts);
 
-		if (substr($lastPart, 0, 1) == 'a')
+		if (\substr($lastPart, 0, 1) == 'a')
 		{
 			return 'alpha';
 		}
 
-		if (substr($lastPart, 0, 1) == 'b')
+		if (\substr($lastPart, 0, 1) == 'b')
 		{
 			return 'beta';
 		}
 
-		if (substr($lastPart, 0, 2) == 'rc')
+		if (\substr($lastPart, 0, 2) == 'rc')
 		{
 			return 'rc';
 		}
@@ -135,27 +135,27 @@ class Release extends AbstractStep
 	private function changelogAsHtml(): string
 	{
 		$conf      = Configuration::getInstance();
-		$filename  = rtrim($conf->get('common.repodir', ''), '/') . '/CHANGELOG';
-		$changelog = @file($filename);
+		$filename  = \rtrim($conf->get('common.repodir', ''), '/') . '/CHANGELOG';
+		$changelog = @\file($filename);
 
-		if (!is_array($changelog) || (count($changelog) == 0))
+		if (!\is_array($changelog) || (\count($changelog) == 0))
 		{
 			return "";
 		}
 
 		// Remove the first line, it's the PHP die() statement
-		array_shift($changelog);
+		\array_shift($changelog);
 
 		// Remove the next two lines, they are the version banner
-		array_shift($changelog);
-		array_shift($changelog);
+		\array_shift($changelog);
+		\array_shift($changelog);
 
 		// Loop until you find a blank line
 		$thisChangelog = [];
 
 		foreach ($changelog as $line)
 		{
-			$line = trim($line);
+			$line = \trim($line);
 
 			if (empty($line))
 			{
@@ -171,7 +171,7 @@ class Release extends AbstractStep
 		}
 
 		// Sort the array
-		asort($thisChangelog);
+		\asort($thisChangelog);
 
 		// Pick lines by type
 		$sorted = [
@@ -187,7 +187,7 @@ class Release extends AbstractStep
 
 		foreach ($thisChangelog as $line)
 		{
-			[$type, $text] = explode(' ', $line, 2);
+			[$type, $text] = \explode(' ', $line, 2);
 
 			switch ($type)
 			{
@@ -287,11 +287,11 @@ class Release extends AbstractStep
 					break;
 			}
 
-			$htmlChangelog .= sprintf("<h4>%s</h4>\n<ul>\n", $title);
+			$htmlChangelog .= \sprintf("<h4>%s</h4>\n<ul>\n", $title);
 
 			foreach ($lines as $line)
 			{
-				$htmlChangelog .= "\t<li>" . htmlspecialchars($line, ENT_COMPAT, 'UTF-8') . "</li>\n";
+				$htmlChangelog .= "\t<li>" . \htmlspecialchars($line, ENT_COMPAT, 'UTF-8') . "</li>\n";
 			}
 
 			$htmlChangelog .= "</ul>\n";

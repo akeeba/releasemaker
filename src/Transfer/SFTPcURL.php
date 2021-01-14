@@ -31,11 +31,11 @@ class SFTPcURL
 	 */
 	public function upload($localFilename, $remoteFilename)
 	{
-		$fp = @fopen($localFilename, 'rb');
+		$fp = @\fopen($localFilename, 'rb');
 
 		if ($fp === false)
 		{
-			throw new FatalProblem(sprintf("Unreadable local file %s", $localFilename), 80);
+			throw new FatalProblem(\sprintf("Unreadable local file %s", $localFilename), 80);
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
@@ -62,13 +62,13 @@ class SFTPcURL
 	private function getCurlHandle($remoteFile = '')
 	{
 		// Remember, the username has to be URL encoded as it's part of a URI!
-		$authentication = urlencode($this->config->username);
+		$authentication = \urlencode($this->config->username);
 
 		// We will only use username and password authentication if there are no certificates configured.
 		if (empty($this->config->pubkeyfile) && !empty($this->config->password))
 		{
 			// Remember, both the username and password have to be URL encoded as they're part of a URI!
-			$password       = urlencode($this->config->password);
+			$password       = \urlencode($this->config->password);
 			$authentication .= ':' . $password;
 		}
 
@@ -80,7 +80,7 @@ class SFTPcURL
 		}
 
 		// Relative path? Append the initial directory.
-		if (substr($remoteFile, 0, 1) != '/')
+		if (\substr($remoteFile, 0, 1) != '/')
 		{
 			$ftpUri .= $this->config->directory;
 		}
@@ -90,7 +90,7 @@ class SFTPcURL
 		{
 			$suffix = '';
 
-			$dirname = dirname($remoteFile);
+			$dirname = \dirname($remoteFile);
 
 			// Windows messing up dirname('/'). KILL ME.
 			if ($dirname == '\\')
@@ -98,31 +98,31 @@ class SFTPcURL
 				$dirname = '';
 			}
 
-			$dirname  = trim($dirname, '/');
-			$basename = basename($remoteFile);
+			$dirname  = \trim($dirname, '/');
+			$basename = \basename($remoteFile);
 
-			if ((substr($remoteFile, -1) == '/') && !empty($basename))
+			if ((\substr($remoteFile, -1) == '/') && !empty($basename))
 			{
 				$suffix = '/' . $suffix;
 			}
 
-			$ftpUri .= '/' . $dirname . (empty($dirname) ? '' : '/') . urlencode($basename) . $suffix;
+			$ftpUri .= '/' . $dirname . (empty($dirname) ? '' : '/') . \urlencode($basename) . $suffix;
 		}
 
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $ftpUri);
-		curl_setopt($ch, CURLOPT_TIMEOUT, $this->config->timeout);
+		$ch = \curl_init();
+		\curl_setopt($ch, CURLOPT_URL, $ftpUri);
+		\curl_setopt($ch, CURLOPT_TIMEOUT, $this->config->timeout);
 
 		// Do I have to use certificate authentication?
 		if (!empty($this->config->pubkeyfile))
 		{
 			// We always need to provide a public key file
-			curl_setopt($ch, CURLOPT_SSH_PUBLIC_KEYFILE, $this->config->pubkeyfile);
+			\curl_setopt($ch, CURLOPT_SSH_PUBLIC_KEYFILE, $this->config->pubkeyfile);
 
 			// Since SSH certificates are self-signed we cannot have cURL verify their signatures against a CA.
-			curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+			\curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+			\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+			\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
 			/**
 			 * This is optional because newer versions of cURL can extract the private key file from a combined
@@ -130,7 +130,7 @@ class SFTPcURL
 			 */
 			if (!empty($this->config->privkeyfile))
 			{
-				curl_setopt($ch, CURLOPT_SSH_PRIVATE_KEYFILE, $this->config->privkeyfile);
+				\curl_setopt($ch, CURLOPT_SSH_PRIVATE_KEYFILE, $this->config->privkeyfile);
 			}
 
 			/**
@@ -142,22 +142,22 @@ class SFTPcURL
 			 */
 			if (!empty($this->config->privkeyfile_pass))
 			{
-				curl_setopt($ch, CURLOPT_KEYPASSWD, $this->config->privkeyfile_pass);
+				\curl_setopt($ch, CURLOPT_KEYPASSWD, $this->config->privkeyfile_pass);
 			}
 		}
 		// Do I have to do SSH Agent authentication?
 		elseif (empty($this->config->password))
 		{
-			curl_setopt($ch, CURLOPT_SSH_AUTH_TYPES, CURLSSH_AUTH_AGENT);
+			\curl_setopt($ch, CURLOPT_SSH_AUTH_TYPES, CURLSSH_AUTH_AGENT);
 		}
 
 		// Should I enable verbose output? Useful for debugging.
 		if ($this->config->verbose)
 		{
-			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			\curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}
 
-		curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
+		\curl_setopt($ch, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
 
 		return $ch;
 	}
@@ -172,18 +172,18 @@ class SFTPcURL
 	private function connect()
 	{
 		$ch = $this->getCurlHandle($this->config->directory . '/');
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_NOBODY, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		\curl_setopt($ch, CURLOPT_HEADER, 1);
+		\curl_setopt($ch, CURLOPT_NOBODY, 1);
+		\curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		$listing = curl_exec($ch);
-		$errNo   = curl_errno($ch);
-		$error   = curl_error($ch);
-		curl_close($ch);
+		$listing = \curl_exec($ch);
+		$errNo   = \curl_errno($ch);
+		$error   = \curl_error($ch);
+		\curl_close($ch);
 
 		if ($errNo !== 0)
 		{
-			throw new FatalProblem(sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error), 80);
+			throw new FatalProblem(\sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error), 80);
 		}
 	}
 
@@ -200,22 +200,22 @@ class SFTPcURL
 	private function uploadFromHandle($remoteFilename, $fp)
 	{
 		// We need the file size. We can do that by getting the file position at EOF
-		fseek($fp, 0, SEEK_END);
-		$filesize = ftell($fp);
-		rewind($fp);
+		\fseek($fp, 0, SEEK_END);
+		$filesize = \ftell($fp);
+		\rewind($fp);
 
 		$ch = $this->getCurlHandle($remoteFilename);
-		curl_setopt($ch, CURLOPT_UPLOAD, 1);
-		curl_setopt($ch, CURLOPT_INFILE, $fp);
-		curl_setopt($ch, CURLOPT_INFILESIZE, $filesize);
+		\curl_setopt($ch, CURLOPT_UPLOAD, 1);
+		\curl_setopt($ch, CURLOPT_INFILE, $fp);
+		\curl_setopt($ch, CURLOPT_INFILESIZE, $filesize);
 
-		curl_exec($ch);
+		\curl_exec($ch);
 
-		$error_no = curl_errno($ch);
-		$error    = curl_error($ch);
+		$error_no = \curl_errno($ch);
+		$error    = \curl_error($ch);
 
-		curl_close($ch);
-		fclose($fp);
+		\curl_close($ch);
+		\fclose($fp);
 
 		if ($error_no !== 0)
 		{

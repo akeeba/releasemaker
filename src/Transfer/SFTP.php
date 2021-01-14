@@ -21,12 +21,12 @@ class SFTP
 	{
 		$this->config = $config;
 
-		if (!function_exists('ssh2_connect'))
+		if (!\function_exists('ssh2_connect'))
 		{
 			throw new FatalProblem('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.', 80);
 		}
 
-		$this->ssh = ssh2_connect($config->hostname, $config->port);
+		$this->ssh = \ssh2_connect($config->hostname, $config->port);
 
 		if (!$this->ssh)
 		{
@@ -35,9 +35,9 @@ class SFTP
 
 		if ($config->pubkeyfile && $config->privkeyfile)
 		{
-			if (!@ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
+			if (!@\ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
 			{
-				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass),
+				throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass),
 					80
 				);
 			}
@@ -45,106 +45,106 @@ class SFTP
 		}
 		elseif ($config->password)
 		{
-			if (!@ssh2_auth_password($this->ssh, $config->username, $config->password))
+			if (!@\ssh2_auth_password($this->ssh, $config->username, $config->password))
 			{
-				throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password), 80);
+				throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password), 80);
 			}
 		}
-		elseif (!@ssh2_auth_agent($this->ssh, $config->username))
+		elseif (!@\ssh2_auth_agent($this->ssh, $config->username))
 		{
-			throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username),
+			throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username),
 				80
 			);
 		}
 
-		$this->fp = ssh2_sftp($this->ssh);
+		$this->fp = \ssh2_sftp($this->ssh);
 
 		if ($this->fp === false)
 		{
 			throw new FatalProblem('Could not connect to SFTP server: no SFTP support on this SSH server', 80);
 		}
 
-		if (!@ssh2_sftp_stat($this->fp, $config->directory))
+		if (!@\ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory), 80);
+			throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory), 80);
 		}
 	}
 
 	public function upload($sourcePath, $destPath)
 	{
-		$dir = dirname($destPath);
+		$dir = \dirname($destPath);
 		$this->chdir($dir);
 
-		$realdir  = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
+		$realdir  = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
 		$realdir  .= '/' . $dir;
-		$realdir  = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
-		$realname = $realdir . '/' . basename($destPath);
+		$realdir  = \substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
+		$realname = $realdir . '/' . \basename($destPath);
 
-		$fp = @fopen(sprintf("ssh2.sftp://%s%s", $this->fp, $realname), 'w');
+		$fp = @\fopen(\sprintf("ssh2.sftp://%s%s", $this->fp, $realname), 'w');
 
 		if ($fp === false)
 		{
-			throw new FatalProblem(sprintf("Could not open remote file %s for writing", $realname), 80);
+			throw new FatalProblem(\sprintf("Could not open remote file %s for writing", $realname), 80);
 		}
 
-		$localfp = @fopen($sourcePath, 'rb');
+		$localfp = @\fopen($sourcePath, 'rb');
 
 		if ($localfp === false)
 		{
-			throw new FatalProblem(sprintf("Could not open local file %s for reading", $sourcePath), 80);
+			throw new FatalProblem(\sprintf("Could not open local file %s for reading", $sourcePath), 80);
 		}
 
 		$res = true;
 
-		while (!feof($localfp) && ($res !== false))
+		while (!\feof($localfp) && ($res !== false))
 		{
-			$buffer = @fread($localfp, 524288);
-			$res    = @fwrite($fp, $buffer);
+			$buffer = @\fread($localfp, 524288);
+			$res    = @\fwrite($fp, $buffer);
 		}
 
-		@fclose($fp);
-		@fclose($localfp);
+		@\fclose($fp);
+		@\fclose($localfp);
 
 		if (!$res)
 		{
 			// If the file was unreadable, just skip it...
-			if (is_readable($sourcePath))
+			if (\is_readable($sourcePath))
 			{
-				throw new FatalProblem(sprintf("Uploading %s has failed.", $destPath), 80);
+				throw new FatalProblem(\sprintf("Uploading %s has failed.", $destPath), 80);
 			}
 			else
 			{
-				throw new FatalProblem(sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
+				throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
 			}
 		}
 	}
 
 	private function chdir(string $dir): bool
 	{
-		$dir = ltrim($dir, '/');
+		$dir = \ltrim($dir, '/');
 
 		if (empty($dir))
 		{
 			return false;
 		}
 
-		$realdir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
+		$realdir = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
 		$realdir .= '/' . $dir;
-		$realdir = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
+		$realdir = \substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
 
-		$result = @ssh2_sftp_stat($this->fp, $realdir);
+		$result = @\ssh2_sftp_stat($this->fp, $realdir);
 		if ($result === false)
 		{
 			// The directory doesn't exist, let's try to create it...
 			$this->makeDirectory($dir);
 
 			// After creating it, change into it
-			$result = @ssh2_sftp_stat($this->fp, $realdir);
+			$result = @\ssh2_sftp_stat($this->fp, $realdir);
 		}
 
 		if (!$result)
 		{
-			throw new FatalProblem(sprintf("Cannot change into %s directory", $realdir), 80);
+			throw new FatalProblem(\sprintf("Cannot change into %s directory", $realdir), 80);
 		}
 
 		return true;
@@ -152,16 +152,16 @@ class SFTP
 
 	private function makeDirectory($dir)
 	{
-		$alldirs     = explode('/', $dir);
-		$previousDir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
-		$previousDir = substr($previousDir, 0, 1) == '/' ? $previousDir : '/' . $previousDir;
+		$alldirs     = \explode('/', $dir);
+		$previousDir = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
+		$previousDir = \substr($previousDir, 0, 1) == '/' ? $previousDir : '/' . $previousDir;
 
 		foreach ($alldirs as $curdir)
 		{
 			$check = $previousDir . '/' . $curdir;
-			if (!@ssh2_sftp_stat($this->fp, $check) && !@ssh2_sftp_mkdir($this->fp, $check, 0755, true))
+			if (!@\ssh2_sftp_stat($this->fp, $check) && !@\ssh2_sftp_mkdir($this->fp, $check, 0755, true))
 			{
-				throw new FatalProblem(sprintf("Could not create directory %s", $check), 80);
+				throw new FatalProblem(\sprintf("Could not create directory %s", $check), 80);
 			}
 			$previousDir = $check;
 		}

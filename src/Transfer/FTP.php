@@ -21,11 +21,11 @@ class FTP
 
 		if ($config->method == 'ftps')
 		{
-			$this->fp = @ftp_ssl_connect($config->hostname, $config->port);
+			$this->fp = @\ftp_ssl_connect($config->hostname, $config->port);
 		}
 		else
 		{
-			$this->fp = @ftp_connect($config->hostname, $config->port);
+			$this->fp = @\ftp_connect($config->hostname, $config->port);
 		}
 
 		if (!$this->fp)
@@ -33,70 +33,70 @@ class FTP
 			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid hostname or port', 80);
 		}
 
-		if (!@ftp_login($this->fp, $config->username, $config->password))
+		if (!@\ftp_login($this->fp, $config->username, $config->password))
 		{
 			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid username or password', 80);
 		}
 
-		if (!@ftp_chdir($this->fp, $config->directory))
+		if (!@\ftp_chdir($this->fp, $config->directory))
 		{
 			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid directory', 80);
 		}
 
-		@ftp_pasv($this->fp, $config->passive);
+		@\ftp_pasv($this->fp, $config->passive);
 	}
 
 	public function __destruct()
 	{
-		if (is_resource($this->fp))
+		if (\is_resource($this->fp))
 		{
-			ftp_close($this->fp);
+			\ftp_close($this->fp);
 		}
 	}
 
 	public function upload($sourcePath, $destPath)
 	{
-		ftp_chdir($this->fp, $this->config->directory);
+		\ftp_chdir($this->fp, $this->config->directory);
 
-		$dir = dirname($destPath);
+		$dir = \dirname($destPath);
 		$this->chdir($dir);
 
-		$realDirectory = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
+		$realDirectory = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
 		$realDirectory .= '/' . $dir;
-		$realDirectory = substr($realDirectory, 0, 1) == '/' ? $realDirectory : '/' . $realDirectory;
-		$realname      = $realDirectory . '/' . basename($destPath);
-		$res           = @ftp_put($this->fp, $realname, $sourcePath, FTP_BINARY);
+		$realDirectory = \substr($realDirectory, 0, 1) == '/' ? $realDirectory : '/' . $realDirectory;
+		$realname      = $realDirectory . '/' . \basename($destPath);
+		$res           = @\ftp_put($this->fp, $realname, $sourcePath, FTP_BINARY);
 
 		if (!$res)
 		{
 			// If the file was unreadable, just skip it...
-			if (is_readable($sourcePath))
+			if (\is_readable($sourcePath))
 			{
-				throw new FatalProblem(sprintf("Uploading %s has failed.", $destPath), 80);
+				throw new FatalProblem(\sprintf("Uploading %s has failed.", $destPath), 80);
 			}
 
-			throw new FatalProblem(sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
+			throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
 		}
 		else
 		{
-			@ftp_chmod($this->fp, 0755, $realname);
+			@\ftp_chmod($this->fp, 0755, $realname);
 		}
 	}
 
 	private function chdir($dir)
 	{
-		$dir = ltrim($dir, '/');
+		$dir = \ltrim($dir, '/');
 
 		if (empty($dir))
 		{
 			return;
 		}
 
-		$realDirectory = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
+		$realDirectory = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
 		$realDirectory .= '/' . $dir;
-		$realDirectory = substr($realDirectory, 0, 1) == '/' ? $realDirectory : '/' . $realDirectory;
+		$realDirectory = \substr($realDirectory, 0, 1) == '/' ? $realDirectory : '/' . $realDirectory;
 
-		$result = @ftp_chdir($this->fp, $realDirectory);
+		$result = @\ftp_chdir($this->fp, $realDirectory);
 
 		if (!$result)
 		{
@@ -104,33 +104,33 @@ class FTP
 			$this->makeDirectory($dir);
 
 			// After creating it, change into it
-			$result = @ftp_chdir($this->fp, $realDirectory);
+			$result = @\ftp_chdir($this->fp, $realDirectory);
 		}
 
 		if (!$result)
 		{
-			throw new FatalProblem(sprintf("Cannot change into %s directory", $realDirectory), 80);
+			throw new FatalProblem(\sprintf("Cannot change into %s directory", $realDirectory), 80);
 		}
 	}
 
 	private function makeDirectory($dir)
 	{
-		$alldirs     = explode('/', $dir);
-		$previousDir = substr($this->config->directory, -1) == '/' ? substr($this->config->directory, 0, -1) : $this->config->directory;
-		$previousDir = substr($previousDir, 0, 1) == '/' ? $previousDir : '/' . $previousDir;
+		$alldirs     = \explode('/', $dir);
+		$previousDir = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
+		$previousDir = \substr($previousDir, 0, 1) == '/' ? $previousDir : '/' . $previousDir;
 
 		foreach ($alldirs as $curdir)
 		{
 			$check = $previousDir . '/' . $curdir;
 
-			if (!@ftp_chdir($this->fp, $check))
+			if (!@\ftp_chdir($this->fp, $check))
 			{
-				if (@ftp_mkdir($this->fp, $check) === false)
+				if (@\ftp_mkdir($this->fp, $check) === false)
 				{
-					throw new FatalProblem(sprintf("Could not create directory %s", $check), 80);
+					throw new FatalProblem(\sprintf("Could not create directory %s", $check), 80);
 				}
 
-				@ftp_chmod($this->fp, 0755, $check);
+				@\ftp_chmod($this->fp, 0755, $check);
 			}
 
 			$previousDir = $check;

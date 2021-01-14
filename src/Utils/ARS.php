@@ -60,7 +60,7 @@ class ARS
 
 		$response = $this->doApiCall($arsData);
 
-		$response = json_decode($response);
+		$response = \json_decode($response);
 
 		if (empty($response))
 		{
@@ -86,7 +86,7 @@ class ARS
 			];
 		}
 
-		return array_shift($response);
+		return \array_shift($response);
 	}
 
 	/**
@@ -104,7 +104,7 @@ class ARS
 			'format' => 'json',
 		];
 
-		$arsData = array_merge($releaseData, $arsData);
+		$arsData = \array_merge($releaseData, $arsData);
 
 		return $this->doApiCall($arsData);
 	}
@@ -132,11 +132,11 @@ class ARS
 		];
 
 		$response = $this->doApiCall($arsData);
-		$response = json_decode($response);
+		$response = \json_decode($response);
 
 		if (!empty($response))
 		{
-			return array_shift($response);
+			return \array_shift($response);
 		}
 
 		return (object) [
@@ -180,10 +180,10 @@ class ARS
 			'view'      => 'items',
 			'task'      => 'save',
 			'format'    => 'json',
-			'returnurl' => base64_encode('index.php'),
+			'returnurl' => \base64_encode('index.php'),
 		];
 
-		$arsData = array_merge($itemData, $arsData);
+		$arsData = \array_merge($itemData, $arsData);
 
 		return (bool) $this->doApiCall($arsData);
 	}
@@ -197,18 +197,18 @@ class ARS
 	{
 		$arsData = [
 			'option'             => 'com_ars',
-			'_fofauthentication' => json_encode([
+			'_fofauthentication' => \json_encode([
 				'username' => $this->username,
 				'password' => $this->password,
 			]),
 		];
 
-		$postData = array_merge($postData, $arsData);
+		$postData = \array_merge($postData, $arsData);
 
-		$url = rtrim($this->host, '/');
-		$url = (substr($url, -4) === '.php') ? $url : ($url . '/index.php');
+		$url = \rtrim($this->host, '/');
+		$url = (\substr($url, -4) === '.php') ? $url : ($url . '/index.php');
 
-		$ch = curl_init($url);
+		$ch = \curl_init($url);
 
 		// Do I need to use FOF API Token Authentication instead?
 		if (!empty($this->apiToken))
@@ -218,36 +218,36 @@ class ARS
 
 			// Alternatively I could do $postData['_fofToken'] = $this->apiToken;
 
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			\curl_setopt($ch, CURLOPT_HTTPHEADER, [
 				'Authentication: Bearer ' . $this->apiToken,
 				'X-FOF-Token: ' . $this->apiToken,
 			]);
 		}
 
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-		curl_setopt($ch, CURLOPT_FAILONERROR, true);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+		\curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		\curl_setopt($ch, CURLOPT_POST, 1);
+		\curl_setopt($ch, CURLOPT_POSTFIELDS, \http_build_query($postData));
+		\curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+		\curl_setopt($ch, CURLOPT_FAILONERROR, true);
+		\curl_setopt($ch, CURLOPT_HEADER, false);
+		\curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		\curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 180);
-		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
+		\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		\curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		\curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+		\curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5');
 
-		$raw = curl_exec($ch);
+		$raw = \curl_exec($ch);
 
-		$errno = curl_errno($ch);
-		$error = curl_error($ch);
-		curl_close($ch);
+		$errno = \curl_errno($ch);
+		$error = \curl_error($ch);
+		\curl_close($ch);
 
 		if ($raw === false)
 		{
-			throw new FatalProblem(sprintf("ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.\ncURL error %s. %s\n", $errno, $error), 30);
+			throw new FatalProblem(\sprintf("ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.\ncURL error %s. %s\n", $errno, $error), 30);
 		}
 
 		return $raw;

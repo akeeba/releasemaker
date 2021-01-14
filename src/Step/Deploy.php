@@ -42,11 +42,11 @@ class Deploy extends AbstractStep
 	{
 		if (!$isPdf)
 		{
-			$this->io->text(sprintf("<info>Deploying %s files</info>", ucfirst($prefix)));
+			$this->io->text(\sprintf("<info>Deploying %s files</info>", \ucfirst($prefix)));
 		}
 		else
 		{
-			$this->io->text(sprintf("<info>Deploying PDF files</info>", ucfirst($prefix)));
+			$this->io->text(\sprintf("<info>Deploying PDF files</info>", \ucfirst($prefix)));
 		}
 
 		$conf = Configuration::getInstance();
@@ -70,7 +70,7 @@ class Deploy extends AbstractStep
 			$config = (object) [
 				'type'             => $type,
 				'hostname'         => $conf->get($prefix . '.ftp.hostname', $conf->get('common.update.ftp.hostname', '')),
-				'port'             => $conf->get($prefix . '.ftp.port', $conf->get('common.update.ftp.port', in_array($type, [
+				'port'             => $conf->get($prefix . '.ftp.port', $conf->get('common.update.ftp.port', \in_array($type, [
 					'sftp', 'sftpcurl',
 				]) ? 22 : 21)),
 				'username'         => $conf->get($prefix . '.ftp.username', $conf->get('common.update.ftp.username', '')),
@@ -104,7 +104,7 @@ class Deploy extends AbstractStep
 
 		foreach ($files as $filename)
 		{
-			$this->io->comment(sprintf("Uploading %s", $filename));
+			$this->io->comment(\sprintf("Uploading %s", $filename));
 
 			$sourcePath = $path . DIRECTORY_SEPARATOR . $filename;
 
@@ -128,7 +128,7 @@ class Deploy extends AbstractStep
 					break;
 
 				case 'sftp':
-					if (function_exists('ssh2_connect'))
+					if (\function_exists('ssh2_connect'))
 					{
 						$this->uploadSftp($config, $sourcePath);
 
@@ -165,7 +165,7 @@ class Deploy extends AbstractStep
 		);
 
 		// Is SSL enabled and we have a cacert.pem file?
-		if (!defined('AKEEBA_CACERT_PEM'))
+		if (!\defined('AKEEBA_CACERT_PEM'))
 		{
 			$config->usessl = false;
 		}
@@ -177,7 +177,7 @@ class Deploy extends AbstractStep
 
 		if (empty($destName))
 		{
-			$destName = basename($sourcePath);
+			$destName = \basename($sourcePath);
 		}
 
 		$conf    = Configuration::getInstance();
@@ -191,10 +191,10 @@ class Deploy extends AbstractStep
 			$acl = Acl::ACL_PUBLIC_READ;
 		}
 
-		$this->io->comment(sprintf("with %s ACL", $acl));
+		$this->io->comment(\sprintf("with %s ACL", $acl));
 
 		$bucket    = $config->bucket;
-		$inputFile = realpath($sourcePath);
+		$inputFile = \realpath($sourcePath);
 		$input     = Input::createFromFile($inputFile);
 
 		$s3Client->putObject($input, $bucket, $uri, $acl, [
@@ -209,7 +209,7 @@ class Deploy extends AbstractStep
 		{
 			$conf     = Configuration::getInstance();
 			$version  = $conf->get('common.version');
-			$destName = $version . '/' . basename($sourcePath);
+			$destName = $version . '/' . \basename($sourcePath);
 		}
 
 		$ftp = new FTP($config);
@@ -222,7 +222,7 @@ class Deploy extends AbstractStep
 		{
 			$conf     = Configuration::getInstance();
 			$version  = $conf->get('common.version');
-			$destName = $version . '/' . basename($sourcePath);
+			$destName = $version . '/' . \basename($sourcePath);
 		}
 
 		$ftp = new FTPcURL($config);
@@ -235,7 +235,7 @@ class Deploy extends AbstractStep
 		{
 			$conf     = Configuration::getInstance();
 			$version  = $conf->get('common.version');
-			$destName = $version . '/' . basename($sourcePath);
+			$destName = $version . '/' . \basename($sourcePath);
 		}
 
 		$sftp = new SFTP($config);
@@ -248,7 +248,7 @@ class Deploy extends AbstractStep
 		{
 			$conf     = Configuration::getInstance();
 			$version  = $conf->get('common.version');
-			$destName = $version . '/' . basename($sourcePath);
+			$destName = $version . '/' . \basename($sourcePath);
 		}
 
 		$sftp = new SFTPcURL($config);

@@ -41,7 +41,7 @@ class Updates extends AbstractStep
 
 		if ($type === 'none')
 		{
-			$this->io->note(sprintf("Skipping %s updates (format set to “none”)", ucfirst($prefix)));
+			$this->io->note(\sprintf("Skipping %s updates (format set to “none”)", \ucfirst($prefix)));
 
 			return;
 		}
@@ -64,7 +64,7 @@ class Updates extends AbstractStep
 			$config = (object) [
 				'type'             => $type,
 				'hostname'         => $conf->get('common.update.ftp.hostname', ''),
-				'port'             => $conf->get('common.update.ftp.port', in_array($type, [
+				'port'             => $conf->get('common.update.ftp.port', \in_array($type, [
 					'sftp', 'sftpcurl',
 				]) ? 22 : 21),
 				'username'         => $conf->get('common.update.ftp.username', ''),
@@ -88,16 +88,16 @@ class Updates extends AbstractStep
 		// No base name means that no updates are set here
 		if (empty($basename))
 		{
-			$this->io->note(sprintf("There are no %s updates", ucfirst($prefix)));
+			$this->io->note(\sprintf("There are no %s updates", \ucfirst($prefix)));
 
 			return;
 		}
 
-		$tempPath = realpath(__DIR__ . '/../../tmp/');
+		$tempPath = \realpath(__DIR__ . '/../../tmp/');
 
 		foreach ($formats as $format_raw)
 		{
-			$this->io->text(sprintf("Pushing %s update format over %s", $format_raw, $type));
+			$this->io->text(\sprintf("Pushing %s update format over %s", $format_raw, $type));
 
 			switch ($format_raw)
 			{
@@ -121,10 +121,10 @@ class Updates extends AbstractStep
 			}
 
 			$temp_filename = $tempPath . '/' . $basename . $extension;
-			$url           .= (substr($url, -4) === '.php') ? '' : '/index.php';
-			$updateURL     = sprintf("%s?option=com_ars&view=update%s&format=%s&id=%s%s", $url, $task, $format, $stream_id, $task);
+			$url           .= (\substr($url, -4) === '.php') ? '' : '/index.php';
+			$updateURL     = \sprintf("%s?option=com_ars&view=update%s&format=%s&id=%s%s", $url, $task, $format, $stream_id, $task);
 
-			$context = stream_context_create([
+			$context = \stream_context_create([
 				'http' => [
 					'method' => 'GET',
 				],
@@ -134,7 +134,7 @@ class Updates extends AbstractStep
 					'verify_depth' => 5,
 				],
 			]);
-			$data    = file_get_contents($updateURL, false, $context);
+			$data    = \file_get_contents($updateURL, false, $context);
 
 			/**
 			 * When we do not have updates for a specific item we might choose to use a fake update stream ID, e.g.
@@ -146,7 +146,7 @@ class Updates extends AbstractStep
 				continue;
 			}
 
-			file_put_contents($temp_filename, $data);
+			\file_put_contents($temp_filename, $data);
 
 			switch ($type)
 			{
@@ -168,7 +168,7 @@ class Updates extends AbstractStep
 					break;
 
 				case 'sftp':
-					if (function_exists('ssh2_connect'))
+					if (\function_exists('ssh2_connect'))
 					{
 						$this->uploadSftp($config, $temp_filename);
 
@@ -186,7 +186,7 @@ class Updates extends AbstractStep
 					break;
 			}
 
-			unlink($temp_filename);
+			\unlink($temp_filename);
 		}
 	}
 
@@ -199,7 +199,7 @@ class Updates extends AbstractStep
 		);
 
 		// Is SSL enabled and we have a cacert.pem file?
-		if (!defined('AKEEBA_CACERT_PEM'))
+		if (!\defined('AKEEBA_CACERT_PEM'))
 		{
 			$config->usessl = false;
 		}
@@ -211,7 +211,7 @@ class Updates extends AbstractStep
 
 		if (empty($destName))
 		{
-			$destName = basename($sourcePath);
+			$destName = \basename($sourcePath);
 		}
 
 		$uri = $config->directory . '/' . $destName;
@@ -223,7 +223,7 @@ class Updates extends AbstractStep
 		}
 
 		$bucket    = $config->bucket;
-		$inputFile = realpath($sourcePath);
+		$inputFile = \realpath($sourcePath);
 		$input     = Input::createFromFile($inputFile);
 
 		$s3Client->putObject($input, $bucket, $uri, $acl, [
@@ -236,7 +236,7 @@ class Updates extends AbstractStep
 	{
 		if (empty($destName))
 		{
-			$destName = basename($sourcePath);
+			$destName = \basename($sourcePath);
 		}
 
 		$ftp = new FTP($config);
@@ -248,7 +248,7 @@ class Updates extends AbstractStep
 	{
 		if (empty($destName))
 		{
-			$destName = basename($sourcePath);
+			$destName = \basename($sourcePath);
 		}
 
 		$ftp = new FTPcURL($config);
@@ -260,7 +260,7 @@ class Updates extends AbstractStep
 	{
 		if (empty($destName))
 		{
-			$destName = basename($sourcePath);
+			$destName = \basename($sourcePath);
 		}
 
 		$sftp = new SFTP($config);
@@ -272,7 +272,7 @@ class Updates extends AbstractStep
 	{
 		if (empty($destName))
 		{
-			$destName = basename($sourcePath);
+			$destName = \basename($sourcePath);
 		}
 
 		$sftp = new SFTPcURL($config);

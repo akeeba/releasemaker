@@ -71,13 +71,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 //	    SetList::PSR_4,
 //	    SetList::PRIVATIZATION,
 //		SetList::CODING_STYLE,
-	    SetList::CODE_QUALITY,
+//	    SetList::CODE_QUALITY,
 //	    SetList::CODE_QUALITY_STRICT,
-//	    SetList::DEAD_CLASSES,
-//	    SetList::GMAGICK_TO_IMAGICK,
-//	    SetList::NAMING,
-//	    SetList::ORDER,
-//	    SetList::PERFORMANCE,
+	    SetList::PERFORMANCE,
 //	    SetList::UNWRAP_COMPAT,
 
 		// Only valid in Rector 0.9

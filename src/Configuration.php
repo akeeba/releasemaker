@@ -61,12 +61,12 @@ class Configuration
 		$result = $default;
 
 		// Explode the registry path into an array
-		$nodes = explode('.', $path);
+		$nodes = \explode('.', $path);
 
 		if ($nodes !== [])
 		{
 			// Get the namespace
-			$count = count($nodes);
+			$count = \count($nodes);
 
 			if ($count < 2)
 			{
@@ -112,10 +112,10 @@ class Configuration
 	public function set(string $path, $value)
 	{
 		// Explode the registry path into an array
-		$nodes = explode('.', $path);
+		$nodes = \explode('.', $path);
 
 		// Get the namespace
-		$count = count($nodes);
+		$count = \count($nodes);
 
 		if ($count < 2)
 		{
@@ -123,7 +123,7 @@ class Configuration
 		}
 		else
 		{
-			$namespace = array_shift($nodes);
+			$namespace = \array_shift($nodes);
 			$count--;
 		}
 
@@ -152,13 +152,13 @@ class Configuration
 		}
 
 		// Set the new values
-		if (is_string($value) && substr($value, 0, 10) == '###json###')
+		if (\is_string($value) && \substr($value, 0, 10) == '###json###')
 		{
-			$value = json_decode(substr($value, 10));
+			$value = \json_decode(\substr($value, 10));
 		}
 
 		// Unset keys when they are being set to null
-		if (is_null($value))
+		if (\is_null($value))
 		{
 			$ret = $ns->{$nodes[$i]};
 
@@ -184,7 +184,7 @@ class Configuration
 			return;
 		}
 
-		$data = file_get_contents($filename);
+		$data = \file_get_contents($filename);
 
 		$this->loadJSON($data);
 	}
@@ -212,7 +212,7 @@ class Configuration
 			}
 		}
 
-		return json_encode($data, JSON_PRETTY_PRINT);
+		return \json_encode($data, JSON_PRETTY_PRINT);
 	}
 
 	/**
@@ -234,9 +234,9 @@ class Configuration
 
 		$customContents = null;
 
-		if (!empty($customCacertPem) && @is_readable($customCacertPem))
+		if (!empty($customCacertPem) && @\is_readable($customCacertPem))
 		{
-			$customContents = @file_get_contents($customCacertPem);
+			$customContents = @\file_get_contents($customCacertPem);
 		}
 
 		if (empty($customContents))
@@ -245,11 +245,11 @@ class Configuration
 		}
 
 		// Let's use the tmpfile trick. The file will removed once the self::$cacertPemFilePointer goes out of scope.
-		$cacertPemFilePointer = tmpfile();
-		$cacertPemFile        = stream_get_meta_data($cacertPemFilePointer)['uri'];
+		$cacertPemFilePointer = \tmpfile();
+		$cacertPemFile        = \stream_get_meta_data($cacertPemFilePointer)['uri'];
 
 		// Combine the original cacert.pem with the provided certificate / certificate storage
-		fwrite($cacertPemFilePointer, file_get_contents(__DIR__ . '/cacert.pem') . "\n\n" . $customContents);
+		\fwrite($cacertPemFilePointer, \file_get_contents(__DIR__ . '/cacert.pem') . "\n\n" . $customContents);
 
 		// DO NOT CALL fclose(). THAT WOULD DELETE OUR TEMPORARY FILE!
 		return $cacertPemFile;
@@ -272,7 +272,7 @@ class Configuration
 	 */
 	private function getNameSpaces(): array
 	{
-		return array_keys($this->registry);
+		return \array_keys($this->registry);
 	}
 
 	/**
@@ -304,7 +304,7 @@ class Configuration
 
 		foreach ($array as $key => $value)
 		{
-			if (is_null($this->get($key)))
+			if (\is_null($this->get($key)))
 			{
 				$this->set($key, $value);
 			}
@@ -318,7 +318,7 @@ class Configuration
 	 */
 	private function loadJSON(?string $json = null)
 	{
-		$array = json_decode($json, true);
+		$array = \json_decode($json, true);
 
 		if (empty($array))
 		{
@@ -430,13 +430,13 @@ class Configuration
 	private function dumpObject(object $object, string $prefix = ''): array
 	{
 		$data = [];
-		$vars = get_object_vars($object);
+		$vars = \get_object_vars($object);
 
 		foreach ($vars as $key => $value)
 		{
-			if (is_array($value))
+			if (\is_array($value))
 			{
-				$value = '###json###' . json_encode($value);
+				$value = '###json###' . \json_encode($value);
 			}
 
 			$data[(empty($prefix) ? '' : $prefix . '.') . $key] = $value;
