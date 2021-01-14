@@ -35,7 +35,7 @@ class SFTPcURL
 
 		if ($fp === false)
 		{
-			throw new FatalProblem("Unreadable local file $localFilename", 80);
+			throw new FatalProblem(sprintf("Unreadable local file %s", $localFilename), 80);
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
@@ -43,7 +43,7 @@ class SFTPcURL
 		{
 			$this->uploadFromHandle($remoteFilename, $fp);
 		}
-		catch (RuntimeException $e)
+		catch (RuntimeException $runtimeException)
 		{
 			return false;
 		}
@@ -183,7 +183,7 @@ class SFTPcURL
 
 		if ($errNo)
 		{
-			throw new FatalProblem("cURL Error $errNo connecting to remote SFTP server: $error", 80);
+			throw new FatalProblem(sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error), 80);
 		}
 	}
 

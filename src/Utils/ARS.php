@@ -247,7 +247,7 @@ class ARS
 
 		if ($raw === false)
 		{
-			throw new FatalProblem('ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.' . "\ncURL error $errno. $error\n", 30);
+			throw new FatalProblem(sprintf("ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.\ncURL error %s. %s\n", $errno, $error), 30);
 		}
 
 		return $raw;

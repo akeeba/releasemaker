@@ -70,7 +70,7 @@ class SFTP
 
 		if (!@ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new FatalProblem('Could not connect to SFTP server: invalid directory (' . $config->directory . ')', 80);
+			throw new FatalProblem(sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory), 80);
 		}
 	}
 
@@ -84,18 +84,18 @@ class SFTP
 		$realdir  = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
 		$realname = $realdir . '/' . basename($destPath);
 
-		$fp = @fopen("ssh2.sftp://{$this->fp}$realname", 'w');
+		$fp = @fopen(sprintf("ssh2.sftp://%s%s", $this->fp, $realname), 'w');
 
 		if ($fp === false)
 		{
-			throw new FatalProblem("Could not open remote file $realname for writing", 80);
+			throw new FatalProblem(sprintf("Could not open remote file %s for writing", $realname), 80);
 		}
 
 		$localfp = @fopen($sourcePath, 'rb');
 
 		if ($localfp === false)
 		{
-			throw new FatalProblem("Could not open local file $sourcePath for reading", 80);
+			throw new FatalProblem(sprintf("Could not open local file %s for reading", $sourcePath), 80);
 		}
 
 		$res = true;
@@ -114,11 +114,11 @@ class SFTP
 			// If the file was unreadable, just skip it...
 			if (is_readable($sourcePath))
 			{
-				throw new FatalProblem('Uploading ' . $destPath . ' has failed.', 80);
+				throw new FatalProblem(sprintf("Uploading %s has failed.", $destPath), 80);
 			}
 			else
 			{
-				throw new FatalProblem('Uploading ' . $destPath . ' has failed because the file is unreadable.', 80);
+				throw new FatalProblem(sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
 			}
 		}
 	}
@@ -148,7 +148,7 @@ class SFTP
 
 		if (!$result)
 		{
-			throw new FatalProblem("Cannot change into $realdir directory", 80);
+			throw new FatalProblem(sprintf("Cannot change into %s directory", $realdir), 80);
 		}
 
 		return true;
@@ -167,7 +167,7 @@ class SFTP
 			{
 				if (@ssh2_sftp_mkdir($this->fp, $check, 0755, true) === false)
 				{
-					throw new FatalProblem('Could not create directory ' . $check, 80);
+					throw new FatalProblem(sprintf("Could not create directory %s", $check), 80);
 				}
 			}
 			$previousDir = $check;

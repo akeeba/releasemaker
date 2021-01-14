@@ -72,10 +72,10 @@ class FTP
 			// If the file was unreadable, just skip it...
 			if (is_readable($sourcePath))
 			{
-				throw new FatalProblem('Uploading ' . $destPath . ' has failed.', 80);
+				throw new FatalProblem(sprintf("Uploading %s has failed.", $destPath), 80);
 			}
 
-			throw new FatalProblem('Uploading ' . $destPath . ' has failed because the file is unreadable.', 80);
+			throw new FatalProblem(sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
 		}
 		else
 		{
@@ -109,7 +109,7 @@ class FTP
 
 		if (!$result)
 		{
-			throw new FatalProblem("Cannot change into $realDirectory directory", 80);
+			throw new FatalProblem(sprintf("Cannot change into %s directory", $realDirectory), 80);
 		}
 	}
 
@@ -127,7 +127,7 @@ class FTP
 			{
 				if (@ftp_mkdir($this->fp, $check) === false)
 				{
-					throw new FatalProblem('Could not create directory ' . $check, 80);
+					throw new FatalProblem(sprintf("Could not create directory %s", $check), 80);
 				}
 
 				@ftp_chmod($this->fp, 0755, $check);

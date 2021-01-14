@@ -109,7 +109,7 @@ class Items extends AbstractStep
 			return;
 		}
 
-		$access = $conf->get("$prefix.access", "1");
+		$access = $conf->get(sprintf("%s.access", $prefix), "1");
 
 		foreach ($coreFiles as $filename)
 		{
@@ -175,7 +175,7 @@ class Items extends AbstractStep
 				$action   = $oldId ? "updated" : "created";
 				$itemMeta = json_decode($result);
 
-				$this->io->success(sprintf("Item %u has been $action", $itemMeta->id));
+				$this->io->success(sprintf("Item %u has been %s", $itemMeta->id, $action));
 
 				return;
 			}

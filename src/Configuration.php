@@ -49,26 +49,6 @@ class Configuration
 	}
 
 	/**
-	 * Create a namespace
-	 *
-	 * @param   string  $namespace  Name of the namespace to create
-	 */
-	private function makeNameSpace(string $namespace): void
-	{
-		$this->registry[$namespace] = ['data' => new stdClass()];
-	}
-
-	/**
-	 * Get the list of namespaces
-	 *
-	 * @return    string[]    List of namespaces
-	 */
-	private function getNameSpaces(): array
-	{
-		return array_keys($this->registry);
-	}
-
-	/**
 	 * Get a registry value
 	 *
 	 * @param   string  $path     Registry path (e.g. global.directory.temporary)
@@ -193,6 +173,109 @@ class Configuration
 	}
 
 	/**
+	 * Load configuration from a JSON file
+	 *
+	 * @param   string  $filename  The path to the file to load
+	 */
+	public function loadFile(?string $filename = null): void
+	{
+		if (empty($filename))
+		{
+			return;
+		}
+
+		$data = file_get_contents($filename);
+
+		$this->loadJSON($data);
+	}
+
+	/**
+	 * Exports the current registry snapshot as an JSON string.
+	 *
+	 * @return    string    JSON representation of the registry
+	 * @noRector  \Rector\Privatization\Rector\ClassMethod\PrivatizeLocalOnlyMethodRector
+	 */
+	public function exportJSON(): string
+	{
+		$data = [];
+
+		$namespaces = $this->getNameSpaces();
+
+		foreach ($namespaces as $namespace)
+		{
+			$ns   = $this->registry[$namespace]['data'];
+			$temp = $this->dumpObject($ns);
+
+			foreach ($temp as $k => $v)
+			{
+				$data[$namespace . '.' . $k] = $v;
+			}
+		}
+
+		return json_encode($data, JSON_PRETTY_PRINT);
+	}
+
+	/**
+	 * Set up a cacert.pem file which merges the built in one with the user-defined one.
+	 *
+	 * @return  string
+	 */
+	public function getCustomCacertPem(): string
+	{
+		global $cacertPemFilePointer;
+
+		$cacertPemFile   = __DIR__ . '/cacert.pem';
+		$customCacertPem = $this->get('common.cacert');
+
+		if (empty($customCacertPem))
+		{
+			return $cacertPemFile;
+		}
+
+		$customContents = null;
+
+		if (!empty($customCacertPem) && @is_readable($customCacertPem))
+		{
+			$customContents = @file_get_contents($customCacertPem);
+		}
+
+		if (empty($customContents))
+		{
+			return $cacertPemFile;
+		}
+
+		// Let's use the tmpfile trick. The file will removed once the self::$cacertPemFilePointer goes out of scope.
+		$cacertPemFilePointer = tmpfile();
+		$cacertPemFile        = stream_get_meta_data($cacertPemFilePointer)['uri'];
+
+		// Combine the original cacert.pem with the provided certificate / certificate storage
+		fwrite($cacertPemFilePointer, file_get_contents(__DIR__ . '/cacert.pem') . "\n\n" . $customContents);
+
+		// DO NOT CALL fclose(). THAT WOULD DELETE OUR TEMPORARY FILE!
+		return $cacertPemFile;
+	}
+
+	/**
+	 * Create a namespace
+	 *
+	 * @param   string  $namespace  Name of the namespace to create
+	 */
+	private function makeNameSpace(string $namespace): void
+	{
+		$this->registry[$namespace] = ['data' => new stdClass()];
+	}
+
+	/**
+	 * Get the list of namespaces
+	 *
+	 * @return    string[]    List of namespaces
+	 */
+	private function getNameSpaces(): array
+	{
+		return array_keys($this->registry);
+	}
+
+	/**
 	 * Resets the registry to the default values
 	 */
 	private function reset(): void
@@ -245,89 +328,6 @@ class Configuration
 		$this->mergeArray($array);
 
 		$this->postProcess();
-	}
-
-	/**
-	 * Load configuration from a JSON file
-	 *
-	 * @param   string  $filename  The path to the file to load
-	 */
-	public function loadFile(?string $filename = null): void
-	{
-		if (empty($filename))
-		{
-			return;
-		}
-
-		$data = file_get_contents($filename);
-
-		$this->loadJSON($data);
-	}
-
-	/**
-	 * Exports the current registry snapshot as an JSON string.
-	 *
-	 * @return    string    JSON representation of the registry
-	 * @noRector  \Rector\Privatization\Rector\ClassMethod\PrivatizeLocalOnlyMethodRector
-	 */
-	public function exportJSON(): string
-	{
-		$data = [];
-
-		$namespaces = $this->getNameSpaces();
-
-		foreach ($namespaces as $namespace)
-		{
-			$ns   = $this->registry[$namespace]['data'];
-			$temp = $this->dumpObject($ns);
-
-			foreach ($temp as $k => $v)
-				{
-					$data[$namespace . '.' . $k] = $v;
-				}
-		}
-
-		return json_encode($data, JSON_PRETTY_PRINT);
-	}
-
-	/**
-	 * Set up a cacert.pem file which merges the built in one with the user-defined one.
-	 *
-	 * @return  string
-	 */
-	public function getCustomCacertPem(): string
-	{
-		global $cacertPemFilePointer;
-
-		$cacertPemFile   = __DIR__ . '/cacert.pem';
-		$customCacertPem = $this->get('common.cacert');
-
-		if (empty($customCacertPem))
-		{
-			return $cacertPemFile;
-		}
-
-		$customContents = null;
-
-		if (!empty($customCacertPem) && @is_readable($customCacertPem))
-		{
-			$customContents = @file_get_contents($customCacertPem);
-		}
-
-		if (empty($customContents))
-		{
-			return $cacertPemFile;
-		}
-
-		// Let's use the tmpfile trick. The file will removed once the self::$cacertPemFilePointer goes out of scope.
-		$cacertPemFilePointer = tmpfile();
-		$cacertPemFile        = stream_get_meta_data($cacertPemFilePointer)['uri'];
-
-		// Combine the original cacert.pem with the provided certificate / certificate storage
-		fwrite($cacertPemFilePointer, file_get_contents(__DIR__ . '/cacert.pem') . "\n\n" . $customContents);
-
-		// DO NOT CALL fclose(). THAT WOULD DELETE OUR TEMPORARY FILE!
-		return $cacertPemFile;
 	}
 
 	/**

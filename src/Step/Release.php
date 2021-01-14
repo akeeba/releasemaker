@@ -76,7 +76,7 @@ class Release extends AbstractStep
 
 		if (empty($this->release->description))
 		{
-			$this->release->description = "<p>Version $version</p>";
+			$this->release->description = sprintf("<p>Version %s</p>", $version);
 		}
 
 		if (empty($this->release->notes))
@@ -287,7 +287,7 @@ class Release extends AbstractStep
 					break;
 			}
 
-			$htmlChangelog .= "<h4>$title</h4>\n<ul>\n";
+			$htmlChangelog .= sprintf("<h4>%s</h4>\n<ul>\n", $title);
 
 			foreach ($lines as $line)
 			{
