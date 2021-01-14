@@ -12,6 +12,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 abstract class AbstractStep implements StepInterface
 {
+	/**
+	 * Symfony I/O object
+	 *
+	 * @var SymfonyStyle
+	 */
 	protected $io;
 
 	public function __construct(SymfonyStyle $io)

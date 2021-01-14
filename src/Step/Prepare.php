@@ -68,7 +68,7 @@ class Prepare extends AbstractStep
 
 		if (empty($pattern))
 		{
-			$pattern = 'com_*' . $type . '.zip';
+			$pattern = 'pkg_*' . $type . '.zip';
 		}
 
 		$dir = new DirectoryIterator($this->path);

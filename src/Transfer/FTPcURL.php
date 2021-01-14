@@ -10,26 +10,26 @@ namespace Akeeba\ReleaseMaker\Transfer;
 use Akeeba\ReleaseMaker\Exception\FatalProblem;
 use RuntimeException;
 
-class FTPcURL
+class FTPcURL implements Uploader
 {
 	private $config;
 
-	public function __construct($config)
+	/** @inheritDoc */
+	public function __construct(object $config)
 	{
 		$this->config = $config;
 
 		$this->connect();
 	}
 
-	/**
-	 * Uploads a local file to the remote storage
-	 *
-	 * @param   string  $localFilename   The full path to the local file
-	 * @param   string  $remoteFilename  The full path to the remote file
-	 *
-	 * @return  boolean  True on success
-	 */
-	public function upload($localFilename, $remoteFilename)
+	/** @inheritDoc */
+	public function __destruct()
+	{
+		// This class does not store a connection object.
+	}
+
+	/** @inheritDoc */
+	public function upload(string $localFilename, string $remoteFilename): void
 	{
 		$fp = @\fopen($localFilename, 'rb');
 
@@ -39,16 +39,7 @@ class FTPcURL
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
-		try
-		{
-			$this->uploadFromHandle($remoteFilename, $fp);
-		}
-		catch (RuntimeException $runtimeException)
-		{
-			return false;
-		}
-
-		return true;
+		$this->uploadFromHandle($remoteFilename, $fp);
 	}
 
 	/**
@@ -222,5 +213,4 @@ class FTPcURL
 
 		return $ch;
 	}
-
 }

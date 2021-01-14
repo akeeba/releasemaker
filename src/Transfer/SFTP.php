@@ -9,7 +9,7 @@ namespace Akeeba\ReleaseMaker\Transfer;
 
 use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
-class SFTP
+class SFTP implements Uploader
 {
 	private $ssh;
 
@@ -17,7 +17,8 @@ class SFTP
 
 	private $config;
 
-	public function __construct($config)
+	/** @inheritDoc */
+	public function __construct(object $config)
 	{
 		$this->config = $config;
 
@@ -70,7 +71,22 @@ class SFTP
 		}
 	}
 
-	public function upload($sourcePath, $destPath)
+	/** @inheritDoc */
+	public function __destruct()
+	{
+		if (is_resource($this->fp))
+		{
+			@fclose($this->fp);
+		}
+
+		ssh2_disconnect($this->ssh);
+
+		$this->fp  = null;
+		$this->ssh = null;
+	}
+
+	/** @inheritDoc */
+	public function upload(string $sourcePath, string $destPath): void
 	{
 		$dir = \dirname($destPath);
 		$this->chdir($dir);
@@ -112,10 +128,8 @@ class SFTP
 			{
 				throw new FatalProblem(\sprintf("Uploading %s has failed.", $destPath), 80);
 			}
-			else
-			{
-				throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
-			}
+
+			throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
 		}
 	}
 

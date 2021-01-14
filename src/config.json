@@ -40,7 +40,7 @@
 	"common.update.s3.directory": "",
 	"common.update.s3.cdnhostname": "",
 
-	"pro.pattern": "com_*pro.zip",
+	"pro.pattern": "pkg_*pro.zip",
 	"pro.method": "sftp",
 	"pro.update.stream": "",
 	"pro.update.formats": [
@@ -69,7 +69,7 @@
 	"pro.s3.cdnhostname": "",
 	"pro.s3.reldir": "",
 
-	"core.pattern": "com_*core.zip",
+	"core.pattern": "pkg_*core.zip",
 	"core.method": "s3",
 	"core.update.stream": "",
 	"core.update.formats": [

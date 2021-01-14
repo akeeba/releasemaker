@@ -9,54 +9,73 @@ namespace Akeeba\ReleaseMaker\Transfer;
 
 use Akeeba\ReleaseMaker\Exception\FatalProblem;
 
-class FTP
+class FTP implements Uploader
 {
-	private $fp;
+	/**
+	 * The FTP connection resource
+	 *
+	 * @var resource|null
+	 */
+	private $ftp;
 
 	private $config;
 
-	public function __construct($config)
+	/** @inheritDoc */
+	public function __construct(object $config)
 	{
 		$this->config = $config;
 
 		if ($config->method == 'ftps')
 		{
-			$this->fp = @\ftp_ssl_connect($config->hostname, $config->port);
+			$ftp = @\ftp_ssl_connect($config->hostname, $config->port);
 		}
 		else
 		{
-			$this->fp = @\ftp_connect($config->hostname, $config->port);
+			$ftp = @\ftp_connect($config->hostname, $config->port);
 		}
 
-		if (!$this->fp)
+		$this->ftp = ($ftp !== false) ? $ftp : null;
+
+		if (is_null($this->ftp))
 		{
 			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid hostname or port', 80);
 		}
 
-		if (!@\ftp_login($this->fp, $config->username, $config->password))
+		if (!@\ftp_login($this->ftp, $config->username, $config->password))
 		{
+			\ftp_close($this->ftp);
+
 			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid username or password', 80);
 		}
 
-		if (!@\ftp_chdir($this->fp, $config->directory))
+		if (!@\ftp_chdir($this->ftp, $config->directory))
 		{
+			\ftp_close($this->ftp);
+
 			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid directory', 80);
 		}
 
-		@\ftp_pasv($this->fp, $config->passive);
-	}
-
-	public function __destruct()
-	{
-		if (\is_resource($this->fp))
+		if (!@\ftp_pasv($this->ftp, $config->passive))
 		{
-			\ftp_close($this->fp);
+			\ftp_close($this->ftp);
+
+			throw new FatalProblem('Could not set the connection\'s FTP %s Mode', $config->passive ? 'Passive' : 'Active');
 		}
 	}
 
-	public function upload($sourcePath, $destPath)
+	/** @inheritDoc */
+	public function __destruct()
 	{
-		\ftp_chdir($this->fp, $this->config->directory);
+		if (\is_resource($this->ftp))
+		{
+			\ftp_close($this->ftp);
+		}
+	}
+
+	/** @inheritDoc */
+	public function upload(string $sourcePath, string $destPath): void
+	{
+		\ftp_chdir($this->ftp, $this->config->directory);
 
 		$dir = \dirname($destPath);
 		$this->chdir($dir);
@@ -65,7 +84,7 @@ class FTP
 		$realDirectory .= '/' . $dir;
 		$realDirectory = \substr($realDirectory, 0, 1) == '/' ? $realDirectory : '/' . $realDirectory;
 		$realname      = $realDirectory . '/' . \basename($destPath);
-		$res           = @\ftp_put($this->fp, $realname, $sourcePath, FTP_BINARY);
+		$res           = @\ftp_put($this->ftp, $realname, $sourcePath, FTP_BINARY);
 
 		if (!$res)
 		{
@@ -77,10 +96,8 @@ class FTP
 
 			throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
 		}
-		else
-		{
-			@\ftp_chmod($this->fp, 0755, $realname);
-		}
+
+		@\ftp_chmod($this->ftp, 0755, $realname);
 	}
 
 	private function chdir($dir)
@@ -96,7 +113,7 @@ class FTP
 		$realDirectory .= '/' . $dir;
 		$realDirectory = \substr($realDirectory, 0, 1) == '/' ? $realDirectory : '/' . $realDirectory;
 
-		$result = @\ftp_chdir($this->fp, $realDirectory);
+		$result = @\ftp_chdir($this->ftp, $realDirectory);
 
 		if (!$result)
 		{
@@ -104,7 +121,7 @@ class FTP
 			$this->makeDirectory($dir);
 
 			// After creating it, change into it
-			$result = @\ftp_chdir($this->fp, $realDirectory);
+			$result = @\ftp_chdir($this->ftp, $realDirectory);
 		}
 
 		if (!$result)
@@ -123,14 +140,14 @@ class FTP
 		{
 			$check = $previousDir . '/' . $curdir;
 
-			if (!@\ftp_chdir($this->fp, $check))
+			if (!@\ftp_chdir($this->ftp, $check))
 			{
-				if (@\ftp_mkdir($this->fp, $check) === false)
+				if (@\ftp_mkdir($this->ftp, $check) === false)
 				{
 					throw new FatalProblem(\sprintf("Could not create directory %s", $check), 80);
 				}
 
-				@\ftp_chmod($this->fp, 0755, $check);
+				@\ftp_chmod($this->ftp, 0755, $check);
 			}
 
 			$previousDir = $check;

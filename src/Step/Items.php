@@ -9,13 +9,12 @@ namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration;
 use Akeeba\ReleaseMaker\Exception\FatalProblem;
-use Akeeba\ReleaseMaker\Utils\ARS;
+use Akeeba\ReleaseMaker\Step\Mixin\ARSConnectorAware;
 use stdClass;
 
 class Items extends AbstractStep
 {
-	/** @var ARS The ARS connector class */
-	private $arsConnector;
+	use ARSConnectorAware;
 
 	/** @var stdClass The release we will be saving items to */
 	private $release;
@@ -30,6 +29,8 @@ class Items extends AbstractStep
 	public function execute(): void
 	{
 		$this->io->section('Creating or updating items');
+
+		$this->initARSConnector();
 
 		$this->io->writeln("<info>Getting release information</info>");
 
@@ -64,18 +65,9 @@ class Items extends AbstractStep
 	 */
 	private function retrieveReleaseInfo(): void
 	{
-		$conf = Configuration::getInstance();
-
-		$this->arsConnector = new ARS([
-			'host'     => $conf->get('common.arsapiurl', ''),
-			'username' => $conf->get('common.username', ''),
-			'password' => $conf->get('common.password', ''),
-			'apiToken' => $conf->get('common.token', ''),
-		]);
-
-		$category = $conf->get('common.category', 0);
-		$version  = $conf->get('common.version', 0);
-
+		$conf          = Configuration::getInstance();
+		$category      = $conf->get('common.category', 0);
+		$version       = $conf->get('common.version', 0);
 		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
 
