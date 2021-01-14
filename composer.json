@@ -20,6 +20,9 @@
 		"ext-curl": "*",
 		"ext-zip": "*"
 	},
+	"require-dev": {
+		"rector/rector": "^0.8.0"
+	},
 	"suggest": {
 		"ext-ssh2": "*",
 		"ext-ftp": "*"
