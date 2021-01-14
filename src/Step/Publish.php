@@ -8,12 +8,12 @@
 namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration;
+use Akeeba\ReleaseMaker\Step\Mixin\ARSConnectorAware;
 use Akeeba\ReleaseMaker\Utils\ARS;
 
 class Publish extends AbstractStep
 {
-	/** @var ARS The ARS connector class */
-	private $arsConnector;
+	use ARSConnectorAware;
 
 	private $publishInfo = [
 		'release' => null,
@@ -28,7 +28,9 @@ class Publish extends AbstractStep
 
 		$this->io->writeln("<info>Initialisation</info>");
 
-		$this->init();
+		$this->initARSConnector();;
+
+		$this->publishInfo = Configuration::getInstance()->get('volatile.publishInfo');
 
 		$this->io->writeln("<info>Publishing Core items</info>");
 
@@ -47,20 +49,6 @@ class Publish extends AbstractStep
 		$this->publishRelease($this->publishInfo['release']);
 
 		$this->io->newLine();
-	}
-
-	private function init(): void
-	{
-		$conf = Configuration::getInstance();
-
-		$this->arsConnector = new ARS([
-			'host'     => $conf->get('common.arsapiurl', ''),
-			'username' => $conf->get('common.username', ''),
-			'password' => $conf->get('common.password', ''),
-			'apiToken' => $conf->get('common.token', ''),
-		]);
-
-		$this->publishInfo = $conf->get('volatile.publishInfo');
 	}
 
 	private function publishItems(array $items): void

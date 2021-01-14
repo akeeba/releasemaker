@@ -34,7 +34,7 @@ class Items extends AbstractStep
 
 		$this->io->writeln("<info>Getting release information</info>");
 
-		$this->retrieveReleaseInfo();
+		$this->release = $this->getRelease();
 
 		$this->io->text(\sprintf("Retrieved information for release %u", $this->release->id));
 
@@ -58,17 +58,6 @@ class Items extends AbstractStep
 		$conf->set('volatile.publishInfo', $this->publishInfo);
 
 		$this->io->newLine();
-	}
-
-	/**
-	 * Set $this->release to the record for the release we will be using to save items to.
-	 */
-	private function retrieveReleaseInfo(): void
-	{
-		$conf          = Configuration::getInstance();
-		$category      = $conf->get('common.category', 0);
-		$version       = $conf->get('common.version', 0);
-		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
 
 	private function deployFiles(string $prefix = 'core', bool $isPdf = false): void

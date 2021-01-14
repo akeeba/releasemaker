@@ -7,7 +7,6 @@
 
 namespace Akeeba\ReleaseMaker\Step\Mixin;
 
-
 use Akeeba\ReleaseMaker\Configuration;
 use Akeeba\ReleaseMaker\Utils\ARS;
 
@@ -37,4 +36,17 @@ trait ARSConnectorAware
 		]);
 	}
 
+	/**
+	 * Get the ARS release object for the version defined by common.version and common.category
+	 *
+	 * @return  object
+	 */
+	protected function getRelease(): object
+	{
+		$conf     = Configuration::getInstance();
+		$category = $conf->get('common.category', 0);
+		$version  = $conf->get('common.version', 0);
+
+		return $this->arsConnector->getRelease($category, $version);
+	}
 }

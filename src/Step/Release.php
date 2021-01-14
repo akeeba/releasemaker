@@ -8,13 +8,12 @@
 namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration;
-use Akeeba\ReleaseMaker\Utils\ARS;
+use Akeeba\ReleaseMaker\Step\Mixin\ARSConnectorAware;
 use Akeeba\ReleaseMaker\Utils\StringHelper;
 
 class Release extends AbstractStep
 {
-	/** @var  ARS  ARS API connector */
-	private $arsConnector;
+	use ARSConnectorAware;
 
 	private $release;
 
@@ -24,7 +23,9 @@ class Release extends AbstractStep
 
 		$this->io->writeln("<info>Checking release status</info>");
 
-		$this->checkRelease();
+		$this->initARSConnector();;
+
+		$this->release = $this->getRelease();
 
 		if (\is_null($this->release->id))
 		{
@@ -38,23 +39,6 @@ class Release extends AbstractStep
 		$this->editRelease();
 
 		$this->io->newLine();
-	}
-
-	private function checkRelease(): void
-	{
-		$conf = Configuration::getInstance();
-
-		$this->arsConnector = new ARS([
-			'host'     => $conf->get('common.arsapiurl', ''),
-			'username' => $conf->get('common.username', ''),
-			'password' => $conf->get('common.password', ''),
-			'apiToken' => $conf->get('common.token', ''),
-		]);
-
-		$category = $conf->get('common.category', 0);
-		$version  = $conf->get('common.version', 0);
-
-		$this->release = $this->arsConnector->getRelease($category, $version);
 	}
 
 	private function editRelease(): void
@@ -91,7 +75,7 @@ class Release extends AbstractStep
 
 		$this->release->maturity = $this->getMaturity($version);
 
-		$result = $this->arsConnector->saveRelease((array) $this->release);
+		$this->arsConnector->saveRelease((array) $this->release);
 	}
 
 	private function readFile(string $filename): ?string

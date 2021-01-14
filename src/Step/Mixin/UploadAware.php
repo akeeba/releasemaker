@@ -14,6 +14,9 @@ use Akeeba\ReleaseMaker\Transfer\S3;
 use Akeeba\ReleaseMaker\Transfer\SFTP;
 use Akeeba\ReleaseMaker\Transfer\SFTPcURL;
 use Akeeba\ReleaseMaker\Transfer\Uploader;
+use RuntimeException;
+use function function_exists;
+use function in_array;
 
 /**
  * Trait for steps which can upload files to remote storage
@@ -35,7 +38,7 @@ trait UploadAware
 	 * @param   callable|null  $onBeforeUpload  Execute this callable before the upload takes place.
 	 *
 	 * @return  void
-	 * @throws  \RuntimeException When the upload fails
+	 * @throws  RuntimeException When the upload fails
 	 */
 	protected function uploadFile(string $prefix, string $localFile, string $remoteFile, callable $onBeforeUpload = null): void
 	{
@@ -76,7 +79,7 @@ trait UploadAware
 				return new FTPcURL($config);
 
 			case 'sftp':
-				if (\function_exists('ssh2_connect'))
+				if (function_exists('ssh2_connect'))
 				{
 					return new SFTP($config);
 				}
@@ -87,7 +90,7 @@ trait UploadAware
 				return new SFTPcURL($config);
 
 			default:
-				throw new \RuntimeException(sprintf('Unknown uploader type ‘%s’.', $type));
+				throw new RuntimeException(sprintf('Unknown uploader type ‘%s’.', $type));
 		}
 	}
 
@@ -121,7 +124,7 @@ trait UploadAware
 		return (object) [
 			'type'             => $type,
 			'hostname'         => $armConfiguration->get($prefix . '.ftp.hostname', $armConfiguration->get('common.update.ftp.hostname', '')),
-			'port'             => $armConfiguration->get($prefix . '.ftp.port', $armConfiguration->get('common.update.ftp.port', \in_array($type, [
+			'port'             => $armConfiguration->get($prefix . '.ftp.port', $armConfiguration->get('common.update.ftp.port', in_array($type, [
 				'sftp', 'sftpcurl',
 			]) ? 22 : 21)),
 			'username'         => $armConfiguration->get($prefix . '.ftp.username', $armConfiguration->get('common.update.ftp.username', '')),
