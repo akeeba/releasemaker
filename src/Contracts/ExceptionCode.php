@@ -18,6 +18,9 @@ class ExceptionCode
 	// Runtime error trying to upload files to remote storage
 	public const UPLOADER_ERROR = 80;
 
+	// Invalid configuration file format
+	public const CONFIG_INVALID_FORMAT = 90;
+
 	// Miscellaneous configuration issue. This is caused by a configuration mistake.
 	public const CONFIG_GENERIC_ERROR = 100;
 

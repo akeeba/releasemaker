@@ -14,6 +14,8 @@ use Akeeba\ReleaseMaker\Configuration\Section\Release;
 use Akeeba\ReleaseMaker\Configuration\Section\Sources;
 use Akeeba\ReleaseMaker\Configuration\Section\Steps;
 use Akeeba\ReleaseMaker\Configuration\Section\Updates;
+use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
+use Akeeba\ReleaseMaker\Exception\ConfigurationError;
 use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
 use LogicException;
 
@@ -33,6 +35,8 @@ final class Configuration
 {
 	use MagicGetterAware;
 
+	private static $instance = null;
+
 	private Release $release;
 
 	private Api $api;
@@ -44,8 +48,6 @@ final class Configuration
 	private Updates $updates;
 
 	private Sources $sources;
-
-	private static $instance = null;
 
 	final private function __construct(array $configuration)
 	{
@@ -72,5 +74,37 @@ final class Configuration
 		self::$instance = new self($configuration);
 
 		return self::$instance;
+	}
+
+	final public static function fromFile(string $configurationFile): self
+	{
+		$sourceFile = $configurationFile;
+
+		if (!is_file($sourceFile) || !is_readable($sourceFile))
+		{
+			$sourceFile = __DIR__ . '/' . $configurationFile;
+		}
+
+		if (!is_file($sourceFile) || !is_readable($sourceFile))
+		{
+			$sourceFile = getcwd() . '/' . $configurationFile;
+		}
+
+		if (!is_file($sourceFile) || !is_readable($sourceFile))
+		{
+			throw new ConfigurationError(sprintf('Cannot locate configuration file %s', $configurationFile));
+		}
+
+		try
+		{
+			$parser        = new Parser();
+			$configuration = $parser->parseFile($sourceFile);
+		}
+		catch (\Exception $e)
+		{
+			throw new ConfigurationError(sprintf("Cannot parse configuration file %s", $sourceFile), ExceptionCode::CONFIG_GENERIC_ERROR, $e);
+		}
+
+		return self::getInstance($configuration);
 	}
 }
