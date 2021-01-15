@@ -5,41 +5,57 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Transfer;
+namespace Akeeba\ReleaseMaker\Uploader;
 
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
+use Akeeba\ReleaseMaker\Configuration\Connection\S3 as FtpConfiguration;
+use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
+use Akeeba\ReleaseMaker\Contracts\Uploader;
+use Akeeba\ReleaseMaker\Exception\UploaderError;
+use InvalidArgumentException;
 use RuntimeException;
 
-class FTPcURL implements Uploader
+class CurlFtp implements Uploader
 {
-	private $config;
+	private ConnectionConfiguration $config;
 
-	/** @inheritDoc */
-	public function __construct(object $config)
+	public function __construct(ConnectionConfiguration $config)
 	{
+		if (!($config instanceof FtpConfiguration))
+		{
+			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, FtpConfiguration::class, get_class($config)));
+		}
+
 		$this->config = $config;
 
 		$this->connect();
 	}
 
-	/** @inheritDoc */
 	public function __destruct()
 	{
 		// This class does not store a connection object.
 	}
 
-	/** @inheritDoc */
-	public function upload(string $localFilename, string $remoteFilename): void
+	/**
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
+	public function upload(string $sourcePath, string $destPath): void
 	{
-		$fp = @\fopen($localFilename, 'rb');
+		$fp = @\fopen($sourcePath, 'rb');
 
 		if ($fp === false)
 		{
-			throw new FatalProblem(\sprintf("Unreadable local file %s", $localFilename), 80);
+			throw new UploaderError(\sprintf("Unreadable local file %s", $sourcePath));
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
-		$this->uploadFromHandle($remoteFilename, $fp);
+		try
+		{
+			$this->uploadFromHandle($destPath, $fp);
+		}
+		catch (RuntimeException $e)
+		{
+			throw new UploaderError(sprintf('Upload of file %s failed. cURL error %d: %s', $sourcePath, $e->getCode(), $e->getMessage()), $e);
+		}
 	}
 
 	/**
@@ -47,9 +63,9 @@ class FTPcURL implements Uploader
 	 * list the contents of the initial directory. The listing is not parsed (we don't really care!) and we do NOT check
 	 * if we can upload files to that remote folder.
 	 *
-	 * @throws  RuntimeException
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
-	private function connect()
+	private function connect(): void
 	{
 		$ch = $this->getCurlHandle($this->config->directory . '/');
 		\curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -64,7 +80,7 @@ class FTPcURL implements Uploader
 
 		if ($errNo !== 0)
 		{
-			throw new FatalProblem(\sprintf("cURL Error %s connecting to remote FTP server: %s", $errNo, $error), 80);
+			throw new UploaderError(\sprintf("cURL Error %s connecting to remote FTP server: %s", $errNo, $error));
 		}
 	}
 
@@ -77,8 +93,10 @@ class FTPcURL implements Uploader
 	 * @return  void
 	 *
 	 * @throws  RuntimeException
+	 *
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
-	private function uploadFromHandle($remoteFilename, $fp)
+	private function uploadFromHandle(string $remoteFilename, $fp): void
 	{
 		// We need the file size. We can do that by getting the file position at EOF
 		\fseek($fp, 0, SEEK_END);
@@ -116,8 +134,10 @@ class FTPcURL implements Uploader
 	 *                               cURL.
 	 *
 	 * @return  resource
+	 *
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
-	private function getCurlHandle($remoteFile = '')
+	private function getCurlHandle(string $remoteFile = '')
 	{
 		/**
 		 * Get the FTP URI
@@ -174,9 +194,9 @@ class FTPcURL implements Uploader
 		\curl_setopt($ch, CURLOPT_TIMEOUT, $this->config->timeout);
 
 		// Should I enable Implict SSL?
-		if ($this->config->method == 'ftpscurl')
+		if ($this->config->secure)
 		{
-			\curl_setopt($ch, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
+			\curl_setopt($ch, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 			\curl_setopt($ch, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_DEFAULT);
 
 			\curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
@@ -204,7 +224,7 @@ class FTPcURL implements Uploader
 		}
 
 		// Should I enable verbose output? Useful for debugging.
-		if ($this->config->verbose)
+		if (defined('ARM_DEBUG'))
 		{
 			\curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}

@@ -8,12 +8,12 @@
 namespace Akeeba\ReleaseMaker\Step\Mixin;
 
 use Akeeba\ReleaseMaker\Configuration;
-use Akeeba\ReleaseMaker\Transfer\FTP;
-use Akeeba\ReleaseMaker\Transfer\FTPcURL;
-use Akeeba\ReleaseMaker\Transfer\S3;
-use Akeeba\ReleaseMaker\Transfer\SFTP;
-use Akeeba\ReleaseMaker\Transfer\SFTPcURL;
-use Akeeba\ReleaseMaker\Transfer\Uploader;
+use Akeeba\ReleaseMaker\Uploader\NativeFtp;
+use Akeeba\ReleaseMaker\Uploader\CurlFtp;
+use Akeeba\ReleaseMaker\Uploader\S3;
+use Akeeba\ReleaseMaker\Uploader\NativeSftp;
+use Akeeba\ReleaseMaker\Uploader\CurlSftp;
+use Akeeba\ReleaseMaker\Uploader\Uploader;
 use RuntimeException;
 use function function_exists;
 use function in_array;
@@ -72,22 +72,22 @@ trait UploadAware
 
 			case 'ftp':
 			case 'ftps':
-				return new FTP($config);
+				return new NativeFtp($config);
 
 			case 'ftpcurl':
 			case 'ftpscurl':
-				return new FTPcURL($config);
+				return new CurlFtp($config);
 
 			case 'sftp':
 				if (function_exists('ssh2_connect'))
 				{
-					return new SFTP($config);
+					return new NativeSftp($config);
 				}
 
-				return new SFTPcURL($config);
+				return new CurlSftp($config);
 
 			case 'sftpcurl':
-				return new SFTPcURL($config);
+				return new CurlSftp($config);
 
 			default:
 				throw new RuntimeException(sprintf('Unknown uploader type ‘%s’.', $type));

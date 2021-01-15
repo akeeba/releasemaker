@@ -5,12 +5,12 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Step;
+namespace Akeeba\ReleaseMaker\Contracts;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Interace for step classes
+ * Interface for step classes
  */
 interface StepInterface
 {

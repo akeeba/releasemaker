@@ -5,11 +5,15 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Transfer;
+namespace Akeeba\ReleaseMaker\Uploader;
 
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
+use Akeeba\ReleaseMaker\Configuration\Connection\S3 as FtpConfiguration;
+use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
+use Akeeba\ReleaseMaker\Contracts\Uploader;
+use Akeeba\ReleaseMaker\Exception\UploaderError;
+use InvalidArgumentException;
 
-class FTP implements Uploader
+class NativeFtp implements Uploader
 {
 	/**
 	 * The FTP connection resource
@@ -18,14 +22,22 @@ class FTP implements Uploader
 	 */
 	private $ftp;
 
-	private $config;
+	private FtpConfiguration $config;
 
-	/** @inheritDoc */
-	public function __construct(object $config)
+	/**
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
+	public function __construct(ConnectionConfiguration $config)
 	{
+		if (!($config instanceof FtpConfiguration))
+		{
+			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, FtpConfiguration::class, get_class($config)));
+		}
+
 		$this->config = $config;
 
-		if ($config->method == 'ftps')
+		if ($config->secure)
 		{
 			$ftp = @\ftp_ssl_connect($config->hostname, $config->port);
 		}
@@ -38,32 +50,35 @@ class FTP implements Uploader
 
 		if (is_null($this->ftp))
 		{
-			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid hostname or port', 80);
+			throw new UploaderError('Could not connect to FTP/FTPS server: invalid hostname or port');
 		}
 
 		if (!@\ftp_login($this->ftp, $config->username, $config->password))
 		{
 			\ftp_close($this->ftp);
 
-			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid username or password', 80);
+			throw new UploaderError('Could not connect to FTP/FTPS server: invalid username or password');
 		}
 
 		if (!@\ftp_chdir($this->ftp, $config->directory))
 		{
 			\ftp_close($this->ftp);
 
-			throw new FatalProblem('Could not connect to FTP/FTPS server: invalid directory', 80);
+			throw new UploaderError('Could not connect to FTP/FTPS server: invalid directory');
 		}
 
 		if (!@\ftp_pasv($this->ftp, $config->passive))
 		{
 			\ftp_close($this->ftp);
 
-			throw new FatalProblem('Could not set the connection\'s FTP %s Mode', $config->passive ? 'Passive' : 'Active');
+			throw new UploaderError(sprintf('Could not set the connection\'s FTP %s Mode', $config->passive ? 'Passive' : 'Active'));
 		}
 	}
 
-	/** @inheritDoc */
+	/**
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
 	public function __destruct()
 	{
 		if (\is_resource($this->ftp))
@@ -72,7 +87,10 @@ class FTP implements Uploader
 		}
 	}
 
-	/** @inheritDoc */
+	/**
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
 	public function upload(string $sourcePath, string $destPath): void
 	{
 		\ftp_chdir($this->ftp, $this->config->directory);
@@ -91,16 +109,20 @@ class FTP implements Uploader
 			// If the file was unreadable, just skip it...
 			if (\is_readable($sourcePath))
 			{
-				throw new FatalProblem(\sprintf("Uploading %s has failed.", $destPath), 80);
+				throw new UploaderError(\sprintf("Uploading %s has failed.", $destPath));
 			}
 
-			throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
+			throw new UploaderError(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath));
 		}
 
 		@\ftp_chmod($this->ftp, 0755, $realname);
 	}
 
-	private function chdir($dir)
+	/**
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
+	private function chdir(string $dir): void
 	{
 		$dir = \ltrim($dir, '/');
 
@@ -126,11 +148,15 @@ class FTP implements Uploader
 
 		if (!$result)
 		{
-			throw new FatalProblem(\sprintf("Cannot change into %s directory", $realDirectory), 80);
+			throw new UploaderError(\sprintf("Cannot change into %s directory", $realDirectory));
 		}
 	}
 
-	private function makeDirectory($dir)
+	/**
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
+	private function makeDirectory(string $dir): bool
 	{
 		$alldirs     = \explode('/', $dir);
 		$previousDir = \substr($this->config->directory, -1) == '/' ? \substr($this->config->directory, 0, -1) : $this->config->directory;
@@ -144,7 +170,7 @@ class FTP implements Uploader
 			{
 				if (@\ftp_mkdir($this->ftp, $check) === false)
 				{
-					throw new FatalProblem(\sprintf("Could not create directory %s", $check), 80);
+					throw new UploaderError(\sprintf("Could not create directory %s", $check));
 				}
 
 				@\ftp_chmod($this->ftp, 0755, $check);

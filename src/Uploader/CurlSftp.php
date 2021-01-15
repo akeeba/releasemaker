@@ -5,41 +5,55 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Transfer;
+namespace Akeeba\ReleaseMaker\Uploader;
 
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
+use Akeeba\ReleaseMaker\Configuration\Connection\S3;
+use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
+use Akeeba\ReleaseMaker\Contracts\Uploader;
+use Akeeba\ReleaseMaker\Exception\UploaderError;
+use InvalidArgumentException;
 use RuntimeException;
 
-class SFTPcURL implements Uploader
+class CurlSftp implements Uploader
 {
-	private $config;
+	private S3 $config;
 
-	/** @inheritDoc */
-	public function __construct(object $config)
+	public function __construct(ConnectionConfiguration $config)
 	{
+		if (!($config instanceof S3))
+		{
+			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, S3::class, get_class($config)));
+		}
+
 		$this->config = $config;
 
 		$this->connect();
 	}
 
-	/** @inheritDoc */
 	public function __destruct()
 	{
 		// This class does not store a connection object.
 	}
 
-	/** @inheritDoc */
-	public function upload(string $localFilename, string $remoteFilename): void
+	/** @noinspection PhpFullyQualifiedNameUsageInspection */
+	public function upload(string $sourcePath, string $destPath): void
 	{
-		$fp = @\fopen($localFilename, 'rb');
+		$fp = @\fopen($sourcePath, 'rb');
 
 		if ($fp === false)
 		{
-			throw new FatalProblem(\sprintf("Unreadable local file %s", $localFilename), 80);
+			throw new UploaderError(\sprintf("Unreadable local file %s", $sourcePath));
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
-		$this->uploadFromHandle($remoteFilename, $fp);
+		try
+		{
+			$this->uploadFromHandle($destPath, $fp);
+		}
+		catch (RuntimeException $e)
+		{
+			throw new UploaderError(sprintf('Upload of file %s failed. cURL error %d: %s', $sourcePath, $e->getCode(), $e->getMessage()), $e);
+		}
 	}
 
 	/**
@@ -49,6 +63,8 @@ class SFTPcURL implements Uploader
 	 *                               cURL.
 	 *
 	 * @return  resource
+	 *
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
 	private function getCurlHandle($remoteFile = '')
 	{
@@ -159,6 +175,8 @@ class SFTPcURL implements Uploader
 	 * check if we can upload files to that remote folder.
 	 *
 	 * @throws  RuntimeException
+	 *
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
 	private function connect()
 	{
@@ -167,14 +185,16 @@ class SFTPcURL implements Uploader
 		\curl_setopt($ch, CURLOPT_NOBODY, 1);
 		\curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		$listing = \curl_exec($ch);
-		$errNo   = \curl_errno($ch);
-		$error   = \curl_error($ch);
+		\curl_exec($ch);
+
+		$errNo = \curl_errno($ch);
+		$error = \curl_error($ch);
+
 		\curl_close($ch);
 
 		if ($errNo !== 0)
 		{
-			throw new FatalProblem(\sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error), 80);
+			throw new UploaderError(\sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error));
 		}
 	}
 
@@ -187,6 +207,8 @@ class SFTPcURL implements Uploader
 	 * @return  void
 	 *
 	 * @throws  RuntimeException
+	 *
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
 	private function uploadFromHandle($remoteFilename, $fp)
 	{

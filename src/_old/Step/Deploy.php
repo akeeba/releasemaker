@@ -10,8 +10,8 @@ namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration;
 use Akeeba\ReleaseMaker\Step\Mixin\UploadAware;
-use Akeeba\ReleaseMaker\Transfer\S3;
-use Akeeba\ReleaseMaker\Transfer\Uploader;
+use Akeeba\ReleaseMaker\Uploader\S3;
+use Akeeba\ReleaseMaker\Uploader\Uploader;
 
 class Deploy extends AbstractStep
 {

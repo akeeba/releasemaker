@@ -8,6 +8,7 @@
 namespace Akeeba\ReleaseMaker\Step;
 
 
+use Akeeba\ReleaseMaker\Contracts\StepInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 abstract class AbstractStep implements StepInterface

@@ -5,41 +5,52 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Transfer;
+namespace Akeeba\ReleaseMaker\Uploader;
 
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
+use Akeeba\ReleaseMaker\Configuration\Connection\S3;
+use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
+use Akeeba\ReleaseMaker\Contracts\Uploader;
+use Akeeba\ReleaseMaker\Exception\UploaderError;
+use InvalidArgumentException;
 
-class SFTP implements Uploader
+class NativeSftp implements Uploader
 {
 	private $ssh;
 
 	private $fp;
 
-	private $config;
+	private S3 $config;
 
-	/** @inheritDoc */
-	public function __construct(object $config)
+	/**
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 */
+	public function __construct(ConnectionConfiguration $config)
 	{
+		if (!($config instanceof S3))
+		{
+			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, S3::class, get_class($config)));
+		}
+
 		$this->config = $config;
 
 		if (!\function_exists('ssh2_connect'))
 		{
-			throw new FatalProblem('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.', 80);
+			throw new UploaderError('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
 		}
 
 		$this->ssh = \ssh2_connect($config->hostname, $config->port);
 
 		if (!$this->ssh)
 		{
-			throw new FatalProblem('Could not connect to SFTP server: invalid hostname or port', 80);
+			throw new UploaderError('Could not connect to SFTP server: invalid hostname or port');
 		}
 
-		if ($config->pubkeyfile && $config->privkeyfile)
+		if ($config->publicKey && $config->privateKey)
 		{
-			if (!@\ssh2_auth_pubkey_file($this->ssh, $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass))
+			if (!@\ssh2_auth_pubkey_file($this->ssh, $config->username, $config->publicKey, $config->privateKey, $config->privateKeyPassword))
 			{
-				throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->pubkeyfile, $config->privkeyfile, $config->privkeyfile_pass),
-					80
+				throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->publicKey, $config->privateKey, $config->privateKeyPassword)
 				);
 			}
 
@@ -48,13 +59,12 @@ class SFTP implements Uploader
 		{
 			if (!@\ssh2_auth_password($this->ssh, $config->username, $config->password))
 			{
-				throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password), 80);
+				throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
 			}
 		}
 		elseif (!@\ssh2_auth_agent($this->ssh, $config->username))
 		{
-			throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username),
-				80
+			throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
 			);
 		}
 
@@ -62,16 +72,19 @@ class SFTP implements Uploader
 
 		if ($this->fp === false)
 		{
-			throw new FatalProblem('Could not connect to SFTP server: no SFTP support on this SSH server', 80);
+			throw new UploaderError('Could not connect to SFTP server: no SFTP support on this SSH server');
 		}
 
 		if (!@\ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new FatalProblem(\sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory), 80);
+			throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory));
 		}
 	}
 
-	/** @inheritDoc */
+	/**
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 */
 	public function __destruct()
 	{
 		if (is_resource($this->fp))
@@ -79,13 +92,15 @@ class SFTP implements Uploader
 			@fclose($this->fp);
 		}
 
-		ssh2_disconnect($this->ssh);
+		\ssh2_disconnect($this->ssh);
 
 		$this->fp  = null;
 		$this->ssh = null;
 	}
 
-	/** @inheritDoc */
+	/**
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
 	public function upload(string $sourcePath, string $destPath): void
 	{
 		$dir = \dirname($destPath);
@@ -100,14 +115,14 @@ class SFTP implements Uploader
 
 		if ($fp === false)
 		{
-			throw new FatalProblem(\sprintf("Could not open remote file %s for writing", $realname), 80);
+			throw new UploaderError(\sprintf("Could not open remote file %s for writing", $realname));
 		}
 
 		$localfp = @\fopen($sourcePath, 'rb');
 
 		if ($localfp === false)
 		{
-			throw new FatalProblem(\sprintf("Could not open local file %s for reading", $sourcePath), 80);
+			throw new UploaderError(\sprintf("Could not open local file %s for reading", $sourcePath));
 		}
 
 		$res = true;
@@ -126,13 +141,17 @@ class SFTP implements Uploader
 			// If the file was unreadable, just skip it...
 			if (\is_readable($sourcePath))
 			{
-				throw new FatalProblem(\sprintf("Uploading %s has failed.", $destPath), 80);
+				throw new UploaderError(\sprintf("Uploading %s has failed.", $destPath));
 			}
 
-			throw new FatalProblem(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath), 80);
+			throw new UploaderError(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath));
 		}
 	}
 
+	/**
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 */
 	private function chdir(string $dir): bool
 	{
 		$dir = \ltrim($dir, '/');
@@ -158,12 +177,16 @@ class SFTP implements Uploader
 
 		if (!$result)
 		{
-			throw new FatalProblem(\sprintf("Cannot change into %s directory", $realdir), 80);
+			throw new UploaderError(\sprintf("Cannot change into %s directory", $realdir));
 		}
 
 		return true;
 	}
 
+	/**
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 * @noinspection PhpComposerExtensionStubsInspection
+	 */
 	private function makeDirectory($dir)
 	{
 		$alldirs     = \explode('/', $dir);
@@ -175,7 +198,7 @@ class SFTP implements Uploader
 			$check = $previousDir . '/' . $curdir;
 			if (!@\ssh2_sftp_stat($this->fp, $check) && !@\ssh2_sftp_mkdir($this->fp, $check, 0755, true))
 			{
-				throw new FatalProblem(\sprintf("Could not create directory %s", $check), 80);
+				throw new UploaderError(\sprintf("Could not create directory %s", $check));
 			}
 			$previousDir = $check;
 		}

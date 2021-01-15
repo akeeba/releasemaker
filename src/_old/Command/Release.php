@@ -8,9 +8,9 @@
 namespace Akeeba\ReleaseMaker\Command;
 
 use Akeeba\ReleaseMaker\Configuration;
+use Akeeba\ReleaseMaker\Contracts\StepInterface;
 use Akeeba\ReleaseMaker\Exception\FatalProblem;
-use Akeeba\ReleaseMaker\Step\StepInterface;
-use http\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 use LogicException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\OutputInterface;
