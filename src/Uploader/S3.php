@@ -15,7 +15,7 @@ use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
 use Akeeba\ReleaseMaker\Exception\ConfigurationError;
-use Akeeba\ReleaseMaker\Exception\UploaderError;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 use Exception;
 use InvalidArgumentException;
 
@@ -73,7 +73,12 @@ class S3 implements Uploader
 		}
 		catch (Exception $e)
 		{
-			throw new UploaderError($e->getMessage(), $e);
+			throw new ARSError($e->getMessage(), $e);
 		}
+	}
+
+	public function getConnectionConfiguration(): ConnectionConfiguration
+	{
+		return $this->config;
 	}
 }

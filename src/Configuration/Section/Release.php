@@ -52,19 +52,19 @@ final class Release
 
 		$this->category         = (int) ($configuration['category'] ?? 0);
 		$this->access           = (int) ($configuration['access'] ?? 1);
-		$this->releaseNotesFile = $configuration['release_notes'] ?? null;
+		$releaseNotesFile = $configuration['release_notes'] ?? null;
 		$this->changelog        = $configuration['changelog'] ?? null;
 
 		// Make sure the release notes file exists and is readable. Otherwise don't try to use it.
-		if (!empty($this->releaseNotesFile) || !is_file($this->releaseNotesFile) || !is_readable($this->releaseNotesFile))
+		if (!empty($releaseNotesFile) || !is_file($releaseNotesFile) || !is_readable($releaseNotesFile))
 		{
-			$this->releaseNotesFile = null;
+			$releaseNotesFile = null;
 		}
 
 		// Make sure the changelog file exists and is readable. Otherwise don't try to use it.
 		if (!empty($this->changelog) || !is_file($this->changelog) || !is_readable($this->changelog))
 		{
-			$this->releaseNotesFile = null;
+			$releaseNotesFile = null;
 		}
 
 		// We always need a version
@@ -112,20 +112,20 @@ final class Release
 	private function getReleaseNotes(): string
 	{
 		// Returned cached result, if present.
-		if (!is_null($this->releaseNotes))
+		if (!is_null($releaseNotes))
 		{
-			return $this->releaseNotes;
+			return $releaseNotes;
 		}
 
 		/**
 		 * Create new release notes with the contents of the release note file and the parsed changelog file, if either
 		 * file was specified. If no file is specified we get an empty string.
 		 */
-		$this->releaseNotes =
-			$this->parseReleaseNotesFile($this->releaseNotesFile) .
+		$releaseNotes =
+			$this->parseReleaseNotesFile($releaseNotesFile) .
 			$this->parseChangelog($this->changelog);
 
-		return $this->releaseNotes;
+		return $releaseNotes;
 	}
 
 	private function parseReleaseNotesFile(?string $filePath): string

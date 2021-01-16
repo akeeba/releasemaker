@@ -7,9 +7,8 @@
 
 namespace Akeeba\ReleaseMaker\Command;
 
-use Akeeba\ReleaseMaker\Configuration;
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Contracts\StepInterface;
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
 use InvalidArgumentException;
 use LogicException;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -37,28 +36,11 @@ class Release
 		$this->banner($io);
 
 		// Load the configuration
-		$jsonFile = $this->getJsonPath($json, $io);
-		$config   = Configuration::getInstance();
-		$config->loadFile($jsonFile);
-
-		// Set up the cacert.pem location
-		global $cacertPemFilePointer;
-
-		$cacertPemFilePointer = null;
-		$caCertPemFile        = $config->getCustomCacertPem();
-
-		\define('AKEEBA_CACERT_PEM', $caCertPemFile);
-
-		// Set up the steps to process
-		$defaultSteps = ['prepare', 'deploy', 'release', 'items', 'publish', 'updates'];
-		$steps        = $config->get('common.steps', $defaultSteps);
-		$steps        = empty($steps) ? $defaultSteps : $steps;
+		$config = Configuration::fromFile($json);
 
 		// Make sure all steps exist
-		foreach ($steps as $step)
+		foreach ($config->steps as $stepClass)
 		{
-			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . \ucfirst($step);
-
 			if (!\class_exists($stepClass))
 			{
 				throw new InvalidArgumentException(\sprintf("Class %s does not exist.", $stepClass), 91);
@@ -71,12 +53,9 @@ class Release
 		}
 
 		// Run each and every step in the order specified
-		foreach ($steps as $step)
+		foreach ($config->steps as $stepClass)
 		{
-			$stepClass = '\\Akeeba\\ReleaseMaker\\Step\\' . \ucfirst($step);
-			/** @var StepInterface $stepObject */
-			$stepObject = new $stepClass($io);
-			$stepObject->execute();
+			(new $stepClass($io))->execute();
 		}
 	}
 
@@ -94,53 +73,5 @@ class Release
 		$io->writeln('<info>This is Free Software distributed under the terms of the GNU GPL v3 or later.</info>');
 		$io->writeln('<info>See LICENSE.txt for more information.</info>');
 		$io->newLine(1);
-	}
-
-	/**
-	 * Get the absolute path to the JSON file. Errors out if the file doesn't exist.
-	 *
-	 * @param   string        $json
-	 * @param   SymfonyStyle  $io
-	 */
-	private function getJsonPath(string $json, SymfonyStyle $io): string
-	{
-		if (\strtolower(\substr($json, -5)) != '.json')
-		{
-			$json = null;
-		}
-
-		if (!@\file_exists($json))
-		{
-			$candidates = [
-				$json = \getcwd() . '/' . $json,
-				$json = __DIR__ . '/' . $json,
-			];
-
-			foreach ($candidates as $file)
-			{
-				if (!\file_exists($file))
-				{
-					continue;
-				}
-
-				$json = $file;
-
-				break;
-			}
-		}
-
-		if (!@\file_exists($json))
-		{
-			$json = null;
-		}
-
-		if (empty($json) || !@\file_exists($json) || !@\is_readable($json))
-		{
-			$io->error("Configuration file not found.");
-
-			throw new FatalProblem("Configuration file not found.", 10);
-		}
-
-		return $json;
 	}
 }

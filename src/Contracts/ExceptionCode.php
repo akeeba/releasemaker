@@ -15,6 +15,21 @@ namespace Akeeba\ReleaseMaker\Contracts;
  */
 class ExceptionCode
 {
+	// Error originating on the remote deployment server
+	public const DEPLOYMENT_ERROR_GENERIC = 220;
+
+	// Error originating on the remote Akeeba Release System installation
+	public const DEPLOYMENT_ERROR_ARS_GENERIC = 221;
+
+	// Failed to create or update an ARS Item for an uploaded file
+	public const DEPLOYMENT_ERROR_ARS_ITEM_EDIT_FAILED = 222;
+
+	// Failed to publish an ARS Item
+	public const DEPLOYMENT_ERROR_ARS_ITEM_PUBLISH_FAILED = 223;
+
+	// No files found to make a release
+	public const NO_FILES_FOUND = 23;
+
 	// Runtime error trying to upload files to remote storage
 	public const UPLOADER_ERROR = 80;
 
@@ -79,9 +94,9 @@ class ExceptionCode
 	public const CONFIG_INVALID_UPDATE_FORMAT = 118;
 
 	// Logic error whcih doesn't fall into any other category. These are logic errors which require fixing the code.
-	public const GENERIC_LOGIC_ERROR = 230;
+	public const GENERIC_LOGIC_ERROR = 240;
 
 	// Invalid class property access.
-	public const INVALID_PROPERTY = 231;
+	public const INVALID_PROPERTY = 241;
 
 }

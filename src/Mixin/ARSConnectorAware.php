@@ -5,10 +5,10 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Step\Mixin;
+namespace Akeeba\ReleaseMaker\Mixin;
 
-use Akeeba\ReleaseMaker\Configuration;
-use Akeeba\ReleaseMaker\Utils\ARS;
+use Akeeba\ReleaseMaker\Configuration\Configuration;
+use Akeeba\ReleaseMaker\Deployment\ARS;
 
 trait ARSConnectorAware
 {
@@ -29,10 +29,10 @@ trait ARSConnectorAware
 		$armConfig = Configuration::getInstance();
 
 		$this->arsConnector = new ARS([
-			'host'     => $armConfig->get('common.arsapiurl', ''),
-			'username' => $armConfig->get('common.username', ''),
-			'password' => $armConfig->get('common.password', ''),
-			'apiToken' => $armConfig->get('common.token', ''),
+			'host'     => $armConfig->api->endpoint,
+			'username' => $armConfig->api->username,
+			'password' => $armConfig->api->password,
+			'apiToken' => $armConfig->api->token,
 		]);
 	}
 
@@ -44,8 +44,8 @@ trait ARSConnectorAware
 	protected function getRelease(): object
 	{
 		$conf     = Configuration::getInstance();
-		$category = $conf->get('common.category', 0);
-		$version  = $conf->get('common.version', 0);
+		$category = $conf->release->category;
+		$version  = $conf->release->version;
 
 		return $this->arsConnector->getRelease($category, $version);
 	}

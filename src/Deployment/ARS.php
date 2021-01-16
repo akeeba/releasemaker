@@ -5,10 +5,9 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\ReleaseMaker\Utils;
+namespace Akeeba\ReleaseMaker\Deployment;
 
-use Akeeba\ReleaseMaker\Configuration;
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 
 /**
  * Akeeba Release System API integration for Akeeba Release Maker
@@ -294,7 +293,7 @@ class ARS
 
 		if ($raw === false)
 		{
-			throw new FatalProblem(\sprintf("ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.\ncURL error %s. %s\n", $errno, $error), 30);
+			throw new ARSError(\sprintf("ARS API communications error; please check common.username, common.password, common.token, common.arsapiurl and your network status.\ncURL error %s. %s\n", $errno, $error));
 		}
 
 		return $raw;
@@ -354,7 +353,7 @@ class ARS
 
 		if ($httpCode === 403)
 		{
-			throw new FatalProblem(\sprintf("access denied; please check common.username, common.password, common.token, common.arsapiurl and your network status.\nHTTP error %s\n", $httpCode), 30);
+			throw new ARSError(\sprintf("access denied; please check common.username, common.password, common.token, common.arsapiurl and your network status.\nHTTP error %s\n", $httpCode));
 		}
 
 		if ($httpCode === 500 && !empty($result))
@@ -374,7 +373,7 @@ class ARS
 
 		if (!empty($errorMessage))
 		{
-			throw new FatalProblem(\sprintf('ARS API communications error: %s', $errorMessage));
+			throw new ARSError(\sprintf('ARS API communications error: %s', $errorMessage));
 		}
 
 		return $result;

@@ -10,7 +10,7 @@ namespace Akeeba\ReleaseMaker\Uploader;
 use Akeeba\ReleaseMaker\Configuration\Connection\S3;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
-use Akeeba\ReleaseMaker\Exception\UploaderError;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 use InvalidArgumentException;
 
 class NativeSftp implements Uploader
@@ -36,21 +36,21 @@ class NativeSftp implements Uploader
 
 		if (!\function_exists('ssh2_connect'))
 		{
-			throw new UploaderError('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
+			throw new ARSError('You do not have the SSH2 PHP extension, therefore could not connect to SFTP server.');
 		}
 
 		$this->ssh = \ssh2_connect($config->hostname, $config->port);
 
 		if (!$this->ssh)
 		{
-			throw new UploaderError('Could not connect to SFTP server: invalid hostname or port');
+			throw new ARSError('Could not connect to SFTP server: invalid hostname or port');
 		}
 
 		if ($config->publicKey && $config->privateKey)
 		{
 			if (!@\ssh2_auth_pubkey_file($this->ssh, $config->username, $config->publicKey, $config->privateKey, $config->privateKeyPassword))
 			{
-				throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->publicKey, $config->privateKey, $config->privateKeyPassword)
+				throw new ARSError(\sprintf("Could not connect to SFTP server: invalid username or public/private key file (%s - %s - %s - %s)", $config->username, $config->publicKey, $config->privateKey, $config->privateKeyPassword)
 				);
 			}
 
@@ -59,12 +59,12 @@ class NativeSftp implements Uploader
 		{
 			if (!@\ssh2_auth_password($this->ssh, $config->username, $config->password))
 			{
-				throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
+				throw new ARSError(\sprintf("Could not connect to SFTP server: invalid username or password (%s:%s)", $config->username, $config->password));
 			}
 		}
 		elseif (!@\ssh2_auth_agent($this->ssh, $config->username))
 		{
-			throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
+			throw new ARSError(\sprintf("Could not connect to SFTP server: invalid username (%s) or agent failed to connect.", $config->username)
 			);
 		}
 
@@ -72,12 +72,12 @@ class NativeSftp implements Uploader
 
 		if ($this->fp === false)
 		{
-			throw new UploaderError('Could not connect to SFTP server: no SFTP support on this SSH server');
+			throw new ARSError('Could not connect to SFTP server: no SFTP support on this SSH server');
 		}
 
 		if (!@\ssh2_sftp_stat($this->fp, $config->directory))
 		{
-			throw new UploaderError(\sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory));
+			throw new ARSError(\sprintf("Could not connect to SFTP server: invalid directory (%s)", $config->directory));
 		}
 	}
 
@@ -115,14 +115,14 @@ class NativeSftp implements Uploader
 
 		if ($fp === false)
 		{
-			throw new UploaderError(\sprintf("Could not open remote file %s for writing", $realname));
+			throw new ARSError(\sprintf("Could not open remote file %s for writing", $realname));
 		}
 
 		$localfp = @\fopen($sourcePath, 'rb');
 
 		if ($localfp === false)
 		{
-			throw new UploaderError(\sprintf("Could not open local file %s for reading", $sourcePath));
+			throw new ARSError(\sprintf("Could not open local file %s for reading", $sourcePath));
 		}
 
 		$res = true;
@@ -141,11 +141,16 @@ class NativeSftp implements Uploader
 			// If the file was unreadable, just skip it...
 			if (\is_readable($sourcePath))
 			{
-				throw new UploaderError(\sprintf("Uploading %s has failed.", $destPath));
+				throw new ARSError(\sprintf("Uploading %s has failed.", $destPath));
 			}
 
-			throw new UploaderError(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath));
+			throw new ARSError(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath));
 		}
+	}
+
+	public function getConnectionConfiguration(): ConnectionConfiguration
+	{
+		return $this->config;
 	}
 
 	/**
@@ -177,7 +182,7 @@ class NativeSftp implements Uploader
 
 		if (!$result)
 		{
-			throw new UploaderError(\sprintf("Cannot change into %s directory", $realdir));
+			throw new ARSError(\sprintf("Cannot change into %s directory", $realdir));
 		}
 
 		return true;
@@ -198,7 +203,7 @@ class NativeSftp implements Uploader
 			$check = $previousDir . '/' . $curdir;
 			if (!@\ssh2_sftp_stat($this->fp, $check) && !@\ssh2_sftp_mkdir($this->fp, $check, 0755, true))
 			{
-				throw new UploaderError(\sprintf("Could not create directory %s", $check));
+				throw new ARSError(\sprintf("Could not create directory %s", $check));
 			}
 			$previousDir = $check;
 		}

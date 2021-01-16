@@ -14,6 +14,7 @@ use Akeeba\ReleaseMaker\Configuration\Section\Release;
 use Akeeba\ReleaseMaker\Configuration\Section\Sources;
 use Akeeba\ReleaseMaker\Configuration\Section\Steps;
 use Akeeba\ReleaseMaker\Configuration\Section\Updates;
+use Akeeba\ReleaseMaker\Configuration\Section\Volatile;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use Akeeba\ReleaseMaker\Exception\ConfigurationError;
 use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
@@ -22,12 +23,13 @@ use LogicException;
 /**
  * Akeeba Release Maker configuration
  *
- * @property-read Release    $release    Release configuration
- * @property-read Api        $api        ARS API connection configuration
- * @property-read Steps      $steps      Release Maker steps configuration
- * @property-read Connection $connection Connections configuration, for uploading to remote servers
- * @property-read Updates    $updates    Configuration for publishing updates to a remote server
- * @property-read Sources    $sources    File sources configuration
+ * @property-read Release    $release     Release configuration
+ * @property-read Api        $api         ARS API connection configuration
+ * @property-read Steps      $steps       Release Maker steps configuration
+ * @property-read Connection $connection  Connections configuration, for uploading to remote servers
+ * @property-read Updates    $updates     Configuration for publishing updates to a remote server
+ * @property-read Sources    $sources     File sources configuration
+ * @property-read Volatile   $volatile    Volatile information shared between steps
  *
  * @since  2.0.0
  */
@@ -49,9 +51,11 @@ final class Configuration
 
 	private Sources $sources;
 
+	private Volatile $volatile;
+
 	final private function __construct(array $configuration)
 	{
-		$this->release    = new Release($configuration['release'] ?? []);
+		$release    = new Release($configuration['release'] ?? []);
 		$this->api        = new Api($configuration['api'] ?? []);
 		$this->steps      = new Steps($configuration['steps'] ?? []);
 		$this->connection = new Connection($configuration['connection'] ?? []);

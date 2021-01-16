@@ -7,7 +7,7 @@
 
 // Has the user run composer install already?
 use Akeeba\ReleaseMaker\Command\Release;
-use Akeeba\ReleaseMaker\Exception\FatalProblem;
+use Akeeba\ReleaseMaker\Exception\ExitCodeSettingException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -45,25 +45,33 @@ try
 {
 	$app->run();
 }
-catch (FatalProblem $e)
-{
-	exit($e->getCode());
-}
 catch (Throwable $e)
 {
+	$exitCode = ($e instanceof ExitCodeSettingException) ? $e->getCode() : 255;
+
 	$input  = new ArgvInput();
 	$output = new ConsoleOutput(ConsoleOutput::VERBOSITY_DEBUG);
 	$io     = new SymfonyStyle($input, $output);
 
-	$io->error([
-		sprintf('Unhandled Exception of type %s', get_class($e)),
-		sprintf('Error code: %d', $e->getCode()),
-		$e->getMessage(),
-	]);
+	// Always show detailed errors when XDebug is enabled
+	$isXDebug = function_exists('xdebug_is_enabled') && xdebug_is_enabled();
 
-	$io->section('Debug trace');
-	$io->text(sprintf('#000 %s(%d)', $e->getFile(), $e->getLine()));
-	$io->text($e->getTraceAsString());
+	if (!defined('ARM_DEBUG') && !$isXDebug)
+	{
+		$io->error($e->getMessage());
+	}
+	else
+	{
+		$io->error([
+			sprintf('Exception of type %s', get_class($e)),
+			sprintf('Error code: %d', $e->getCode()),
+			$e->getMessage(),
+		]);
 
-	exit(255);
+		$io->section('Debug trace');
+		$io->text(sprintf('#000 %s(%d)', $e->getFile(), $e->getLine()));
+		$io->text($e->getTraceAsString());
+	}
+
+	exit($exitCode);
 }

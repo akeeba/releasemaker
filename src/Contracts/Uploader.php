@@ -19,4 +19,6 @@ interface Uploader
 	public function __destruct();
 
 	public function upload(string $sourcePath, string $destPath): void;
+
+	public function getConnectionConfiguration(): ConnectionConfiguration;
 }

@@ -10,7 +10,7 @@ namespace Akeeba\ReleaseMaker\Uploader;
 use Akeeba\ReleaseMaker\Configuration\Connection\S3 as FtpConfiguration;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
-use Akeeba\ReleaseMaker\Exception\UploaderError;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 use InvalidArgumentException;
 
 class NativeFtp implements Uploader
@@ -50,28 +50,28 @@ class NativeFtp implements Uploader
 
 		if (is_null($this->ftp))
 		{
-			throw new UploaderError('Could not connect to FTP/FTPS server: invalid hostname or port');
+			throw new ARSError('Could not connect to FTP/FTPS server: invalid hostname or port');
 		}
 
 		if (!@\ftp_login($this->ftp, $config->username, $config->password))
 		{
 			\ftp_close($this->ftp);
 
-			throw new UploaderError('Could not connect to FTP/FTPS server: invalid username or password');
+			throw new ARSError('Could not connect to FTP/FTPS server: invalid username or password');
 		}
 
 		if (!@\ftp_chdir($this->ftp, $config->directory))
 		{
 			\ftp_close($this->ftp);
 
-			throw new UploaderError('Could not connect to FTP/FTPS server: invalid directory');
+			throw new ARSError('Could not connect to FTP/FTPS server: invalid directory');
 		}
 
 		if (!@\ftp_pasv($this->ftp, $config->passive))
 		{
 			\ftp_close($this->ftp);
 
-			throw new UploaderError(sprintf('Could not set the connection\'s FTP %s Mode', $config->passive ? 'Passive' : 'Active'));
+			throw new ARSError(sprintf('Could not set the connection\'s FTP %s Mode', $config->passive ? 'Passive' : 'Active'));
 		}
 	}
 
@@ -109,13 +109,18 @@ class NativeFtp implements Uploader
 			// If the file was unreadable, just skip it...
 			if (\is_readable($sourcePath))
 			{
-				throw new UploaderError(\sprintf("Uploading %s has failed.", $destPath));
+				throw new ARSError(\sprintf("Uploading %s has failed.", $destPath));
 			}
 
-			throw new UploaderError(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath));
+			throw new ARSError(\sprintf("Uploading %s has failed because the file is unreadable.", $destPath));
 		}
 
 		@\ftp_chmod($this->ftp, 0755, $realname);
+	}
+
+	public function getConnectionConfiguration(): ConnectionConfiguration
+	{
+		return $this->config;
 	}
 
 	/**
@@ -148,7 +153,7 @@ class NativeFtp implements Uploader
 
 		if (!$result)
 		{
-			throw new UploaderError(\sprintf("Cannot change into %s directory", $realDirectory));
+			throw new ARSError(\sprintf("Cannot change into %s directory", $realDirectory));
 		}
 	}
 
@@ -170,7 +175,7 @@ class NativeFtp implements Uploader
 			{
 				if (@\ftp_mkdir($this->ftp, $check) === false)
 				{
-					throw new UploaderError(\sprintf("Could not create directory %s", $check));
+					throw new ARSError(\sprintf("Could not create directory %s", $check));
 				}
 
 				@\ftp_chmod($this->ftp, 0755, $check);

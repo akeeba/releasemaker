@@ -10,7 +10,7 @@ namespace Akeeba\ReleaseMaker\Uploader;
 use Akeeba\ReleaseMaker\Configuration\Connection\S3;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
-use Akeeba\ReleaseMaker\Exception\UploaderError;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -42,7 +42,7 @@ class CurlSftp implements Uploader
 
 		if ($fp === false)
 		{
-			throw new UploaderError(\sprintf("Unreadable local file %s", $sourcePath));
+			throw new ARSError(\sprintf("Unreadable local file %s", $sourcePath));
 		}
 
 		// Note: don't manually close the file pointer, it's closed automatically by uploadFromHandle
@@ -52,8 +52,13 @@ class CurlSftp implements Uploader
 		}
 		catch (RuntimeException $e)
 		{
-			throw new UploaderError(sprintf('Upload of file %s failed. cURL error %d: %s', $sourcePath, $e->getCode(), $e->getMessage()), $e);
+			throw new ARSError(sprintf('Upload of file %s failed. cURL error %d: %s', $sourcePath, $e->getCode(), $e->getMessage()), $e);
 		}
+	}
+
+	public function getConnectionConfiguration(): ConnectionConfiguration
+	{
+		return $this->config;
 	}
 
 	/**
@@ -194,7 +199,7 @@ class CurlSftp implements Uploader
 
 		if ($errNo !== 0)
 		{
-			throw new UploaderError(\sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error));
+			throw new ARSError(\sprintf("cURL Error %s connecting to remote SFTP server: %s", $errNo, $error));
 		}
 	}
 
