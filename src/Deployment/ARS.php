@@ -7,6 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Deployment;
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Exception\ARSError;
 
 /**
@@ -271,7 +272,7 @@ class ARS
 		\curl_setopt($ch, CURLOPT_FAILONERROR, true);
 		\curl_setopt($ch, CURLOPT_HEADER, false);
 		\curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		\curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+		\curl_setopt($ch, CURLOPT_CAINFO, Configuration::getInstance()->api->CACertPath);
 
 		\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 		\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
@@ -341,14 +342,14 @@ class ARS
 			'ssl'  => [
 				'verify_peer'       => true,
 				'allow_self_signed' => false,
-				'cafile'            => AKEEBA_CACERT_PEM,
+				'cafile'            => Configuration::getInstance()->api->CACertPath,
 				'verify_depth'      => 8,
 			],
 		];
 
 		$context  = stream_context_create($streamOptions);
 		$result   = @file_get_contents($url, false, $context);
-		$headers  = $this->getParsedHeaders($http_response_header);
+		$headers  = $this->getParsedHeaders($http_response_header ?? []);
 		$httpCode = $headers['HTTP_RESPONSE_CODE'] ?? 200;
 
 		if ($httpCode === 403)

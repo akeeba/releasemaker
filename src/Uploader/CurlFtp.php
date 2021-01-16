@@ -7,6 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Uploader;
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Connection\S3 as FtpConfiguration;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
@@ -204,7 +205,7 @@ class CurlFtp implements Uploader
 			\curl_setopt($ch, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 			\curl_setopt($ch, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_DEFAULT);
 
-			\curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
+			\curl_setopt($ch, CURLOPT_CAINFO, Configuration::getInstance()->api->CACertPath);
 			\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 			\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		}

@@ -42,7 +42,6 @@ class S3 implements Uploader
 				$config->access, $config->secret, $config->signature, $config->region
 			);
 			$this->s3Config->setSSL($config->tls);
-			// TODO Set cacert.pem location
 			$this->s3Client = new Connector($this->s3Config);
 		}
 		catch (Exception $e)

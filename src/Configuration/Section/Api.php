@@ -45,6 +45,11 @@ final class Api implements ConfigurationSection
 
 	private ?string $CACertPath;
 
+	/**
+	 * @var resource
+	 */
+	private $cacertPemFilePointer;
+
 	/** @noinspection PhpUnusedParameterInspection */
 	public function __construct(array $configuration, Configuration $parent)
 	{
@@ -145,11 +150,11 @@ final class Api implements ConfigurationSection
 		$defaultContents = $defaultContents ?: '';
 
 		// Let's use the tmpfile trick. The file will removed once the $CACertPath property goes out of scope.
-		$cacertPemFilePointer = \tmpfile();
-		$cacertPemFile        = \stream_get_meta_data($cacertPemFilePointer)['uri'];
+		$this->cacertPemFilePointer = \tmpfile();
+		$cacertPemFile        = \stream_get_meta_data($this->cacertPemFilePointer)['uri'];
 
 		// Combine the original cacert.pem with the provided certificate / certificate storage.
-		\fwrite($cacertPemFilePointer, $defaultContents . "\n\n" . $customContents);
+		\fwrite($this->cacertPemFilePointer, $defaultContents . "\n\n" . $customContents);
 
 		// Set the property to our merged file.
 		$this->CACertPath = $cacertPemFile;
