@@ -85,7 +85,7 @@ final class Api
 	private function setEndpoint(?string $url): void
 	{
 		// We always need an endpoint URL
-		if (empty($this->endpoint))
+		if (empty($url))
 		{
 			throw new NoARSEndpoint();
 		}

@@ -55,7 +55,7 @@ final class Configuration
 
 	final private function __construct(array $configuration)
 	{
-		$release    = new Release($configuration['release'] ?? []);
+		$this->release    = new Release($configuration['release'] ?? []);
 		$this->api        = new Api($configuration['api'] ?? []);
 		$this->steps      = new Steps($configuration['steps'] ?? []);
 		$this->connection = new Connection($configuration['connection'] ?? []);
