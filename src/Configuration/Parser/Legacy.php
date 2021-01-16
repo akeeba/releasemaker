@@ -73,7 +73,7 @@ class Legacy implements ConfigurationParser
 				'username'             => $raw["{$prefix}.ftp.username"] ?? '',
 				'password'             => $raw["{$prefix}.ftp.password"] ?? '',
 				'passive'              => (bool) ($raw["{$prefix}.ftp.passive"] ?? true),
-				'directory'            => ($raw["{$prefix}.method"] ?? 'ftp' == 's3') ? $raw["{$prefix}.s3.directory"] ?? '' : $raw["{$prefix}.ftp.directory"] ?? '',
+				'directory'            => (($raw["{$prefix}.method"] ?? 'ftp') == 's3') ? $raw["{$prefix}.s3.directory"] ?? '' : $raw["{$prefix}.ftp.directory"] ?? '',
 				'passive_fix'          => (bool) ($raw["{$prefix}.ftp.passive_fix"] ?? true),
 				'timeout'              => (int) ($raw["{$prefix}.ftp.timeout"] ?? 3600),
 				'public_key'           => $raw["{$prefix}.ftp.pubkeyfile"] ?? '',
