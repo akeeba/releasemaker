@@ -11,6 +11,7 @@ namespace Akeeba\ReleaseMaker\Configuration\Section;
 use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Update\Source;
 use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
+use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
 
 /**
  * Update sources configuration section
@@ -21,6 +22,8 @@ use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
  */
 final class Updates implements ConfigurationSection
 {
+	use MagicGetterAware;
+
 	private array $sources = [];
 
 	public function __construct(array $configuration, Configuration $parent)
