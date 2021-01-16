@@ -7,6 +7,7 @@
 
 namespace Akeeba\ReleaseMaker\Uploader;
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Connection\S3;
 use Akeeba\ReleaseMaker\Configuration\Connection\Sftp;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
@@ -78,7 +79,7 @@ class CurlSftp implements Uploader
 		$authentication = \urlencode($this->config->username);
 
 		// We will only use username and password authentication if there are no certificates configured.
-		if (empty($this->config->pubkeyfile) && !empty($this->config->password))
+		if (($this->config->publicKey == '') && ($this->config->password != ''))
 		{
 			// Remember, both the username and password have to be URL encoded as they're part of a URI!
 			$password       = \urlencode($this->config->password);
@@ -87,7 +88,7 @@ class CurlSftp implements Uploader
 
 		$ftpUri = 'sftp://' . $authentication . '@' . $this->config->hostname;
 
-		if (!empty($this->config->port))
+		if ($this->config->port > 0)
 		{
 			$ftpUri .= ':' . (int) $this->config->port;
 		}
@@ -127,10 +128,10 @@ class CurlSftp implements Uploader
 		\curl_setopt($ch, CURLOPT_TIMEOUT, $this->config->timeout);
 
 		// Do I have to use certificate authentication?
-		if (!empty($this->config->pubkeyfile))
+		if ($this->config->publicKey != '')
 		{
 			// We always need to provide a public key file
-			\curl_setopt($ch, CURLOPT_SSH_PUBLIC_KEYFILE, $this->config->pubkeyfile);
+			\curl_setopt($ch, CURLOPT_SSH_PUBLIC_KEYFILE, $this->config->publicKey);
 
 			// Since SSH certificates are self-signed we cannot have cURL verify their signatures against a CA.
 			\curl_setopt($ch, CURLOPT_CAINFO, Configuration::getInstance()->api->CACertPath);
@@ -141,9 +142,9 @@ class CurlSftp implements Uploader
 			 * This is optional because newer versions of cURL can extract the private key file from a combined
 			 * certificate file.
 			 */
-			if (!empty($this->config->privkeyfile))
+			if ($this->config->privateKey != '')
 			{
-				\curl_setopt($ch, CURLOPT_SSH_PRIVATE_KEYFILE, $this->config->privkeyfile);
+				\curl_setopt($ch, CURLOPT_SSH_PRIVATE_KEYFILE, $this->config->privateKey);
 			}
 
 			/**
@@ -153,13 +154,13 @@ class CurlSftp implements Uploader
 			 * same problem you get when libssh is compiled against GnuTLS. The solution to that is having an
 			 * unencrypted private key file.
 			 */
-			if (!empty($this->config->privkeyfile_pass))
+			if ($this->config->privateKeyPassword != '')
 			{
-				\curl_setopt($ch, CURLOPT_KEYPASSWD, $this->config->privkeyfile_pass);
+				\curl_setopt($ch, CURLOPT_KEYPASSWD, $this->config->privateKeyPassword);
 			}
 		}
 		// Do I have to do SSH Agent authentication?
-		elseif (empty($this->config->password))
+		elseif ($this->config->password != '')
 		{
 			\curl_setopt($ch, CURLOPT_SSH_AUTH_TYPES, CURLSSH_AUTH_AGENT);
 		}
