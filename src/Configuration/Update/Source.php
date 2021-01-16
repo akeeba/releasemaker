@@ -53,7 +53,7 @@ class Source
 		$this->title          = $configuration['title'] ?? sprintf('Updates for stream %d', $this->stream);
 		$this->connectionName = $configuration['connection'] ?? '';
 		$this->directory      = $configuration['directory'] ?? null;
-		$this->baseName       = $configuration['baseName'] ?? sprintf('stream-%s', $this->stream);
+		$this->baseName       = $configuration['base_name'] ?? sprintf('stream-%s', $this->stream);
 		$this->formats        = $configuration['formats'] ?? ['xml'];
 
 		if ($this->stream <= 0)
