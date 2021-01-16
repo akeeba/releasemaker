@@ -226,7 +226,7 @@ class ARS
 		$url = (\substr($url, -4) === '.php') ? $url : ($url . '/index.php');
 
 		$conf                = Configuration::getInstance();
-		$communicationMethod = $conf->get('common.ars.communication', 'php');
+		$communicationMethod = $conf->api->connector;
 
 		switch ($communicationMethod)
 		{
