@@ -40,13 +40,13 @@ $app
 	);
 
 $app->setDefaultCommand('release', true);
+$app->setCatchExceptions(false);
 
 try
 {
 	$app->run();
 }
-catch (Throwable $e)
-{
+catch (Throwable $e) {
 	$exitCode = ($e instanceof ExitCodeSettingException) ? $e->getCode() : 255;
 
 	$input  = new ArgvInput();
