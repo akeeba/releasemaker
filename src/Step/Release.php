@@ -8,6 +8,7 @@
 namespace Akeeba\ReleaseMaker\Step;
 
 use Akeeba\ReleaseMaker\Configuration\Configuration;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 use Akeeba\ReleaseMaker\Mixin\ARSConnectorAware;
 
 class Release extends AbstractStep
@@ -68,7 +69,14 @@ class Release extends AbstractStep
 
 		$release->maturity = $this->getMaturity($conf->release->version);
 
-		$this->arsConnector->saveRelease((array) $release);
+		try
+		{
+			$this->arsConnector->saveRelease((array) $release);
+		}
+		catch (\Exception $e)
+		{
+			throw new ARSError('Failed to create or update the release', $e);
+		}
 
 		$conf->volatile->release = $release;
 	}

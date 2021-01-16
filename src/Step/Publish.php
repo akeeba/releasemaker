@@ -10,6 +10,7 @@ namespace Akeeba\ReleaseMaker\Step;
 use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Volatile\File as FileInformation;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
+use Akeeba\ReleaseMaker\Exception\ARSError;
 use Akeeba\ReleaseMaker\Exception\DeploymentError;
 use Akeeba\ReleaseMaker\Mixin\ARSConnectorAware;
 
@@ -40,29 +41,29 @@ class Publish extends AbstractStep
 
 		$this->io->writeln("<info>Publishing Release</info>");
 
-		// TODO Improve the logic here. If publishing the release fails we need to halt with an error.
-		$x = $this->publishRelease($configuration->volatile->release);
-
-		var_dump($x);
+		$this->publishRelease($configuration->volatile->release);
 
 		$this->io->newLine();
 	}
 
 	private function publishItem(FileInformation $fileInfo): bool
 	{
-		$result = $this->arsConnector->saveItem([
-			'id'        => $fileInfo->arsItemId,
-			'published' => 1,
-		]);
-
-		if ($result)
+		try
 		{
-			$this->io->success(\sprintf("Item %u has been published", $fileInfo->arsItemId));
+			$result = $this->arsConnector->saveItem([
+				'id'        => $fileInfo->arsItemId,
+				'published' => 1,
+			]);
+			$result = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+		}
+		catch (\JsonException $e)
+		{
+			$this->io->caution(\sprintf("Item %u has NOT been published -- Please check manually", $fileInfo->arsItemId));
 
 			return false;
 		}
 
-		$this->io->caution(\sprintf("Item %u has NOT been published -- Please check manually", $fileInfo->arsItemId));
+		$this->io->success(\sprintf("Item %u has been published", $fileInfo->arsItemId));
 
 		return true;
 	}
@@ -71,6 +72,15 @@ class Publish extends AbstractStep
 	{
 		$release->published = 1;
 
-		return $this->arsConnector->saveRelease((array) $release);
+		try
+		{
+			$result = $this->arsConnector->saveRelease((array) $release);
+
+			Configuration::getInstance()->volatile->release = json_decode($result, false, 512, JSON_THROW_ON_ERROR);
+		}
+		catch (\Exception $e)
+		{
+			throw new ARSError('Failed to publish the release', $e);
+		}
 	}
 }

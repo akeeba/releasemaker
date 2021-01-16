@@ -65,22 +65,22 @@ class Items extends AbstractStep
 		$item->access     = $fileInfo->access;
 		$item->published  = 0;
 
-		$result = $this->arsConnector->saveItem((array) $item);
-
-		if ($result !== 'false')
+		try
 		{
-			$action   = $oldId ? "updated" : "created";
-			$itemMeta = \json_decode($result);
+			$result = $this->arsConnector->saveItem((array) $item);
+			$itemMeta = json_decode($result, false, 512, JSON_THROW_ON_ERROR);
+		}
+		catch (\Exception $previousException)
+		{
+			$this->io->error("Failed to create item");
 
-			$this->io->success(\sprintf("Item %u has been %s", $itemMeta->id, $action));
-
-			$fileInfo->arsItemId = $itemMeta->id;
-
-			return;
+			throw new DeploymentError(\sprintf("Failed to create item for file %s, item type ‘%s’", basename($fileInfo->sourcePath), $itemType), ExceptionCode::DEPLOYMENT_ERROR_ARS_ITEM_EDIT_FAILED, $previousException);
 		}
 
-		$this->io->error("Failed to create item");
+		$action   = $oldId ? "updated" : "created";
 
-		throw new DeploymentError(\sprintf("Failed to create item for file %s, item type ‘%s’", basename($fileInfo->sourcePath), $itemType), ExceptionCode::DEPLOYMENT_ERROR_ARS_ITEM_EDIT_FAILED);
+		$this->io->success(\sprintf("Item %u has been %s", $itemMeta->id, $action));
+
+		$fileInfo->arsItemId = $itemMeta->id;
 	}
 }
