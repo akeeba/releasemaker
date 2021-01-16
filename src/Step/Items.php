@@ -51,8 +51,8 @@ class Items extends AbstractStep
 		$configuration = Configuration::getInstance();
 		$releaseId     = $configuration->volatile->release->id;
 
-		$isLink   = (strpos('http://', $fileInfo->destinationPath) === 0) || strpos('https://', $fileInfo->destinationPath) === 0;
-		$itemType = $isLink ? 'link' : 'file';
+		$isLink    = (strpos($fileInfo->fileOrUrl, 'http://') === 0) || (strpos($fileInfo->fileOrUrl, 'https://') === 0);
+		$itemType  = $isLink ? 'link' : 'file';
 
 		// Fetch a record of the file
 		$item  = $this->arsConnector->getItem($releaseId, $itemType, $fileInfo->fileOrUrl);
