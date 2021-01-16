@@ -32,7 +32,7 @@ class NativeFtp implements Uploader
 	{
 		if (!($config instanceof FtpConfiguration))
 		{
-			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, FtpConfiguration::class, get_class($config)));
+			throw new InvalidArgumentException(sprintf("%s expects a %s configuration object, %s given.", __CLASS__, FtpConfiguration::class, get_class($config)));
 		}
 
 		$this->config = $config;

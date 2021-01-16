@@ -21,7 +21,7 @@ class Prepare extends AbstractStep
 		// Get the configuration
 		$conf = Configuration::getInstance();
 
-		$conf->volatile->files = [];
+		$files = [];
 
 		foreach ($conf->sources->sources as $fileSource)
 		{
@@ -37,15 +37,17 @@ class Prepare extends AbstractStep
 			foreach ($filePaths as $sourcePath)
 			{
 				$this->io->comment(\sprintf("Found %s", \basename($sourcePath)));
-				$conf->volatile->files[] = new FileInformation($sourcePath, $fileSource->uploader, $fileSource->access);
+				$files[] = new FileInformation($sourcePath, $fileSource->uploader, $fileSource->access);
 			}
 		}
 
-		if (empty($conf->volatile->files))
+		if (empty($files))
 		{
 			// No files whatsoever? Oops!
 			throw new ConfigurationError('No extension files (Core or Pro) found. Aborting execution.', ExceptionCode::NO_FILES_FOUND);
 		}
+
+		$conf->volatile->files = $files;
 
 		$this->io->newLine();
 	}

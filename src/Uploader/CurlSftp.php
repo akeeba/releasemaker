@@ -8,6 +8,7 @@
 namespace Akeeba\ReleaseMaker\Uploader;
 
 use Akeeba\ReleaseMaker\Configuration\Connection\S3;
+use Akeeba\ReleaseMaker\Configuration\Connection\Sftp;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
 use Akeeba\ReleaseMaker\Exception\ARSError;
@@ -16,13 +17,13 @@ use RuntimeException;
 
 class CurlSftp implements Uploader
 {
-	private S3 $config;
+	private Sftp $config;
 
 	public function __construct(ConnectionConfiguration $config)
 	{
-		if (!($config instanceof S3))
+		if (!($config instanceof Sftp))
 		{
-			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, S3::class, get_class($config)));
+			throw new InvalidArgumentException(sprintf("%s expects a %s configuration object, %s given.", __CLASS__, Sftp::class, get_class($config)));
 		}
 
 		$this->config = $config;
@@ -164,7 +165,7 @@ class CurlSftp implements Uploader
 		}
 
 		// Should I enable verbose output? Useful for debugging.
-		if ($this->config->verbose)
+		if (defined('ARM_DEBUG'))
 		{
 			\curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		}

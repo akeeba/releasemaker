@@ -31,7 +31,7 @@ class S3 implements Uploader
 	{
 		if (!($config instanceof S3ConfigFromFile))
 		{
-			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, S3ConfigFromFile::class, get_class($config)));
+			throw new InvalidArgumentException(sprintf("%s expects a %s configuration object, %s given.", __CLASS__, S3ConfigFromFile::class, get_class($config)));
 		}
 
 		$this->config = $config;

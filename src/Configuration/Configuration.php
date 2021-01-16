@@ -55,12 +55,13 @@ final class Configuration
 
 	final private function __construct(array $configuration)
 	{
-		$this->release    = new Release($configuration['release'] ?? []);
-		$this->api        = new Api($configuration['api'] ?? []);
-		$this->steps      = new Steps($configuration['steps'] ?? []);
-		$this->connection = new Connection($configuration['connection'] ?? []);
-		$this->updates    = new Updates($configuration['updates'] ?? []);
-		$this->sources    = new Sources($configuration['sources'] ?? []);
+		$this->release    = new Release($configuration['release'] ?? [], $this);
+		$this->api        = new Api($configuration['api'] ?? [], $this);
+		$this->steps      = new Steps($configuration['steps'] ?? [], $this);
+		$this->connection = new Connection($configuration['connections'] ?? [], $this);
+		$this->updates    = new Updates($configuration['updates'] ?? [], $this);
+		$this->sources    = new Sources($configuration['files'] ?? [], $this);
+		$this->volatile   = new Volatile([], $this);
 	}
 
 	final public static function getInstance(?array $configuration = null): self

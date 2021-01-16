@@ -7,8 +7,11 @@
 
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
 use Akeeba\ReleaseMaker\Contracts\StepInterface;
 use Akeeba\ReleaseMaker\Exception\InvalidStep;
+use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
 use Akeeba\ReleaseMaker\Step\Deploy;
 use Akeeba\ReleaseMaker\Step\Items;
 use Akeeba\ReleaseMaker\Step\Prepare;
@@ -21,11 +24,14 @@ use Akeeba\ReleaseMaker\Step\Updates;
  *
  * @property-read  string[] $steps Class names of the steps to follow during the release process
  */
-final class Steps
+final class Steps implements ConfigurationSection
 {
+	use MagicGetterAware;
+
 	private array $steps = [];
 
-	public function __construct(array $configuration)
+	/** @noinspection PhpUnusedParameterInspection */
+	public function __construct(array $configuration, Configuration $parent)
 	{
 		$this->setSteps($configuration['steps'] ?? []);
 	}

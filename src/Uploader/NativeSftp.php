@@ -8,6 +8,7 @@
 namespace Akeeba\ReleaseMaker\Uploader;
 
 use Akeeba\ReleaseMaker\Configuration\Connection\S3;
+use Akeeba\ReleaseMaker\Configuration\Connection\Sftp;
 use Akeeba\ReleaseMaker\Contracts\ConnectionConfiguration;
 use Akeeba\ReleaseMaker\Contracts\Uploader;
 use Akeeba\ReleaseMaker\Exception\ARSError;
@@ -19,7 +20,7 @@ class NativeSftp implements Uploader
 
 	private $fp;
 
-	private S3 $config;
+	private Sftp $config;
 
 	/**
 	 * @noinspection PhpFullyQualifiedNameUsageInspection
@@ -27,9 +28,9 @@ class NativeSftp implements Uploader
 	 */
 	public function __construct(ConnectionConfiguration $config)
 	{
-		if (!($config instanceof S3))
+		if (!($config instanceof Sftp))
 		{
-			throw new InvalidArgumentException(sprintf("%s expects a %s conifugration object, %s given.", __CLASS__, S3::class, get_class($config)));
+			throw new InvalidArgumentException(sprintf("%s expects a %s configuration object, %s given.", __CLASS__, S3::class, get_class($config)));
 		}
 
 		$this->config = $config;

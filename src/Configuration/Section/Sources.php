@@ -8,7 +8,10 @@
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Source\File;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
+use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
 
 /**
  * File sources configuration section
@@ -17,14 +20,17 @@ use Akeeba\ReleaseMaker\Configuration\Source\File;
  *
  * @since  2.0.0
  */
-class Sources
+final class Sources implements ConfigurationSection
 {
+	use MagicGetterAware;
+
 	private array $sources = [];
 
-	public function __construct(array $configuration)
+	/** @noinspection PhpUnusedParameterInspection */
+	public function __construct(array $configuration, Configuration $parent)
 	{
-		$this->sources = array_map(function ($source) {
-			return new File($source);
+		$this->sources = array_map(function ($source) use ($parent) {
+			return new File($source, $parent);
 		}, $configuration);
 	}
 }

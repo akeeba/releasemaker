@@ -23,8 +23,8 @@ class Release
 		// Enable debug mode if necessary
 		if ($debug)
 		{
-			\ini_set('display_errors', true);
-			\error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
+			ini_set('display_errors', true);
+			error_reporting(E_ALL & E_DEPRECATED & E_STRICT);
 			define('ARM_DEBUG', 1);
 		}
 
@@ -41,19 +41,19 @@ class Release
 		// Make sure all steps exist
 		foreach ($config->steps as $stepClass)
 		{
-			if (!\class_exists($stepClass))
+			if (!class_exists($stepClass))
 			{
-				throw new InvalidArgumentException(\sprintf("Class %s does not exist.", $stepClass), 91);
+				throw new InvalidArgumentException(sprintf("Class %s does not exist.", $stepClass), 91);
 			}
 
-			if (!\class_implements($stepClass, StepInterface::class))
+			if (!class_implements($stepClass, StepInterface::class))
 			{
-				throw new LogicException(\sprintf("Class %s does not implement StepInterface.", $stepClass), 91);
+				throw new LogicException(sprintf("Class %s does not implement StepInterface.", $stepClass), 91);
 			}
 		}
 
 		// Run each and every step in the order specified
-		foreach ($config->steps as $stepClass)
+		foreach ($config->steps->steps as $stepClass)
 		{
 			(new $stepClass($io))->execute();
 		}
@@ -67,9 +67,9 @@ class Release
 	private function banner(OutputStyle $io)
 	{
 		$io->writeln('<info>Akeeba Release Maker</info>');
-		$io->writeln(\sprintf('<info>%s</info>', \str_repeat('=', 80)));
+		$io->writeln(sprintf('<info>%s</info>', str_repeat('=', 80)));
 		$io->writeln('<info>An automated script to upload and release a new version of an Akeeba component.</info>');
-		$io->writeln(\sprintf('<info>Copyright (c)2012-%s Nicholas K. Dionysopoulos / Akeeba Ltd</info>', \date('Y')));
+		$io->writeln(sprintf('<info>Copyright (c)2012-%s Nicholas K. Dionysopoulos / Akeeba Ltd</info>', date('Y')));
 		$io->writeln('<info>This is Free Software distributed under the terms of the GNU GPL v3 or later.</info>');
 		$io->writeln('<info>See LICENSE.txt for more information.</info>');
 		$io->newLine(1);

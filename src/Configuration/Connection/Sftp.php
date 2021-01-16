@@ -98,7 +98,10 @@ class Sftp extends Configuration
 	{
 		$config = clone $this;
 
-		$config->directory = $directory;
+		if (!empty($directory))
+		{
+			$config->directory = $directory;
+		}
 
 		switch ($this->type)
 		{

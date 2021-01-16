@@ -7,7 +7,11 @@
 
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Volatile\File;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
+use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
+use Akeeba\ReleaseMaker\Mixin\MagicSetterAware;
 
 /**
  * Volatile data, used while the application is running
@@ -15,9 +19,42 @@ use Akeeba\ReleaseMaker\Configuration\Volatile\File;
  * @property File[] $files   Files being processed
  * @property object $release Release item being processed
  */
-class Volatile
+final class Volatile implements ConfigurationSection
 {
+	use MagicGetterAware, MagicSetterAware;
+
 	private array $files;
 
-	private object $release;
+	private ?object $release;
+
+	/** @noinspection PhpUnusedParameterInspection */
+	public function __construct(array $configuration, Configuration $parent)
+	{
+		$this->files   = [];
+		$this->release = null;
+	}
+
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function setFiles(array $files): void
+	{
+		$this->files = $files;
+	}
+
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function &getRelease(): ?object
+	{
+		return $this->release;
+	}
+
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function setRelease(?object $release): void
+	{
+		$this->release = $release;
+	}
+
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function &getFiles(): array
+	{
+		return $this->files;
+	}
 }

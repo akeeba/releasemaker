@@ -89,13 +89,13 @@ class S3 extends Configuration
 		}
 
 		// We cannot allow an invalid endpoint if it's not empty
-		if (!empty($this->endpoint) || !filter_var($this->hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME))
+		if (!empty($this->endpoint) && !filter_var($this->endpoint, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME))
 		{
 			throw new InvalidHostname($this->endpoint);
 		}
 
 		// We cannot allow an invalid CDN hostname
-		if (!empty($this->cdnHostname) || !filter_var($this->cdnHostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME))
+		if (!empty($this->cdnHostname) && !filter_var($this->cdnHostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME))
 		{
 			throw new InvalidCDNHostname($this->cdnHostname);
 		}
@@ -135,7 +135,10 @@ class S3 extends Configuration
 	{
 		$config = clone $this;
 
-		$config->directory = $directory;
+		if (!empty($directory))
+		{
+			$config->directory = $directory;
+		}
 
 		return new S3Uploader($config);
 	}

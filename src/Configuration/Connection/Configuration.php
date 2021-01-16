@@ -44,11 +44,11 @@ abstract class Configuration implements ConnectionConfiguration
 			case 'ftps':
 			case 'ftpcurl':
 			case 'ftpscurl':
-				return new S3($configuration);
+				return new Ftp($configuration);
 
 			case 'sftp':
 			case 'sftpcurl':
-				return new S3($configuration);
+				return new Sftp($configuration);
 
 			case 's3':
 				return new S3($configuration);

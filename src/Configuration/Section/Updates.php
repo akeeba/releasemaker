@@ -8,7 +8,9 @@
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Update\Source;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
 
 /**
  * Update sources configuration section
@@ -17,14 +19,14 @@ use Akeeba\ReleaseMaker\Configuration\Update\Source;
  *
  * @since  2.0.0
  */
-class Updates
+final class Updates implements ConfigurationSection
 {
 	private array $sources = [];
 
-	public function __construct(array $configuration)
+	public function __construct(array $configuration, Configuration $parent)
 	{
-		$this->sources = array_map(function ($source) {
-			return new Source($source);
+		$this->sources = array_map(function ($source) use ($parent) {
+			return new Source($source, $parent);
 		}, $configuration);
 	}
 }

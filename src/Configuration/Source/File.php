@@ -46,8 +46,12 @@ class File
 
 	private string $matchPattern;
 
-	public function __construct(array $configuration)
+	private Configuration $parent;
+
+	public function __construct(array $configuration, Configuration $parent)
 	{
+		$this->parent = $parent;
+
 		$this->setSourcePath($configuration['source'] ?? '');
 
 		$this->title          = $configuration['title'] ?? sprintf('File matching ' . $this->matchPattern);
@@ -55,7 +59,7 @@ class File
 		$this->directory      = $configuration['directory'] ?? null;
 		$this->access         = (int) ($configuration['access'] ?? 2);
 
-		if (!in_array($this->connectionName, Configuration::getInstance()->connection->getConnectionKeys()))
+		if (!in_array($this->connectionName, $this->parent->connection->getConnectionKeys()))
 		{
 			throw new InvalidConnectionKey($this->connectionName);
 		}
@@ -71,7 +75,7 @@ class File
 	/** @noinspection PhpUnusedPrivateMethodInspection */
 	private function getUploader(): Uploader
 	{
-		$connection = Configuration::getInstance()->connection->getConnection($this->connectionName);
+		$connection = $this->parent->connection->getConnection($this->connectionName);
 
 		return $connection->getUploader($this->directory);
 	}

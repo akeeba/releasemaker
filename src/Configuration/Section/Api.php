@@ -9,6 +9,8 @@
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use Akeeba\ReleaseMaker\Exception\ARSEndpointIsNotAURL;
 use Akeeba\ReleaseMaker\Exception\ConfigurationError;
@@ -27,7 +29,7 @@ use InvalidArgumentException;
  * @property-read  null|string $token          FOF Token
  * @property-read  null|string $CACertPath     Absolute path to the custom cacert.pem file
  */
-final class Api
+final class Api implements ConfigurationSection
 {
 	use MagicGetterAware;
 
@@ -43,7 +45,8 @@ final class Api
 
 	private ?string $CACertPath;
 
-	public function __construct(array $configuration)
+	/** @noinspection PhpUnusedParameterInspection */
+	public function __construct(array $configuration, Configuration $parent)
 	{
 		$this->setEndpoint($configuration['endpoint'] ?? null);
 

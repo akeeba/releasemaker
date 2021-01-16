@@ -8,7 +8,9 @@
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
 use Akeeba\ReleaseMaker\Configuration\Connection\Configuration as ConnectionConfiguration;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
 
 /**
  * Connection configuration section
@@ -16,11 +18,12 @@ use Akeeba\ReleaseMaker\Configuration\Connection\Configuration as ConnectionConf
  *
  * @since  2.0.0
  */
-final class Connection
+final class Connection implements ConfigurationSection
 {
 	private array $connections = [];
 
-	public function __construct(array $configuration)
+	/** @noinspection PhpUnusedParameterInspection */
+	public function __construct(array $configuration, Configuration $parent)
 	{
 		foreach ($configuration as $key => $definition)
 		{

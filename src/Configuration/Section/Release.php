@@ -8,6 +8,8 @@
 namespace Akeeba\ReleaseMaker\Configuration\Section;
 
 
+use Akeeba\ReleaseMaker\Configuration\Configuration;
+use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use Akeeba\ReleaseMaker\Exception\ConfigurationError;
 use Akeeba\ReleaseMaker\Exception\InvalidStep;
@@ -28,7 +30,7 @@ use League\CommonMark\GithubFlavoredMarkdownConverter;
  * @property-read  null|string $changelog              Absolute filesystem path to the changelog file.
  * @property-read  string      $releaseNotes           HTML content for the release notes. Constructed as needed.
  */
-final class Release
+final class Release implements ConfigurationSection
 {
 	use MagicGetterAware;
 
@@ -44,7 +46,8 @@ final class Release
 
 	private ?string $changelog;
 
-	public function __construct(array $configuration)
+	/** @noinspection PhpUnusedParameterInspection */
+	public function __construct(array $configuration, Configuration $parent)
 	{
 		$this->version = $configuration['version'] ?? null;
 

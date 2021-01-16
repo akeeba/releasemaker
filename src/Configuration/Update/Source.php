@@ -44,8 +44,11 @@ class Source
 
 	private array $formats = [];
 
-	public function __construct(array $configuration)
+	private Configuration $parent;
+
+	public function __construct(array $configuration, Configuration $parent)
 	{
+		$this->parent         = $parent;
 		$this->stream         = (int) ($configuration['stream'] ?? 0);
 		$this->title          = $configuration['title'] ?? sprintf('Updates for stream %d', $this->stream);
 		$this->connectionName = $configuration['connection'] ?? '';
@@ -58,7 +61,7 @@ class Source
 			throw new InvalidUpdateStream($this->stream);
 		}
 
-		if (!in_array($this->connectionName, Configuration::getInstance()->connection->getConnectionKeys()))
+		if (!in_array($this->connectionName, $this->parent->connection->getConnectionKeys()))
 		{
 			throw new InvalidConnectionKey($this->connectionName);
 		}
@@ -82,7 +85,7 @@ class Source
 	/** @noinspection PhpUnusedPrivateMethodInspection */
 	private function getUploader(): Uploader
 	{
-		$connection = Configuration::getInstance()->connection->getConnection($this->connectionName);
+		$connection = $this->parent->connection->getConnection($this->connectionName);
 
 		return $connection->getUploader($this->directory);
 	}

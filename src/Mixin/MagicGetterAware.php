@@ -8,6 +8,7 @@
 namespace Akeeba\ReleaseMaker\Mixin;
 
 
+use ReflectionObject;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use LogicException;
 
@@ -41,9 +42,17 @@ trait MagicGetterAware
 			return $this->{$method}();
 		}
 
-		if (property_exists($this, $name))
+		try
 		{
-			return $this->{$name};
+			$refObject   = new ReflectionObject($this);
+			$refProperty = $refObject->getProperty($name);
+			$refProperty->setAccessible(true);
+
+			return $refProperty->getValue($this);
+		}
+		catch (\ReflectionException $e)
+		{
+			// Nope. We'll error out.
 		}
 
 		throw new LogicException(sprintf('Unknown property %s in class %s.', $name, __CLASS__), ExceptionCode::INVALID_PROPERTY);
