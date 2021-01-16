@@ -25,7 +25,7 @@ class Items extends AbstractStep
 
 		$this->initARSConnector();
 
-		if (empty($configuration->volatile->release))
+		if (!is_object($configuration->volatile->release) || !property_exists($configuration->volatile->release, 'id'))
 		{
 			$this->io->writeln("<info>Getting release information</info>");
 

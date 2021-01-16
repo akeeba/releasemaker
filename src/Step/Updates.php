@@ -32,14 +32,14 @@ class Updates extends AbstractStep
 	{
 		$configuration = Configuration::getInstance();
 
-		if (empty($updateSource->stream))
+		if ((int) $updateSource->stream == 0)
 		{
 			$this->io->note('Will not fetch updates (no update stream ID was configured)');
 
 			return;
 		}
 
-		if (empty($updateSource->baseName) || empty($updateSource->formats))
+		if (($updateSource->baseName == '') || !count($updateSource->formats))
 		{
 			$this->io->note('Will not fetch updates (no base name or format was configured)');
 
