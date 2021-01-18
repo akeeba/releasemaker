@@ -8,6 +8,7 @@
 namespace Akeeba\ReleaseMaker\Configuration\Parser;
 
 use Akeeba\ReleaseMaker\Contracts\ConfigurationParser;
+use ColinODell\Json5\Json5Decoder;
 
 /**
  * Modern JSON5 configuration file parser
@@ -31,7 +32,7 @@ class Json5 implements ConfigurationParser
 
 		try
 		{
-			$test = json5_decode($content, true, 512, JSON_THROW_ON_ERROR);
+			$test = Json5Decoder::decode($content, true);
 		}
 		catch (\JsonException $e)
 		{
@@ -67,7 +68,7 @@ class Json5 implements ConfigurationParser
 		}
 
 		$content = @file_get_contents($sourcePath);
-		$raw     = json5_decode($content, true, 512, JSON_THROW_ON_ERROR);
+		$raw     = Json5Decoder::decode($content, true);
 		$config  = [
 			'release'     => [],
 			'api'         => [],
