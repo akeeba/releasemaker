@@ -71,7 +71,9 @@ class Release extends AbstractStep
 
 		try
 		{
-			$this->arsConnector->saveRelease((array) $release);
+			$result = $this->arsConnector->saveRelease((array) $release);
+
+			$release = json_decode($result);
 		}
 		catch (\Exception $e)
 		{
