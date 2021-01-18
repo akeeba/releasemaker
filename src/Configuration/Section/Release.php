@@ -14,6 +14,7 @@ use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use Akeeba\ReleaseMaker\Exception\ConfigurationError;
 use Akeeba\ReleaseMaker\Exception\InvalidStep;
 use Akeeba\ReleaseMaker\Exception\NoCategory;
+use Akeeba\ReleaseMaker\Exception\NoVersion;
 use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
 use DateTime;
 use Exception;
@@ -42,9 +43,11 @@ final class Release implements ConfigurationSection
 
 	private int $access = 1;
 
-	private ?string $releaseNotesFile;
+	private ?string $releaseNotesFile = null;
 
-	private ?string $changelog;
+	private ?string $changelog = null;
+
+	private ?string $releaseNotes = null;
 
 	/** @noinspection PhpUnusedParameterInspection */
 	public function __construct(array $configuration, Configuration $parent)
@@ -55,11 +58,11 @@ final class Release implements ConfigurationSection
 
 		$this->category         = (int) ($configuration['category'] ?? 0);
 		$this->access           = (int) ($configuration['access'] ?? 1);
-		$releaseNotesFile = $configuration['release_notes'] ?? null;
+		$this->releaseNotesFile = $configuration['release_notes'] ?? null;
 		$this->changelog        = $configuration['changelog'] ?? null;
 
 		// Make sure the release notes file exists and is readable. Otherwise don't try to use it.
-		if (!empty($releaseNotesFile) || !is_file($releaseNotesFile) || !is_readable($releaseNotesFile))
+		if (!empty($this->releaseNotesFile) || !is_file($this->releaseNotesFile) || !is_readable($this->releaseNotesFile))
 		{
 			$releaseNotesFile = null;
 		}
@@ -73,7 +76,7 @@ final class Release implements ConfigurationSection
 		// We always need a version
 		if (empty($this->version))
 		{
-			throw new InvalidStep();
+			throw new NoVersion();
 		}
 
 		if (!is_numeric($this->category) || ($this->category <= 0))
@@ -115,9 +118,9 @@ final class Release implements ConfigurationSection
 	private function getReleaseNotes(): string
 	{
 		// Returned cached result, if present.
-		if (!is_null($releaseNotes))
+		if (!is_null($this->releaseNotes))
 		{
-			return $releaseNotes;
+			return $this->releaseNotes;
 		}
 
 		/**
@@ -125,7 +128,7 @@ final class Release implements ConfigurationSection
 		 * file was specified. If no file is specified we get an empty string.
 		 */
 		$releaseNotes =
-			$this->parseReleaseNotesFile($releaseNotesFile) .
+			$this->parseReleaseNotesFile($this->releaseNotesFile) .
 			$this->parseChangelog($this->changelog);
 
 		return $releaseNotes;
