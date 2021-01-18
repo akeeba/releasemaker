@@ -2,11 +2,9 @@
 
 This section describes how Akeeba Release Maker will connect to Akeeba Release System on your site.
 
-## Available keys
+The section is a dictionary (key-value array). It has the following keys.
 
-This section consists of the following keys.
-
-### `endpoint`
+## `endpoint`
 
 **Required**: Yes.
 
@@ -16,7 +14,7 @@ Akeeba Release System endpoint URL. This is currently your site's homepage URL p
 
 For example `https://www.example.com/index.php`.
 
-### `connector`
+## `connector`
 
 **Required**: No.
 
@@ -29,7 +27,7 @@ There are two options:
 * `curl` (deprecated). Uses the PHP cURL extension. This connector does not relay the ARS error messages. We also found it to not be working reliably with some sites on Apple computers with Apple Silicon processors.
 * `php` (default, recommended). Uses the native HTTP stream wrappers to access ARS. It will also relay ARS error messages where applicable.
 
-### `username`
+## `username`
 
 **Required**: Only when `token` is empty.
 
@@ -39,7 +37,7 @@ A Super User username, used to authenticate to ARS.
 
 This option is deprecated. We strongly recommend using the `token` authentication method instead. See also the [Authentication](#authentication) section below.
 
-### `password`
+## `password`
 
 **Required**: Only when `token` is empty.
 
@@ -49,7 +47,7 @@ The password to the Super User defined with `username`, used to authenticate to 
 
 This option is deprecated. We strongly recommend using the `token` authentication method instead. See also the [Authentication](#authentication) section below.
 
-### `token`
+## `token`
 
 **Required**: Only when both `username` and `password` are empty.
 
@@ -57,7 +55,7 @@ This option is deprecated. We strongly recommend using the `token` authenticatio
 
 The FOF personal access token for a user which has `core.create` and `core.edit` privileges to ARS Releases and Items. See also the [Authentication](#authentication) section below.
 
-### `cacert`
+## `cacert`
 
 **Required**: No.
 
@@ -73,7 +71,7 @@ This will be used in all Akeeba Release Maker communications to external servers
 
 Example: '/home/myuser/my_certificate.pem'
 
-## Authentication
+# Authentication
 
 When Akeeba Release Maker is creating or updating an ARS Release and its Items it's using ARS' JSON API. It is essentially POSTing information to URLs directly accessing ARS on your site. These requests happen outside the context of your browser and in a separate Joomla user session each. As a result, Joomla and ARS don't know who you are.
 

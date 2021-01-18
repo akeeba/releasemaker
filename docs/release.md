@@ -2,11 +2,9 @@
 
 This section contains general information about your software release in Akeeba Release System.
 
-## Available keys
+It is a dictionary (key-value array). It has the following keys.
 
-This section consists of the following keys.
-
-### `version`
+## `version`
 
 **Required**: Yes.
 
@@ -22,7 +20,7 @@ The version number must follow the PHP versioning format. The following suffixes
 
 All other version numbers are considered to be stable.
 
-### `date`
+## `date`
 
 **Required**: No.
 
@@ -37,7 +35,7 @@ It can have one of the following formats understood by PHP's `DateTime` construc
 
 Dates need to be expressed in the GMT timezone, regardless of your site's or user's timezone preferences.
 
-### `category`
+## `category`
 
 **Required**: Yes.
 
@@ -47,7 +45,7 @@ The ARS category ID your release belongs in.
 
 Go to ARS on your site, Categories and click on the category you want to make releases in. Check the URL. The number in the id parameter is the one you need to put here.
 
-### `access`
+## `access`
 
 **Required**: No.
 
@@ -55,7 +53,7 @@ Go to ARS on your site, Categories and click on the category you want to make re
 
 Joomla's Access Level for the entire category. If not set it defaults to 1 (the default Public access level in Joomla).
 
-### `release_notes`
+## `release_notes`
 
 **Required**: No.
 
@@ -65,7 +63,7 @@ Absolute filesystem path to a file containing HTML (without the HTML, HEAD and B
 
 If it's not specified the release notes will be empty, notwithstanding the `changelog` option below.
 
-### `changelog`
+## `changelog`
 
 **Required**: No.
 

@@ -8,7 +8,7 @@ The format of this file reflects our software release needs back in 2012, when w
 
 We very strongly recommend using the JSON5 or YAML formats. They are more feature rich than the legacy format, allowing for very customised software release processes. After all, when you use Akeeba Release Maker 2.x with a legacy file it is [internally translated](../src/Configuration/Parser/Legacy.php) to the modern format anyway.
 
-Note that support for legacy configuration files may disappear in the future.
+**Support for legacy configuration files may disappear in the future.**
 
 ## Sample release.json file
 
