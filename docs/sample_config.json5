@@ -134,8 +134,11 @@
 			region: 'us-east-1',
 			// The common prefix (directory in the bucket) where the files will be uploaded.
 			directory: '',
-			// Optional. The hostname of the CDN where the files are publicly accessible from. Used when your Amazon S3
-			// bucket is the source of an Amazon CloudFront distribution.
+			// The hostname of the CDN where the files are publicly accessible from. Used when your Amazon S3
+			// bucket is the source of an Amazon CloudFront distribution. If you are going to allow direct access to
+			// your files in your Amazon S3 bucket (BAD IDEA! FAR MORE EXPENSIVE!) you need to enter the hostname of
+			// your bucket in the format BUCKETNAME.s3.REGION.amazonaws.com  Please note that buckets with dots in their
+			// name are NOT SUPPORTED and WILL NOT WORK. See https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html#VirtualHostingLimitations
 			cdnhostname: 'cdn.example.com',
 			// Optional. Amazon S3 ACL for the uploaded files. 'public-read' is the only one that makes sense with an
 			// unmodified ARS installation.

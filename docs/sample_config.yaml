@@ -1,0 +1,179 @@
+# @package    AkeebaReleaseMaker
+# @copyright  Copyright (c)2012-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+# @license    GNU General Public License version 3, or later
+#
+# Sample configuration file.
+#
+# This file in the YAML format. See https://yaml.org
+
+# Information about the ARS release.
+release:
+	# The version number you are releasing.
+	version: 1.2.3
+	# Date and time of the release. Use 'now' for current date and time (GMT). Otherwise use a date and time string
+	# which can be parsed by PHP, ideally an ISO-8601 date string. Default: 'now'
+	date: now
+	# The ARS category of the software you're releasing.
+	category: 1
+	# Numeric ID of a Joomla! View Access Level which to assign to the release. Optional.
+	access: 1
+	# Optional. Absolute filesystem path to the release notes files. HTML (.html, .htm) and Markdown (.md)
+	# files are supported. If omitted release notes will be blank, notwithstanding the changelog file if one is
+	# defined below.
+	release_notes: /home/user/Projects/com_example/RELEASENOTES.html
+	# Optional. Absolute filesystem path to the CHANGELOG file. Plain text (no extension, .txt) files are
+	# supported. The changelog is appended to the generated release notes.
+	changelog: /home/user/Projects/com_example/CHANGELOG
+
+# How to connect to the remote site's Akeeba Release System installation.
+api:
+	# Endpoint URL. Your site's homepage URL plus /index.php
+	endpoint: https://www.example.com/index.php
+	# Connector type: 'php' (recommended, default) or 'curl' (deprecated).
+	connector: php
+	# A Super User username on your site. Deprecated.
+	username: '',
+	# The password for the Super User defined by username. Deprecated.
+	password: '',
+	# A FOF Token for a Super User on your site. Use it INSTEAD OF username and password.
+	token: SAMPLE_TOKEN,
+	# Optional. Absolute path to a file containing on or more PEM-encoded TLS certificate to be considered trusted
+	# Certification Authorities (CA) when making TLS connections. This will be merged with the default cacert.pem
+	# retrieved from cURL's site.
+	cacert: /home/user/cacert.pem,
+
+# Optional. Configure the Release Maker steps to execute. FOR DEBUGGING ONLY. Omit for production use.
+steps:
+	- prepare
+	- deploy
+	- release
+	- items
+	- publish
+	- update
+
+connections:
+	# An FTP configuration example. Valid for 'ftp' and 'ftpcurl' connection types.
+	sample_ftp:
+		# Connection type. One of 'ftp', 'ftps', 'ftpcurl', or 'ftpscurl' for FTP(S) connections.
+		type: ftp
+		# FTP(S) hostname.
+		hostname: ftp.example.com
+		# Optional. FTP(S) port. Default: 21.
+		port: 21,
+		# FTP(S) username.
+		username: example
+		# FTP(S) password.
+		password: '3x@MplE_p4s5w0RD'
+		# Optional. Use FTP(S) passive mode for update streams. Default true.
+		passive: true
+		# Optional. Is this an FTPS connection? Default: false for types 'ftp, 'ftpcurl'; true for types 'ftps',
+		# 'ftpscurl'
+		secure: false
+		# FTP(S) directory where files are uploaded to. This can be overridden in update and file sources.
+		directory: files/prod/example
+		# Optional. For ftpcurl and ftpscurl only. When true ignores the IP sent by the server in response to PASV,
+		# using its public IP instead. Default true.
+		passive_fix: true
+		# Optional. Total (connection and upload) timeout in seconds. Default: 3600 (one hour).
+		timeout: 6600
+
+	# An SFTP configuration example. Valid for 'sftp' and 'sftpcurl' connection types.
+	sample_sftp:
+		# Connection type. One of 'sftp' or 'sftpcurl'.
+		type: sftp
+		# SFTP hostname.
+		hostname: sftp.example.com
+		# Optional. SFTP port for update streams. Default: 22.
+		port: 22
+		# SFTP username.
+		username: example
+		# SFTP password. Not used when public_key is set.
+		password: ''
+		# SFTP directory where files are uploaded to.
+		directory: /home/site/public_html/files/prod/example
+		# Optional. For SFTP certificate authentication only. Absolute path to the Public Key file.
+		public_key: /home/user/.ssh/id_rsa.pub
+		# Optional. For SFTP certificate authentication only. Absolute path to the Private Key file. Not required
+		# by newer cURL versions.
+		private_key: /home/user/.ssh/id_rsa
+		# Optional. For SFTP certificate authentication only. Password for the Private Key file. Does not work when
+		# SSH2 or libcurl is compiled against GnuTLS. Always compile against OpenSSL or use unencrypted Private Key
+		# files.
+		private_key_password: '!ns3<uR3*P@s5w0Rd'
+		# Optional. Total (connection and upload) timeout in seconds. Default: 3600 (one hour).
+		timeout: 6600
+
+	# An Amazon S3 (or compatible third party service) configuration example. Valid for 's3' connection type.
+	sample_s3:
+		# Connection type. Only 's3' gives you an Amazon S3-compatible connection :)
+		type: s3
+		# Custom endpoint URL for S3-compatible services. Omit to use Amazon S3 proper.
+		endpoint: s3.amazonaws.com
+		# S3 Access Key. Recommended to use an IAM user with read/write privileges on the specific bucket only.
+		access: ABCDEF01234567890
+		# S3 Secret Key. Recommended to use an IAM user with read/write privileges on the specific bucket only.
+		secret: AnExampleSecretKeyGeneratedByAmazon
+		# The Bucket where the files will be uploaded to.
+		bucket: example-bucket
+		# Should I use HTTPS? Default true. Set false to use HTTP (unencrypted connections) — strongly discouraged!
+		tls: true
+		# S3 request signature method: 'v4' or 'v2'. Amazon and some third party services use 'v4'. Only use 'v2'
+		# with third party services implementing an S3-compatible API which only understands legacy v2 signatures.
+		signature: v4
+		# Only when signature is 'v4'. The Amazon S3 region where your bucket lives. Some third party services will
+		# need this to be set as well if they are using v4 signatures, e.g. DreamObjects.
+		region: us-east-1
+		# The common prefix (directory in the bucket) where the files will be uploaded.
+		directory: uploads/example
+		# Optional. The hostname of the CDN where the files are publicly accessible from. Used when your Amazon S3
+		# bucket is the source of an Amazon CloudFront distribution.
+		cdnhostname: cdn.example.com
+		# Optional. Amazon S3 ACL for the uploaded files. 'public-read' is the only one that makes sense with an
+		# unmodified ARS installation.
+		acl: public-read
+		# Optional. Amazon S3 storage class. Use 'STANDARD' or omit unless you have a specific reason to use a
+		# different storage class.
+		storage_class: STANDARD
+		# Optional. Cache control maximum age in seconds. Default: 600 seconds. Amazon S3 and Amazon CloudFront
+		# will re-read the file from the bucket before returning it after this time. Keep it low to prevent update
+		# streams being outdated a long time after you make a new release. Values between 300 and 1800 seconds are
+		# recommended.
+		maximum_age: 600
+
+# Optional. Configure update sources. Omit to not upload any update streams to external servers.
+updates:
+	# Include one or more sources using the following format.
+	-
+		# A title printed when Release Maker is processing the update.
+		title: 'Example Software Core updates'
+		# How should I upload the updates? Use one of the keys in the 'connections' section.
+		connection: sample_s3
+		# Optional. Override the directory of the connection.
+		directory: /updates
+		# ARS update stream to read from.
+		stream: 123
+		# Base name of the update stream file to upload. DO NOT INCLUDE THE EXTENSION OF THE FILE!
+		base_name: pkg_example_core
+		# Which update stream formats to upload. One or more of 'ini', 'inibare' or 'xml'.
+		formats:
+			- ini
+			- inibare
+			- xml
+	# ...add more update sources here.
+],
+
+# Release source files configuration.
+files:
+	-
+		# A title printed when Release Maker is processing the files.
+		title: 'Example Software Core'
+		# How should I upload the files? Use one of the keys in the 'connections' section.
+		connection: sample_sftp
+		# Optional. Override the directory of the connection.
+		directory: /home/site/public_html/files/prod/example
+		# Filesystem match pattern for the file to upload. Must include the absolute filesystem path. All files
+		# matched by the pattern will be uploaded using the settings in this configuration.
+		source: /home/user/Projects/com_example/release/pkg_*-core.zip
+		# Optional. Numeric ID of the Joomla View Access Level for the files being uploaded. Default: the same as
+		# `release.access`.
+		access: 2
