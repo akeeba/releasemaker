@@ -160,7 +160,6 @@ updates:
       - inibare
       - xml
   # ...add more update sources here.
-],
 
 # Release source files configuration.
 files:
