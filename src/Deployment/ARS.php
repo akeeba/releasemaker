@@ -137,6 +137,7 @@ class ARS
 	 */
 	public function getItem($release, $type, $fileOrURL)
 	{
+		// Try to find the item by filename
 		$key = ($type == 'file') ? 'filename' : 'url';
 
 		$arsData = [

@@ -61,10 +61,17 @@ class File
 			return $this->destinationPath;
 		}
 
+		/** @var \Akeeba\ReleaseMaker\Configuration\Connection\S3 $s3Config */
+		$s3Config = $this->uploader->getConnectionConfiguration();
+		$basePath = trim($s3Config->directory, '/');
+		$basePath .= empty($basePath) ? '' : '/';
+
 		return sprintf(
-			"%s%s/%s",
+			"%s%s/%s%s",
 			$config->tls ? 'https://' : 'http://',
-			$config->cdnHostname, $this->destinationPath
+			$config->cdnHostname,
+			$basePath,
+			$this->destinationPath
 		);
 	}
 
