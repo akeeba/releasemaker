@@ -51,8 +51,8 @@ class Items extends AbstractStep
 		$configuration = Configuration::getInstance();
 		$releaseId     = $configuration->volatile->release->id;
 
-		$isLink    = (strpos($fileInfo->fileOrUrl, 'http://') === 0) || (strpos($fileInfo->fileOrUrl, 'https://') === 0);
-		$itemType  = $isLink ? 'link' : 'file';
+		$isLink   = (strpos($fileInfo->fileOrUrl, 'http://') === 0) || (strpos($fileInfo->fileOrUrl, 'https://') === 0);
+		$itemType = $isLink ? 'link' : 'file';
 
 		// Fetch a record of the file
 		$item  = $this->arsConnector->getItem($releaseId, $itemType, $fileInfo->fileOrUrl);
@@ -67,8 +67,17 @@ class Items extends AbstractStep
 
 		try
 		{
-			$result = $this->arsConnector->saveItem((array) $item);
-			$itemMeta = json_decode($result, false, 512, JSON_THROW_ON_ERROR);
+			if (!empty($item->id))
+			{
+				$result = $this->arsConnector->editItem((array) $item);
+			}
+			else
+			{
+				$result = $this->arsConnector->addItem((array) $item);
+				$item   = json_decode($result, false, 512, JSON_THROW_ON_ERROR);
+			}
+
+
 		}
 		catch (\Exception $previousException)
 		{
@@ -77,10 +86,10 @@ class Items extends AbstractStep
 			throw new DeploymentError(\sprintf("Failed to create item for file %s, item type ‘%s’", basename($fileInfo->sourcePath), $itemType), ExceptionCode::DEPLOYMENT_ERROR_ARS_ITEM_EDIT_FAILED, $previousException);
 		}
 
-		$action   = $oldId ? "updated" : "created";
+		$action = $oldId ? "updated" : "created";
 
-		$this->io->success(\sprintf("Item %u has been %s", $itemMeta->id, $action));
+		$this->io->success(\sprintf("Item %u has been %s", $item->id, $action));
 
-		$fileInfo->arsItemId = $itemMeta->id;
+		$fileInfo->arsItemId = $item->id;
 	}
 }

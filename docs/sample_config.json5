@@ -30,6 +30,9 @@
 
 	// How to connect to the remote site's Akeeba Release System installation.
 	api: {
+		// API type. 'fof': Use FOF 2.x/3.x/4.x integrated JSON API (for ARS 2.x to 6.x only). 'joomla': Use the Joomla
+		// 4 API application (ARS 7.0.0 and later versions only).
+		type: 'fof',
 		// Endpoint URL. Your site's homepage URL plus /index.php
 		endpoint: 'https://www.example.com/index.php',
 		// Connector type: 'php' (recommended, default) or 'curl' (deprecated).

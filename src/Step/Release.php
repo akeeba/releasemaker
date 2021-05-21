@@ -71,9 +71,15 @@ class Release extends AbstractStep
 
 		try
 		{
-			$result = $this->arsConnector->saveRelease((array) $release);
-
-			$release = json_decode($result);
+			if (!empty($release->id ?? 0))
+			{
+				$result = $this->arsConnector->editRelease((array) $release);
+			}
+			else
+			{
+				$result  = $this->arsConnector->addRelease((array) $release);
+				$release = json_decode($result, false, 512, JSON_THROW_ON_ERROR);
+			}
 		}
 		catch (\Exception $e)
 		{

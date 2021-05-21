@@ -24,8 +24,9 @@ The `pdf` section is designed for documentation but can be used to upload anythi
 
 * *common.version* Version number, e.g. 1.2.3
 * *common.date* Release date, e.g. 2015-04-03
-* *common.arsapiurl* URL to the site with Akeeba Release System installed, e.g. http://www.example.com (do NOT include index.php?option=com_ars etc)
+* *common.arsapiurl* For ARS 2.x to 6.x inclusive this is the URL to the site with Akeeba Release System installed, e.g. `http://www.example.com` (do NOT include index.php?option=com_ars etc). For ARS 7.x and later it's the URL to your Joomla 4+ site's API application e.g. `http://www.example.com/api` (you may include `index.php` but DO NOT enter anything else, e.g. the `/v1/ars` path to the ARS API endpoint; it's added automatically).
 * *common.ars.communication* How you want to access the ARS API. `curl` to use cURL (legacy, doesn't return verbose error information if the API call fails), `php` to use PHP's native HTTP stream wrapper (preferred, default).
+* *common.ars.type* The type of JSON API implementation to talk to ARS. For ARS 2.x to 6.x inclusive use `fof` or leave blank. For ARS 7.x and alter use `joomla`. 
 * *common.username* Your login username, needs to have core.manage privilege for ARS or core.admin (Super User) privilege
 * *common.password* Your login password
 * *common.token* Your FOF API Token. Used when username and password are left empty.

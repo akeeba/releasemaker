@@ -93,6 +93,9 @@ class ExceptionCode
 	// Configuration error: Invalid update format
 	public const CONFIG_INVALID_UPDATE_FORMAT = 118;
 
+	// Configuration error: Using the Joomla API application requires using a Joomla! API token
+	public const CONFIG_ARS_JOOMLA_REQUIRES_TOKEN = 119;
+
 	// Logic error whcih doesn't fall into any other category. These are logic errors which require fixing the code.
 	public const GENERIC_LOGIC_ERROR = 240;
 

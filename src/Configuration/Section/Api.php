@@ -14,6 +14,7 @@ use Akeeba\ReleaseMaker\Contracts\ConfigurationSection;
 use Akeeba\ReleaseMaker\Contracts\ExceptionCode;
 use Akeeba\ReleaseMaker\Exception\ARSEndpointIsNotAURL;
 use Akeeba\ReleaseMaker\Exception\ConfigurationError;
+use Akeeba\ReleaseMaker\Exception\InvalidARSJoomlaConfiguration;
 use Akeeba\ReleaseMaker\Exception\NoArsAuthenticationPossible;
 use Akeeba\ReleaseMaker\Exception\NoARSEndpoint;
 use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
@@ -22,6 +23,7 @@ use InvalidArgumentException;
 /**
  * Release configuration section.
  *
+ * @property-read  string      $type           Connector type: 'fof' or 'joomla'
  * @property-read  string      $endpoint       URL for the ARS API endpoint
  * @property-read  string      $connector      Connector type ('php' or 'curl')
  * @property-read  null|string $username       Super User username
@@ -32,6 +34,8 @@ use InvalidArgumentException;
 final class Api implements ConfigurationSection
 {
 	use MagicGetterAware;
+
+	private string $type;
 
 	private ?string $endpoint;
 
@@ -50,9 +54,9 @@ final class Api implements ConfigurationSection
 	 */
 	private $cacertPemFilePointer;
 
-	/** @noinspection PhpUnusedParameterInspection */
 	public function __construct(array $configuration, Configuration $parent)
 	{
+		$this->setType($configuration['type'] ?? 'fof');
 		$this->setEndpoint($configuration['endpoint'] ?? null);
 
 		try
@@ -84,10 +88,28 @@ final class Api implements ConfigurationSection
 			$this->username = null;
 			$this->password = null;
 		}
+		elseif ($this->type == 'joomla')
+		{
+			// No token but 'joomla' API connection type selected. I'm afraid this won't fly.
+			throw new InvalidARSJoomlaConfiguration();
+		}
 		else
 		{
 			$this->token = null;
 		}
+	}
+
+	/** @noinspection PhpUnusedParameterInspection */
+
+	/**
+	 * @param   string|null  $type
+	 */
+	public function setType(?string $type): void
+	{
+		$valid = ['fof', 'joomla'];
+		$type  = strtolower($type);
+
+		$this->type = in_array($type, $valid) ? $type : 'fof';
 	}
 
 	private function setEndpoint(?string $url): void
@@ -138,7 +160,7 @@ final class Api implements ConfigurationSection
 		}
 
 		// Try to load the custom file's contents.
-		$customContents  = @\file_get_contents($filePath);
+		$customContents = @\file_get_contents($filePath);
 
 		if (empty($customContents))
 		{
@@ -151,7 +173,7 @@ final class Api implements ConfigurationSection
 
 		// Let's use the tmpfile trick. The file will removed once the $CACertPath property goes out of scope.
 		$this->cacertPemFilePointer = \tmpfile();
-		$cacertPemFile        = \stream_get_meta_data($this->cacertPemFilePointer)['uri'];
+		$cacertPemFile              = \stream_get_meta_data($this->cacertPemFilePointer)['uri'];
 
 		// Combine the original cacert.pem with the provided certificate / certificate storage.
 		\fwrite($this->cacertPemFilePointer, $defaultContents . "\n\n" . $customContents);

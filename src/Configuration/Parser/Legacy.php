@@ -109,6 +109,7 @@ class Legacy implements ConfigurationParser
 				'password'  => $raw['common.password'] ?? '',
 				'token'     => $raw['common.token'] ?? '',
 				'cacert'    => $raw['common.cacert'] ?? '',
+				'type'      => $raw['common.ars.apitype'] ?? 'fof',
 			],
 			'steps'       => $raw['common.steps'] ?? [],
 			'connections' => [

@@ -8,14 +8,16 @@
 namespace Akeeba\ReleaseMaker\Mixin;
 
 use Akeeba\ReleaseMaker\Configuration\Configuration;
-use Akeeba\ReleaseMaker\Deployment\ARS;
+use Akeeba\ReleaseMaker\Deployment\ArsFof;
+use Akeeba\ReleaseMaker\Deployment\ArsJoomla;
+use Akeeba\ReleaseMaker\Deployment\ARSInterface;
 
 trait ARSConnectorAware
 {
 	/**
 	 * The ARS connector class
 	 *
-	 * @var ARS
+	 * @var ARSInterface
 	 */
 	protected $arsConnector;
 
@@ -28,12 +30,25 @@ trait ARSConnectorAware
 	{
 		$armConfig = Configuration::getInstance();
 
-		$this->arsConnector = new ARS([
-			'host'     => $armConfig->api->endpoint,
-			'username' => $armConfig->api->username,
-			'password' => $armConfig->api->password,
-			'apiToken' => $armConfig->api->token,
-		]);
+		switch ($armConfig->api->type)
+		{
+			case 'fof':
+				$this->arsConnector = new ArsFof([
+					'host'     => $armConfig->api->endpoint,
+					'username' => $armConfig->api->username,
+					'password' => $armConfig->api->password,
+					'apiToken' => $armConfig->api->token,
+				]);
+				break;
+
+			case 'joomla':
+				$this->arsConnector = new ArsJoomla([
+					'host'     => $armConfig->api->endpoint,
+					'apiToken' => $armConfig->api->token,
+				]);
+				break;
+		}
+
 	}
 
 	/**

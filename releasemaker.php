@@ -68,6 +68,19 @@ catch (Throwable $e) {
 			$e->getMessage(),
 		]);
 
+		$parent = $e->getPrevious();
+
+		while (!is_null($parent))
+		{
+			$io->error([
+				sprintf('Previous exception of type %s', get_class($parent)),
+				sprintf('Error code: %d', $parent->getCode()),
+				$parent->getMessage(),
+			]);
+
+			$parent = $parent->getPrevious();
+		}
+
 		$io->section('Debug trace');
 		$io->text(sprintf('#000 %s(%d)', $e->getFile(), $e->getLine()));
 		$io->text($e->getTraceAsString());

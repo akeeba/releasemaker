@@ -13,7 +13,7 @@ use Akeeba\ReleaseMaker\Exception\ARSError;
 /**
  * Akeeba Release System API integration for Akeeba Release Maker
  */
-class ARS
+class ArsFof implements ARSInterface
 {
 	/**
 	 * The hostname of the site where ARS is installed, without the index.php
@@ -90,10 +90,10 @@ class ARS
 				'description'      => null,
 				'notes'            => null,
 				'hits'             => 0,
-				'created'          => 0,
-				'created_by'       => '0000-00-00 00:00:00',
-				'modified'         => 0,
-				'modified_by'      => '0000-00-00 00:00:00',
+				'created_by'       => 0,
+				'created'          => '0000-00-00 00:00:00',
+				'modified_by'      => 0,
+				'modified'         => '0000-00-00 00:00:00',
 				'checked_out'      => 0,
 				'checked_out_time' => '0000-00-00 00:00:00',
 				'ordering'         => 0,
@@ -106,35 +106,52 @@ class ARS
 		return \array_shift($response);
 	}
 
-	/**
-	 * Save the changes to an existing release or create a new release
-	 *
-	 * @param   array  $releaseData  The release data to save. At the bare minimum we need an ID and a title!
-	 *
-	 * @return  bool  As returned by ARS' JSON API
-	 */
-	public function saveRelease(array $releaseData)
+	public function getReleaseById(int $release_id): object
 	{
 		$arsData = [
 			'view'   => 'Releases',
-			'task'   => 'save',
+			'task'   => 'read',
+			'id'     => $release_id,
 			'format' => 'json',
 		];
 
-		$arsData = \array_merge($releaseData, $arsData);
+		$response = $this->doApiCall($arsData);
 
-		return $this->doApiCall($arsData);
+		$response = \json_decode($response);
+
+		return $response ?: (object) [
+			'id'               => null,
+			'category_id'      => null,
+			'version'          => null,
+			'alias'            => null,
+			'maturity'         => 'stable',
+			'description'      => null,
+			'notes'            => null,
+			'hits'             => 0,
+			'created_by'       => 0,
+			'created'          => '0000-00-00 00:00:00',
+			'modified_by'      => 0,
+			'modified'         => '0000-00-00 00:00:00',
+			'checked_out'      => 0,
+			'checked_out_time' => '0000-00-00 00:00:00',
+			'ordering'         => 0,
+			'access'           => 1,
+			'published'        => 0,
+			'language'         => '*',
+		];
 	}
 
-	/**
-	 * Get the data object of an item
-	 *
-	 * @param   integer  $release    The release ID inside which the item is expected
-	 * @param   string   $type       The item type, one of 'file' or 'link'
-	 * @param   string   $fileOrURL  The relative path or absolute URL of the item
-	 *
-	 * @return  object  The data object of the item
-	 */
+
+	public function addRelease(array $releaseData)
+	{
+		return $this->saveRelease($releaseData);
+	}
+
+	public function editRelease(array $releaseData)
+	{
+		return $this->saveRelease($releaseData);
+	}
+
 	public function getItem($release, $type, $fileOrURL)
 	{
 		// Try to find the item by filename
@@ -171,10 +188,10 @@ class ARS
 			'sha1'             => null,
 			'filesize'         => null,
 			'hits'             => 0,
-			'created'          => 0,
-			'created_by'       => '0000-00-00 00:00:00',
-			'modified'         => 0,
-			'modified_by'      => '0000-00-00 00:00:00',
+			'created_by'       => 0,
+			'created'          => '0000-00-00 00:00:00',
+			'modified_by'      => 0,
+			'modified'         => '0000-00-00 00:00:00',
 			'checked_out'      => 0,
 			'checked_out_time' => '0000-00-00 00:00:00',
 			'ordering'         => 0,
@@ -185,14 +202,70 @@ class ARS
 		];
 	}
 
-	/**
-	 * Save the changes to an existing item or create a new item
-	 *
-	 * @param   array  $itemData  The item data to save.
-	 *
-	 * @return  string  As returned by ARS' JSON API
-	 */
-	public function saveItem(array $itemData): string
+	public function getItemById($item_id)
+	{
+		$arsData = [
+			'view'   => 'Items',
+			'task'   => 'read',
+			'id'     => $item_id,
+			'format' => 'json',
+		];
+
+		$response = $this->doApiCall($arsData);
+		$response = \json_decode($response);
+
+		return $response ?: (object) [
+			'id'               => null,
+			'release_id'       => null,
+			'title'            => null,
+			'alias'            => null,
+			'description'      => null,
+			'type'             => null,
+			'filename'         => null,
+			'url'              => null,
+			'updatestream'     => null,
+			'md5'              => null,
+			'sha1'             => null,
+			'filesize'         => null,
+			'hits'             => 0,
+			'created_by'       => 0,
+			'created'          => '0000-00-00 00:00:00',
+			'modified_by'      => 0,
+			'modified'         => '0000-00-00 00:00:00',
+			'checked_out'      => 0,
+			'checked_out_time' => '0000-00-00 00:00:00',
+			'ordering'         => 0,
+			'access'           => 1,
+			'published'        => 0,
+			'language'         => '*',
+			'environments'     => null,
+		];
+	}
+
+	public function addItem(array $itemData): string
+	{
+		return $this->saveItem($itemData);
+	}
+
+	public function editItem(array $itemData): string
+	{
+		return $this->saveItem($itemData);
+	}
+
+	private function saveRelease(array $releaseData)
+	{
+		$arsData = [
+			'view'   => 'Releases',
+			'task'   => 'save',
+			'format' => 'json',
+		];
+
+		$arsData = \array_merge($releaseData, $arsData);
+
+		return $this->doApiCall($arsData);
+	}
+
+	private function saveItem(array $itemData): string
 	{
 		$arsData = [
 			'view'      => 'Items',
@@ -279,7 +352,7 @@ class ARS
 		\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		\curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 		\curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-		\curl_setopt($ch, CURLOPT_USERAGENT, 'AkeebaReleaseMaker/1.0');
+		\curl_setopt($ch, CURLOPT_USERAGENT, 'AkeebaReleaseMaker/2.0');
 
 		// In Debug mode I have cURL output everything that's going on to STDERR
 		if (defined('ARM_DEBUG'))

@@ -50,11 +50,15 @@ class Publish extends AbstractStep
 	{
 		try
 		{
-			$result = $this->arsConnector->saveItem([
-				'id'        => $fileInfo->arsItemId,
-				'published' => 1,
-			]);
-			$result = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+			$item            = $this->arsConnector->getItemById($fileInfo->arsItemId);
+			$item->published = 1;
+
+			if (empty($item->id))
+			{
+				throw new \RuntimeException(sprintf('Cannot find item %d which we had just created!', $fileInfo->arsItemId), ExceptionCode::GENERIC_LOGIC_ERROR);
+			}
+
+			$this->arsConnector->editItem((array) $item);
 		}
 		catch (\JsonException $e)
 		{
@@ -74,9 +78,9 @@ class Publish extends AbstractStep
 
 		try
 		{
-			$result = $this->arsConnector->saveRelease((array) $release);
+			$this->arsConnector->editRelease((array) $release);
 
-			Configuration::getInstance()->volatile->release = json_decode($result, false, 512, JSON_THROW_ON_ERROR);
+			Configuration::getInstance()->volatile->release = $release;
 		}
 		catch (\Exception $e)
 		{

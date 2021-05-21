@@ -33,7 +33,7 @@ final class Steps implements ConfigurationSection
 	/** @noinspection PhpUnusedParameterInspection */
 	public function __construct(array $configuration, Configuration $parent)
 	{
-		$this->setSteps($configuration['steps'] ?? []);
+		$this->setSteps($configuration ?? []);
 	}
 
 	private function setSteps(array $steps)

@@ -4,15 +4,26 @@ This section describes how Akeeba Release Maker will connect to Akeeba Release S
 
 The section is a dictionary (key-value array). It has the following keys.
 
+## `type`
+
+**Required**: No.
+
+**Type**: String. One of `fof` or `joomla`.
+
+The type of JSON API implementation on your site.
+
+* For ARS 2.x to 6.x inclusive use `fof`. This uses the JSON API provided by the FOF framework.
+* For ARS 7.x and later use `joomla`. This uses the separate Joomla API application available in Joomla 4.0 and later. 
+
 ## `endpoint`
 
 **Required**: Yes.
 
 **Type**: String.
 
-Akeeba Release System endpoint URL. This is currently your site's homepage URL plus `/index.php`. 
-
-For example `https://www.example.com/index.php`.
+Akeeba Release System endpoint URL. 
+* For ARS 2.x to 6.x inclusive use your site's homepage URL plus `/index.php`. For example `https://www.example.com/index.php`. 
+* For ARS 7.x and later use your site's homepage URL plus `/api`. For example `https://www.example.com/api`.
 
 ## `connector`
 
@@ -29,7 +40,7 @@ There are two options:
 
 ## `username`
 
-**Required**: Only when `token` is empty.
+**Required**: Only when using the `fof` JSON API type and `token` is empty.
 
 **Type**: String.
 
@@ -39,7 +50,7 @@ This option is deprecated. We strongly recommend using the `token` authenticatio
 
 ## `password`
 
-**Required**: Only when `token` is empty.
+**Required**: Only when using the `fof` JSON API type and `token` is empty.
 
 **Type**: String.
 
@@ -49,11 +60,14 @@ This option is deprecated. We strongly recommend using the `token` authenticatio
 
 ## `token`
 
-**Required**: Only when both `username` and `password` are empty.
+**Required**: Always when using the `joomla` JSON API type. Otherwise only when both `username` and `password` are empty.
 
 **Type**: String.
 
-The FOF personal access token for a user which has `core.create` and `core.edit` privileges to ARS Releases and Items. See also the [Authentication](#authentication) section below.
+* For ARS 5.x to 6.x inclusive this is the FOF personal access token for a user which has `core.create` and `core.edit` privileges to ARS Releases and Items.
+* For ARS 7.x this is the Joomla API Token for a Super User.
+
+See also the [Authentication](#authentication) section below.
 
 ## `cacert`
 
@@ -79,8 +93,11 @@ Clearly, we can't allow just about anybody to create releases on our sites. It w
 
 If these requests were sent as-is they would appear to come from an unauthenticated (guest) user which has no privileges to create or edit ARS releases. Therefore the requests need to be authenticated. This can happen in one of two ways:
 
-**Username and password**. This is the legacy method, introduced in 2011. You are essentially sending your Super User username and password in plaintext to your site. Your user will be logged in without checking for an anti-CSRF token or Two Factor Authentication and without going through any code which could prevent password logins for your user. As a result this method carries a lot of risk, even if you are using HTTPS on your site. It is scheduled for removal in FOF 4 and ARS 6.
+**Username and password**. This is the legacy method, introduced in 2011. You are essentially sending your Super User username and password in plaintext to your site. Your user will be logged in without checking for an anti-CSRF token or Two Factor Authentication and without going through any code which could prevent password logins for your user. As a result this method carries a lot of risk, even if you are using HTTPS on your site. It is removed in ARS 7.
 
-**FOF Token**. Starting in 2019, the FOF repository includes a [user plugin](https://github.com/akeeba/fof/tree/development/plugins/user/foftoken) which allows you to create a personal access token. The token is never stored directly in your site. Instead, it is constructed from the site's secret (stored in Joomla's `configuration.php`) and a seed created with a cryptographically secure random number generator which is stored in your Joomla user profile information. The token check is performed using time-safe comparisons to prevent timing attacks. This is the most secure method for authenticating to a site. It is also the basis of the Joomla API Token which we contributed to Joomla 4.0.
+**FOF Token**. Starting in 2019, the FOF repository includes a [user plugin](https://github.com/akeeba/fof/tree/development/plugins/user/foftoken) which allows you to create a personal access token. The token is never stored directly in your site. Instead, it is constructed from the site's secret (stored in Joomla's `configuration.php`) and a seed created with a cryptographically secure random number generator which is stored in your Joomla user profile information. The token check is performed using time-safe comparisons to prevent timing attacks. This is the most secure method for authenticating to a site. It is also the basis of the Joomla API Token which we contributed to Joomla 4.0. This only applies to ARS 2.x to 6.x inclusive.
 
-We strongly recommend installing the User – FOF Token plugin on your site and using the FOF token of a sufficiently privileged user to create releases on your site. Always use HTTPS with a valid, commercially-signed TLS certificate on your site to prevent man in the middle attacks. 
+  We strongly recommend installing the User – FOF Token plugin on your site and using the FOF token of a sufficiently privileged user to create releases on your site. Always use HTTPS with a valid, commercially-signed TLS certificate on your site to prevent man in the middle attacks.
+
+**Joomla API Token**. This applies to ARS 7 and later running on Joomla 4 and later. We no longer use FOF for these ARS versions. Instead, we use the core MVC and the Joomla API application. Therefore you need the Joomla API token for a Super User on your site. Please note that Joomla 4.0 grants access to the API application **only to Super Users**, long before we can any further access checks. Always use HTTPS with a valid, commercially-signed TLS certificate on your site to prevent man in the middle attacks.
+
