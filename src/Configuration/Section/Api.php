@@ -18,6 +18,7 @@ use Akeeba\ReleaseMaker\Exception\InvalidARSJoomlaConfiguration;
 use Akeeba\ReleaseMaker\Exception\NoArsAuthenticationPossible;
 use Akeeba\ReleaseMaker\Exception\NoARSEndpoint;
 use Akeeba\ReleaseMaker\Mixin\MagicGetterAware;
+use Composer\CaBundle\CaBundle;
 use InvalidArgumentException;
 
 /**
@@ -168,7 +169,7 @@ final class Api implements ConfigurationSection
 		}
 
 		// Get the default cacert.pem file's contents so we can merge them with our custom file.
-		$defaultContents = @file_get_contents(__DIR__ . '/../../cacert.pem');
+		$defaultContents = @file_get_contents(CaBundle::getBundledCaBundlePath());
 		$defaultContents = $defaultContents ?: '';
 
 		// Let's use the tmpfile trick. The file will removed once the $CACertPath property goes out of scope.
@@ -184,6 +185,6 @@ final class Api implements ConfigurationSection
 
 	private function getCACertPath(): string
 	{
-		return empty($this->CACertPath) ? (__DIR__ . '/../../cacert.pem') : $this->CACertPath;
+		return empty($this->CACertPath) ? (CaBundle::getBundledCaBundlePath()) : $this->CACertPath;
 	}
 }

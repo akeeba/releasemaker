@@ -33,7 +33,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 	 * Paths to exclude.
 	 */
 	$parameters->set(Option::EXCLUDE_PATHS, [
-		__DIR__ . '/src/cacert.pem',
 		__DIR__ . '/src/config.json',
 		__DIR__ . '/composer.json',
 		__DIR__ . '/composer.lock',
