@@ -301,6 +301,11 @@ class ArsJoomla implements ARSInterface
 		$url = (substr($url, -4) === '.php') ? $url : ($url . '/index.php');
 		$url .= '/' . trim($path, '/');
 
+		if (strpos($url, '/index.php') !== false && strpos($url, '/api/index.php') === false)
+		{
+			$url = str_replace('/index.php', '/api/index.php', $url);
+		}
+
 		$conf                = Configuration::getInstance();
 		$communicationMethod = $conf->api->connector;
 
