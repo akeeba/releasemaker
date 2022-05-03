@@ -338,7 +338,6 @@ class ArsJoomla implements ARSInterface
 		$ch = curl_init($url);
 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			'Authentication: Bearer ' . $this->apiToken,
 			'X-Joomla-Token: ' . $this->apiToken,
 			'Accept: application/vnd.api+json',
 		]);
@@ -357,7 +356,7 @@ class ArsJoomla implements ARSInterface
 				break;
 
 			case 'POST':
-				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+				curl_setopt($ch, CURLOPT_POSTFIELDS, empty($postData) ? null : json_encode($postData));
 				/**
 				 * The following line is unnecessary. Setting CURLOPT_POSTFIELDS implicitly sets CURLOPT_POST to 1.
 				 * See https://curl.se/libcurl/c/CURLOPT_POSTFIELDS.html
@@ -371,7 +370,7 @@ class ArsJoomla implements ARSInterface
 			case 'TRACK':
 			case 'TRACE':
 			default:
-				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+				curl_setopt($ch, CURLOPT_POSTFIELDS, empty($postData) ? null : json_encode($postData));
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
 				break;
 		}
@@ -420,7 +419,6 @@ class ArsJoomla implements ARSInterface
 	private function requestWithPhp(string $url, array $postData, string $method = 'POST'): ?string
 	{
 		$headers = [
-			'Authentication' => 'Bearer ' . $this->apiToken,
 			'X-Joomla-Token' => $this->apiToken,
 			'Accept'         => 'application/vnd.api+json',
 		];
