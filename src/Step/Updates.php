@@ -46,7 +46,14 @@ class Updates extends AbstractStep
 			return;
 		}
 
-		$urlPattern = $configuration->api->endpoint . '?option=com_ars&view=update&task=%s&format=%s&id=' . $updateSource->stream;
+		$nonApiUrl = $configuration->api->endpoint;
+
+		if (strpos($nonApiUrl, '/api/index.php'))
+		{
+			$nonApiUrl = str_replace('/api/index.php', '/index.php', $nonApiUrl);
+		}
+
+		$urlPattern = $nonApiUrl . '?option=com_ars&view=update&task=%s&format=%s&id=' . $updateSource->stream;
 
 		foreach ($updateSource->formats as $format)
 		{
