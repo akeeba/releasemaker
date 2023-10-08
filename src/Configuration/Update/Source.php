@@ -75,7 +75,7 @@ class Source
 
 		foreach ($this->formats as $format)
 		{
-			if (!in_array($format, ['xml', 'ini', 'inibare']))
+			if (!in_array($format, ['xml', 'ini', 'inibare', 'json']))
 			{
 				throw new InvalidUpdateFormat($format);
 			}

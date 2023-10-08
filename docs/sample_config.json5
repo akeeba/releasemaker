@@ -171,8 +171,8 @@
 			stream: 123,
 			// Base name of the update stream file to upload. DO NOT INCLUDE THE EXTENSION OF THE FILE!
 			base_name: 'pkg_example_core',
-			// Which update stream formats to upload. One or more of 'ini', 'inibare' or 'xml'.
-			formats: ['ini', 'inibare', 'xml'],
+			// Which update stream formats to upload. One or more of 'ini', 'inibare', 'json', or 'xml'.
+			formats: ['ini', 'inibare', 'xml', 'json'],
 		},
 		// ...add more update sources here.
 	],

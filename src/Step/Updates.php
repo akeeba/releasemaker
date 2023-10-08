@@ -57,20 +57,30 @@ class Updates extends AbstractStep
 
 		foreach ($updateSource->formats as $format)
 		{
-			$task         = ($format === 'xml') ? 'stream' : 'ini';
-			$joomlaFormat = ($format === 'xml') ? 'xml' : 'ini';
+			$task         = match ($format)
+			{
+				'xml' => 'stream',
+				default => $format
+			};
+			$joomlaFormat = match ($format)
+			{
+				'inibare' => 'ini',
+				default => $format
+			};
 			$url          = sprintf($urlPattern, $task, $joomlaFormat);
 
-			$context = \stream_context_create([
-				'http' => [
-					'method' => 'GET',
-				],
-				'ssl'  => [
-					'verify_peer'  => true,
-					'cafile'       => $configuration->api->CACertPath,
-					'verify_depth' => 5,
-				],
-			]);
+			$context = \stream_context_create(
+				[
+					'http' => [
+						'method' => 'GET',
+					],
+					'ssl'  => [
+						'verify_peer'  => true,
+						'cafile'       => $configuration->api->CACertPath,
+						'verify_depth' => 5,
+					],
+				]
+			);
 			$data    = \file_get_contents($url, false, $context);
 
 			if ($data === false)
